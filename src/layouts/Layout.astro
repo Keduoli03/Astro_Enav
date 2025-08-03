@@ -11,6 +11,23 @@ import '../styles/global.css';
 <html lang="zh-CN">
 <head>
   <style id="critical-css" type="text/css">
+    /* 防止白屏闪烁的关键样式 */
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* 立即应用背景色，防止闪烁 */
+    body.io-grey-mode {
+      background-color: #f9f9f9 !important;
+      color: #333 !important;
+    }
+    
+    body.io-black-mode {
+      background-color: #222 !important;
+      color: #fff !important;
+    }
+    
     /* 加载动画核心样式 */
     body {
       margin: 0;
@@ -75,7 +92,10 @@ import '../styles/global.css';
   <link rel="preload" href="/css/block-library.min-5.6.2.css" as="style">
   <link rel="stylesheet" href="/css/iconfont-3.03029.1.css" type="text/css" media="all" />
   <link rel="stylesheet" href="/css/bootstrap.min-4.3.1.css" type="text/css" media="all" />
+  <!-- 将关键CSS改为同步加载 -->
   <link rel="stylesheet" href="/css/style-3.03029.1.css" type="text/css" media="all" />
+  <!-- 其他CSS可以保持预加载 -->
+  <link rel="preload" href="/css/block-library.min-5.6.2.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="stylesheet" href="/fontawesome-5.15.4/css/all.min.css" type="text/css" />
   <script>
     (function() {
@@ -96,12 +116,18 @@ import '../styles/global.css';
       const cookieValue = getCookie('night_mode');
       const shouldUseNightMode = cookieValue ? cookieValue === 'night' : isNightTime();
       
-      // 立即设置body类名
+      // 立即设置body类名和背景色
       if (shouldUseNightMode) {
         document.documentElement.className = 'night-mode-loading';
         document.body.className = 'io-black-mode page-loading';
+        // 立即设置背景色
+        document.body.style.backgroundColor = '#222';
+        document.body.style.color = '#fff';
       } else {
         document.body.className = 'io-grey-mode page-loading';
+        // 立即设置背景色
+        document.body.style.backgroundColor = '#f9f9f9';
+        document.body.style.color = '#333';
       }
     })();
   </script>
