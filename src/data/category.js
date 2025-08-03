@@ -70,6 +70,17 @@ export const CATEGORY_CONFIG = {
        }
     ]
   },
+  picturetool: {
+    name: '图片工具',
+    icon: 'fas fa-image',
+    subItems: [
+      {
+        id: 'picturetool',
+        name: '图片工具',
+        icon: 'fas fa-image'
+      },
+    ]
+  }
 };
 
 // 辅助方法

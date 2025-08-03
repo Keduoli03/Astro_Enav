@@ -1,12 +1,13 @@
 
 /*背景*/
+/* 只是搜索栏下面的背景 */
 .io-grey-mode .page-container .grid-bg {
     /* 默认网格 */
     background-image: linear-gradient(rgba(50, 0, 0, 0.05) 1px, transparent 0), linear-gradient(90deg, rgba(50, 0, 0, 0.05) 1px, transparent 0);  
     background-size: 15px 15px;
     background-color: #d8d8d8;
     /* 自定义背景 */
-    /* background-image: url('/images/bg.jpg');
+    /* background-image: url('/images/yileina.png');
     background-size: cover;
     background-position: center; */
 }
