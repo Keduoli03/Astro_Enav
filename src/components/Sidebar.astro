@@ -96,13 +96,15 @@ const categories = getCategoryList();
 
 
 <!-- 添加平滑滚动脚本 -->
+<!-- 修改JavaScript部分 -->
 <script is:inline>
 document.addEventListener('DOMContentLoaded', () => {
+  // 平滑滚动函数
   // 平滑滚动函数
   function smoothScrollTo(target) {
     target.scrollIntoView({
       behavior: 'smooth',
-      block: 'start'
+      block: 'center'  // 改为 center，让目标元素滚动到屏幕中央
     });
     
     // 临时高亮目标区域
@@ -111,24 +113,54 @@ document.addEventListener('DOMContentLoaded', () => {
       target.style.backgroundColor = '';
     }, 2000);
   }
+  
+  // 检查是否在首页
+  function isHomePage() {
+    return window.location.pathname === '/' || window.location.pathname === '/index.html';
+  }
+  
   // 处理分类链接点击
   document.querySelectorAll('.sidebar-menu a[data-category-id]').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const categoryId = link.getAttribute('data-category-id');
       const targetId = `category-${categoryId.toLowerCase().replace(/\s+/g, '-')}`;
-      const targetElement = document.getElementById(targetId);
       
+      // 如果不在首页，跳转到首页并带上锚点
+      if (!isHomePage()) {
+        window.location.href = `/#${targetId}`;
+        return;
+      }
+      
+      // 如果在首页，直接滚动到目标位置
+      const targetElement = document.getElementById(targetId);
       if (targetElement) {
         smoothScrollTo(targetElement);
       } else {
-        // 如果目标元素不存在，可能是异步加载的内容
         console.warn(`目标分类区域未找到: ${targetId}`);
       }
     });
   });
-  // 页面加载时检查哈希并滚动
-  if (window.location.hash) {
+  
+  // 处理友情链接
+  document.querySelectorAll('a[href="#friendlink"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      if (!isHomePage()) {
+        window.location.href = '/#friendlink';
+        return;
+      }
+      
+      const targetElement = document.getElementById('friendlink');
+      if (targetElement) {
+        smoothScrollTo(targetElement);
+      }
+    });
+  });
+  
+  // 页面加载时检查哈希并滚动（仅在首页）
+  if (isHomePage() && window.location.hash) {
     const targetId = window.location.hash.substring(1);
     const targetElement = document.getElementById(targetId);
     
