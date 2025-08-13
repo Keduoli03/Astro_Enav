@@ -118,9 +118,9 @@ export const sites = [
 欢迎提交 Issue 和 Pull Request！
 
 1. Fork 本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
+2. 创建特性分支 
+3. 提交更改
+4. 推送到分支 
 5. 开启 Pull Request
 
 ## 📄 许可证
@@ -140,6 +140,7 @@ export const sites = [
 
 - 提交 [Issue](https://github.com/Keduoli03/Astro_Enav/issues)
 - 发起 [Discussion](https://github.com/Keduoli03/Astro_Enav/discussions)
+- 联系邮箱: [2801429414@qq.com](mailto:2801429414@qq.com)
 
 ---
 
