@@ -1,67 +1,58 @@
 ---
 import SearchModal from "./Utils/SearchModal.astro"
+import LightDarkSwitch from "./Utils/LightDarkSwitch.svelte";
 ---
 
-
-
 <footer class="main-footer footer-type-1 text-xs">
-            <div id="footer-tools" class="d-flex flex-column">
-                <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top">
-                    <i class="iconfont icon-to-up"></i>
-                </a>
+    <div id="footer-tools" class="d-flex flex-column">
+        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top">
+            <i class="iconfont icon-to-up"></i>
+        </a>
 
-                <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1"
-                    rel="search" one-link-mark="yes">
-                    <i class="iconfont icon-search"></i>
-                </a>
+        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1"
+            rel="search" one-link-mark="yes">
+            <i class="iconfont icon-search"></i>
+        </a>
 
+        <LightDarkSwitch client:load />
+    </div>
+    <!-- 底部信息 -->
+    <div class="footer-inner transition text-50 text-sm text-center">
+        Powered by: 🪐 <a href="https://astro.build/">Astro</a> + <a href="https://github.com/WebStackPage/WebStackPage.github.io">Webstack</a>✨
+        <div class="flex flex-col items-center">
+        <!-- 运行时间和访问量合并到同一行 -->
+        <div id="runtime-container" class="flex items-center justify-center space-x-2">
+        <span id="runningtime"></span>
+        <span>|</span>
+        <span>本网站已访问 <span id="busuanzi_value_page_pv" style=" color: hsl(192 98% 55%); font-weight: bold; "></span> 次</span>
+        <span>|</span>
+        <span>总访客 <span id="busuanzi_value_site_uv" style=" color: hsl(192 98% 55%); font-weight: bold; "></span> 人</span>
+        </div>
+        <div class="footer-text">本站内容源自互联网，如有内容侵犯了你的权益，请联系删除相关内容<br/></div>
+        </div>
+    </div>
 
-		<a href="javascript:" onclick="window.location.href='javascript:switchNightMode()'" class="btn rounded-circle switch-dark-mode m-1" id="yejian"
-                    data-toggle="tooltip" data-placement="left" title="日间模式">
-                    <i class="mode-ico iconfont icon-night"></i>
-                </a>
-
-            </div>
-            <!-- 底部信息 -->
-            <div class="footer-inner transition text-50 text-sm text-center">
-                Powered by: 🪐 <a href="https://astro.build/">Astro</a> + <a href="https://github.com/WebStackPage/WebStackPage.github.io">Webstack</a>✨
-                <div class="flex flex-col items-center">
-                <!-- 运行时间和访问量合并到同一行 -->
-                <div id="runtime-container" class="flex items-center justify-center space-x-2">
-                <span id="runningtime"></span>
-                <span>|</span>
-                <span>本网站已访问 <span id="busuanzi_value_page_pv" style=" color: hsl(192 98% 55%); font-weight: bold; "></span> 次</span>
-                <span>|</span>
-                <span>总访客 <span id="busuanzi_value_site_uv" style=" color: hsl(192 98% 55%); font-weight: bold; "></span> 人</span>
-                </div>
-                <div class="footer-text">本站内容源自互联网，如有内容侵犯了你的权益，请联系删除相关内容<br/></div>
-                </div>
-            </div>
-
-        <script type="text/javascript">function runtime() {
-            const t = new Date("06/25/2025 15:00:00"),
-                n = new Date,
-                s = n - t,
-                e = Math.floor(s / 1e3),
-                o = Math.floor(e / 86400),
-                i = Math.floor(e % 86400 / 3600),
-                a = Math.floor(e % 3600 / 60),
-                r = e % 60;
-            document.getElementById("runningtime").innerHTML = `⏱️本站已运行: ${o}天${i}小时${a}分${r}秒 `;
-        }
-        setInterval(runtime, 1e3);
-        </script>
-        <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    </footer>
+    <script type="text/javascript">function runtime() {
+        const t = new Date("06/25/2025 15:00:00"),
+            n = new Date,
+            s = n - t,
+            e = Math.floor(s / 1e3),
+            o = Math.floor(e / 86400),
+            i = Math.floor(e % 86400 / 3600),
+            a = Math.floor(e % 3600 / 60),
+            r = e % 60;
+        document.getElementById("runningtime").innerHTML = `⏱️本站已运行: ${o}天${i}小时${a}分${r}秒 `;
+    }
+    setInterval(runtime, 1e3);
+    </script>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</footer>
 
 <SearchModal />
-
 
 <script type='text/javascript' src='/js/jquery.ui.touch-punch.min-0.2.2.js' id='jqueryui-touch-js'></script>
 <!-- 影响搜索栏 -->
 <script type='text/javascript' src='/js/clipboard.min-5.6.2.js' id='clipboard-js'></script>
-<!-- 应该是无用js -->
-<!-- <script type='text/javascript' src='/js/tooltip-extend.js' id='iplaycode-nav-js'></script> -->
 
 <!-- 控制右下角搜索栏>... -->
 <script type='text/javascript' id='popper-js-extra'>
@@ -72,8 +63,7 @@ var theme = {"ajaxurl":"","addico":"https:\/\/nav.baidu.cn\/wp-content\/themes\/
 <script type='text/javascript' src='/js/bootstrap.min-4.3.1.js' id='bootstrap-js'></script>
 <!-- <script type='text/javascript' src='/js/theia-sticky-sidebar-1.5.0.js' id='sidebar-js'></script> -->
 <script type='text/javascript' src='/js/lazyload.min-12.4.0.js' id='lazyload-js'></script>
-<!-- fancybox,暂未发现异常 -->
-<!-- <script type='text/javascript' src='/js/fancybox.min-3.5.7.js' id='lightbox-js-js'></script> -->
+
 <!-- 先留着，屏蔽这个会影响功能 -->
 <script type='text/javascript' src='/js/app-anim.js' id='appanim-js'></script>
 

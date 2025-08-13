@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.4.1",
+    "@astrojs/svelte": "^7.1.0",
     "@astrojs/vercel": "^8.2.0",
-    "astro": "^5.10.1"
+    "astro": "^5.10.1",
+    "svelte": "^5.38.1"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.32"

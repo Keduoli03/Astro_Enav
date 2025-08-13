@@ -1,18 +1,11 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel';
 import sitemap from '@astrojs/sitemap';
+import vercel from '@astrojs/vercel/serverless';
+import svelte from '@astrojs/svelte';
 
-// https://astro.build/config
 export default defineConfig({
-  experimental: {
-    preserveScriptOrder: true
-  },
-    site: 'https://nav.blueke.top/',
-    integrations: [sitemap({
-      filter: (page) => page == 'https://nav.blueke.top/',
-    }),
-  ],
-    
-    adapter: vercel(),
+  site: 'https://nav.blueke.top/',
+  integrations: [sitemap(), svelte()],
+  output: 'server',
+  adapter: vercel()
 });

@@ -5,138 +5,20 @@ import Header from '../components/Header.astro';
 import Search from '../components/Search.astro';
 import Footer from '../components/Footer.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE,SITE_BG } from '../settings';
+import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
 import '../styles/global.css';
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <style id="critical-css" type="text/css">
-    /* 防止白屏闪烁的关键样式 */
-    html, body {
-      margin: 0;
-      padding: 0;
-    }
-    
-    /* 立即应用背景色，防止闪烁 */
-    body.io-grey-mode {
-      background-color: #f9f9f9 !important;
-      color: #333 !important;
-    }
-    
-    body.io-black-mode {
-      background-color: #222 !important;
-      color: #fff !important;
-    }
-    
-    /* 加载动画核心样式 */
-    body {
-      margin: 0;
-      overflow: hidden;
-    }
-    body.page-loading {
-      position: relative;
-    }
-    body.page-loading::before,
-    body.page-loading::after {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 9999;
-      transition: opacity 0.5s ease-out;
-    }
-    body.page-loading::before {
-      background: var(--loading-bg, #f9f9f9);
-      opacity: 1;
-    }
-    body.page-loading::after {
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 50px;
-      height: 50px;
-      border: 5px solid var(--loading-border, rgba(0, 0, 0, 0.15));
-      border-top-color: var(--loading-border-top, #333);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-    
-    body.page-loaded {
-      overflow: auto;
-    }
-    body.page-loaded::before,
-    body.page-loaded::after {
-      opacity: 0;
-      pointer-events: none;
-    }
-    
-    body.io-grey-mode {
-      --bg-color: #f9f9f9;
-      --loading-bg: #f9f9f9;
-      --loading-border: rgba(0, 0, 0, 0.15);
-      --loading-border-top: #333;
-    }
-    body.io-black-mode {
-      --bg-color: #222;
-      --loading-bg: #222;
-      --loading-border: rgba(255, 255, 255, 0.15);
-      --loading-border-top: #fff;
-    }
-  </style>
   <link rel="preload" href="/css/block-library.min-5.6.2.css" as="style">
   <link rel="stylesheet" href="/css/iconfont-3.03029.1.css" type="text/css" media="all" />
   <link rel="stylesheet" href="/css/bootstrap.min-4.3.1.css" type="text/css" media="all" />
-  <!-- 将关键CSS改为同步加载 -->
   <link rel="stylesheet" href="/css/style-3.03029.1.css" type="text/css" media="all" />
-  <!-- 其他CSS可以保持预加载 -->
   <link rel="preload" href="/css/block-library.min-5.6.2.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="stylesheet" href="/fontawesome-5.15.4/css/all.min.css" type="text/css" />
-  <script>
-    (function() {
-      // 读取夜间模式Cookie
-      function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        return parts.length === 2 ? parts.pop().split(';').shift() : '';
-      }
-      
-      // 判断是否为夜间时间（22:00-6:00）
-      function isNightTime() {
-        const hour = new Date().getHours();
-        return hour > 22 || hour < 6;
-      }
-      
-      // 获取应该使用的模式
-      const cookieValue = getCookie('night_mode');
-      const shouldUseNightMode = cookieValue ? cookieValue === 'night' : isNightTime();
-      
-      // 立即设置body类名和背景色
-      if (shouldUseNightMode) {
-        document.documentElement.className = 'night-mode-loading';
-        document.body.className = 'io-black-mode page-loading';
-        // 立即设置背景色
-        document.body.style.backgroundColor = '#222';
-        document.body.style.color = '#fff';
-      } else {
-        document.body.className = 'io-grey-mode page-loading';
-        // 立即设置背景色
-        document.body.style.backgroundColor = '#f9f9f9';
-        document.body.style.color = '#333';
-      }
-    })();
-  </script>
   
   <meta charset="UTF-8" />
-  <style id="initial-theme">
-    body.io-grey-mode { background-color: #f9f9f9; }
-    body.io-black-mode { background-color: #222; }
-  </style>
   <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f9f9f9" />
@@ -146,15 +28,83 @@ import '../styles/global.css';
   <meta name="keywords" content={SITE_TITLE} />
   <meta name="description" content={SITE_DESCRIPTION} />
 
+  <!-- 防止FOUC的内联样式 - 必须在CSS加载前定义 -->
+  <style>
+    /* 防止白色闪烁的关键样式 */
+    body.io-black-mode {
+      background-color: #1b1d1f !important;
+      color: #c6c9cf !important;
+    }
+    body.io-grey-mode {
+      background-color: #f9f9f9 !important;
+      color: #282a2d !important;
+    }
+    /* 确保过渡动画 */
+    body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+  </style>
+
+  <!-- 防止FOUC的主题初始化脚本 - 与LightDarkSwitch.svelte保持一致 -->
+  <script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE}}>
+    (function() {
+      // 使用与theme-utils.ts相同的逻辑
+      function getStoredTheme() {
+        const stored = localStorage.getItem('theme');
+        return stored || DEFAULT_THEME;
+      }
+      
+      function applyThemeToDocument(theme) {
+        // 立即应用到body，不等待DOM加载
+        const body = document.body || document.getElementsByTagName('body')[0];
+        if (body) {
+          // 移除现有的主题类
+          body.classList.remove('io-grey-mode', 'io-black-mode');
+          
+          // 应用新的主题类
+          switch (theme) {
+            case LIGHT_MODE:
+              body.classList.add('io-grey-mode');
+              break;
+            case DARK_MODE:
+              body.classList.add('io-black-mode');
+              break;
+            case AUTO_MODE:
+              if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                body.classList.add('io-black-mode');
+              } else {
+                body.classList.add('io-grey-mode');
+              }
+              break;
+          }
+        }
+      }
+      
+      // 立即应用存储的主题
+      const storedTheme = getStoredTheme();
+      // 如果存储的是AUTO_MODE，LightDarkSwitch会默认设为LIGHT_MODE
+      const theme = (storedTheme === LIGHT_MODE || storedTheme === DARK_MODE) ? storedTheme : LIGHT_MODE;
+      
+      // 立即尝试应用主题
+      applyThemeToDocument(theme);
+      
+      // 如果body还不存在，监听DOM变化
+      if (!document.body) {
+        const observer = new MutationObserver(function(mutations) {
+          if (document.body) {
+            observer.disconnect();
+            applyThemeToDocument(theme);
+          }
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    })();
+  </script>
   
   <script type="text/javascript" src="/js/jquery.min-3.2.1.js" id="jquery-js"></script>
   <script src="/js/content-search.js" defer id="content-search-js"></script>
-  
-  <!-- 防止夜间模式闪烁的预加载脚本 -->
-
 </head>
 
-<!-- 移除默认的io-grey-mode类 -->
 <body class="page-loading">
 <div class="page-container">
   <Sidebar />
@@ -162,12 +112,10 @@ import '../styles/global.css';
     <Header />
     <Search />
     <div id="content" class="content-site customize-site">
-      <slot /> <!-- 这里是内容插槽 -->
+      <slot />
     </div>
     <Footer />
   </div>
 </div>
-
-<script type="text/javascript" src="/js/night-mode.js"></script>
 </body>
 </html>
