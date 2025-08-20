@@ -9,10 +9,10 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.4.1",
+    "@astrojs/sitemap": "^3.5.0",
     "@astrojs/svelte": "^7.1.0",
-    "@astrojs/vercel": "^8.2.0",
-    "astro": "^5.10.1",
+    "@astrojs/vercel": "^8.2.6",
+    "astro": "^5.13.2",
     "svelte": "^5.38.1"
   },
   "devDependencies": {

@@ -40,22 +40,251 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
   SITE_DESCRIPTION={SITE_DESCRIPTION}
   SITE_FAVICON={SITE_FAVICON}
 >
-如你所见，这是一个导航网站，基于Webstack-Hugo版本进行构建，迁移到了Astro。
-目前仍处于开发状态，如有bug欢迎联系！<br>
-仓库地址：https://github.com/Keduoli03/Astro_Enav
-邮箱：2801429414@qq.com
-<br>
-<br>
-PS：本页其实也还未完善，建议从跳转到首页开始使用
-<br>
-<br>
-<a href="./"><i class="fa fa-home fa-lg mr-2"></i>
-   <span>回到首页</span>
-</a>
-<br>
-<br>
-如果你有什么好的建议，也欢迎在本页留言哦~
-<br>
-<br>
-<WalineComment />
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-6">
+        <!-- 页面标题 -->
+        <div class="text-center mb-5">
+          <h1 class="display-4 mb-3 font-weight-bold">
+            <i class="iconfont icon-about text-primary mr-3"></i>
+            关于本站
+          </h1>
+          <p class="lead text-muted">一个简洁、现代的网址导航站点</p>
+        </div>
+
+        <!-- 项目介绍卡片 -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-4">
+            <div class="row align-items-center">
+              <div class="col-md-3 text-center mb-3 mb-md-0">
+                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                  <i class="iconfont icon-rocket text-white" style="font-size: 2rem;"></i>
+                </div>
+              </div>
+              <div class="col-md-9">
+                <h3 class="card-title mb-3">项目简介</h3>
+                <p class="card-text text-muted mb-0">
+                  这是一个基于 <strong>Astro</strong> 和 <strong>WebStack-Hugo</strong> 开发的现代化导航网站。
+                  采用响应式设计，支持暗色模式，为用户提供简洁、高效的网址收藏和导航体验。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 技术特性 -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h3 class="card-title mb-4">
+              <i class="iconfont icon-features text-success mr-2"></i>
+              技术特性
+            </h3>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="d-flex align-items-center">
+                  <i class="iconfont icon-responsive text-info mr-3" style="font-size: 1.5rem;"></i>
+                  <div>
+                    <h6 class="mb-1">响应式设计</h6>
+                    <small class="text-muted">完美适配各种设备</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="d-flex align-items-center">
+                  <i class="iconfont icon-night text-warning mr-3" style="font-size: 1.5rem;"></i>
+                  <div>
+                    <h6 class="mb-1">暗色模式</h6>
+                    <small class="text-muted">护眼的夜间主题</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="d-flex align-items-center">
+                  <i class="iconfont icon-search text-primary mr-3" style="font-size: 1.5rem;"></i>
+                  <div>
+                    <h6 class="mb-1">本地搜索</h6>
+                    <small class="text-muted">快速找到目标网站</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="d-flex align-items-center">
+                  <i class="iconfont icon-speed text-success mr-3" style="font-size: 1.5rem;"></i>
+                  <div>
+                    <h6 class="mb-1">高性能</h6>
+                    <small class="text-muted">基于 Astro 静态生成</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 开发状态 -->
+        <div class="alert alert-info border-0 shadow-sm mb-4">
+          <div class="d-flex align-items-center">
+            <i class="iconfont icon-info-circle text-info mr-3" style="font-size: 1.5rem;"></i>
+            <div>
+              <h6 class="alert-heading mb-1">开发状态</h6>
+              <p class="mb-0">项目仍在持续开发中，如遇到问题欢迎反馈！我们会及时处理并不断完善功能。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 联系方式 -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-4">
+            <h3 class="card-title mb-4">
+              <i class="iconfont icon-contact text-primary mr-2"></i>
+              联系方式
+            </h3>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <a href="https://github.com/Keduoli03/Astro_Enav" target="_blank" class="btn btn-outline-dark btn-block d-flex align-items-center justify-content-center py-3">
+                  <i class="fab fa-github mr-2" style="font-size: 1.2rem;"></i>
+                  <div class="text-left">
+                    <div class="font-weight-bold">GitHub 仓库</div>
+                    <small class="text-muted">查看源码 & 提交 Issue</small>
+                  </div>
+                </a>
+              </div>
+              <div class="col-md-6 mb-3">
+                <a href="mailto:2801429414@qq.com" class="btn btn-outline-primary btn-block d-flex align-items-center justify-content-center py-3">
+                  <i class="fas fa-envelope mr-2" style="font-size: 1.2rem;"></i>
+                  <div class="text-left">
+                    <div class="font-weight-bold">邮箱联系</div>
+                    <small class="text-muted" style="color: inherit !important;">2801429414@qq.com</small>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快速导航 -->
+        <div class="text-center mb-5">
+          <a href="./" class="btn btn-primary btn-lg px-5 py-3 shadow">
+            <i class="fas fa-home mr-2"></i>
+            返回首页
+          </a>
+        </div>
+
+        <!-- 用户反馈区域 -->
+        <div class="card shadow-sm mb-5">
+          <div class="card-body p-4">
+            <h3 class="card-title mb-3">
+              <i class="iconfont icon-comment text-success mr-2"></i>
+              用户反馈
+            </h3>
+            <p class="text-muted mb-4">
+              如果你有任何建议、意见或发现了问题，欢迎在下方留言。你的反馈对我们非常重要！
+            </p>
+            <WalineComment />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .card {
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn {
+      transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    
+    .display-4 {
+      font-weight: 700 !important; /* 确保标题加粗 */
+    }
+    
+    /* 暗色模式适配 - 修复样式问题 */
+    :global(.io-black-mode) .card {
+      background-color: #2c2e2f !important;
+      border-color: #404040 !important;
+      color: #c6c9cf !important;
+    }
+    
+    :global(.io-black-mode) .card-title,
+    :global(.io-black-mode) .card-text,
+    :global(.io-black-mode) h1,
+    :global(.io-black-mode) h3,
+    :global(.io-black-mode) h6 {
+      color: #c6c9cf !important;
+    }
+    
+    :global(.io-black-mode) .text-muted {
+      color: #a0a0a0 !important;
+    }
+    
+    :global(.io-black-mode) .alert-info {
+      background-color: rgba(23, 162, 184, 0.15) !important;
+      border-color: rgba(23, 162, 184, 0.3) !important;
+      color: #c6c9cf !important;
+    }
+    
+    /* 修复GitHub卡片 - 提高可见性 */
+    :global(.io-black-mode) .btn-outline-dark {
+      color: #ffffff !important;
+      border-color: #6c757d !important;
+      background-color: rgba(108, 117, 125, 0.2) !important;
+    }
+    
+    :global(.io-black-mode) .btn-outline-dark:hover {
+      background-color: #495057 !important;
+      border-color: #495057 !important;
+      color: #ffffff !important;
+    }
+    
+    /* 确保GitHub图标清晰可见 */
+    :global(.io-black-mode) .btn-outline-dark .fab.fa-github {
+      color: #ffffff !important;
+    }
+    
+    /* 修复按钮内的文字和小文本 */
+    :global(.io-black-mode) .btn-outline-dark .font-weight-bold {
+      color: #ffffff !important;
+    }
+    
+    :global(.io-black-mode) .btn-outline-dark small.text-muted {
+      color: #d1d3d4 !important;
+    }
+    
+    :global(.io-black-mode) .btn-outline-primary {
+      color: #4dabf7 !important;
+      border-color: #4dabf7 !important;
+    }
+    
+    :global(.io-black-mode) .btn-outline-primary:hover {
+      background-color: #4dabf7 !important;
+      border-color: #4dabf7 !important;
+      color: #ffffff !important;
+    }
+    
+    /* 确保悬浮时邮箱图标是白色 */
+    :global(.io-black-mode) .btn-outline-primary:hover .fas.fa-envelope {
+      color: #ffffff !important;
+    }
+    
+    
+    /* 确保小文本在暗色模式下可读 */
+    :global(.io-black-mode) small {
+      color: #b8bcc0 !important;
+    }
+    
+    /* 修复lead文本在暗色模式下的显示 */
+    :global(.io-black-mode) .lead {
+      color: #b8bcc0 !important;
+    }
+  </style>
 </Layout>
