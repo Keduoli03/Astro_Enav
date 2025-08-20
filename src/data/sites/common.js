@@ -8,6 +8,13 @@ export default [
     id: "yuque"
   },
   {
+    url: "https://www.doubao.com/chat",
+    title: "豆包",
+    description: "豆包Chat，一个基于大模型的智能问答平台",
+    logo: "",
+    id: "doubao"
+  },
+  {
     url: "https://github.com",
     title: "GitHub",
     description: "代码托管平台",
