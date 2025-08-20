@@ -1,17 +1,142 @@
 ---
-// src/pages/about.astro
+// src/pages/submit.astro
 import WalineComment from '@/components/Utils/WalineComment.astro';
 import Layout from '../layouts/Layout.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
 ---
 
 <Layout 
-  SITE_TITLE={SITE_TITLE}
-  SITE_DESCRIPTION={SITE_DESCRIPTION}
+  SITE_TITLE={SITE_TITLE + ' - 网站提交'}
+  SITE_DESCRIPTION="分享你喜欢的网站，让更多人发现优质内容"
   SITE_FAVICON={SITE_FAVICON}
 >
-如果你有好的网站想要分享，欢迎在下方留言！
-<br>
-<WalineComment />
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-lg-12 col-xl-8">
+        <!-- 页面标题 -->
+        <div class="text-center mb-5">
+          <h1 class="display-4 mb-3 font-weight-bold">
+            网站提交
+          </h1>
+          <p class="lead text-muted">分享你发现的优质网站，让更多人受益</p>
+        </div>
 
+        <!-- 提交指南 -->
+        <div class="row mb-5">
+          <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+              <div class="card-body text-center">
+                <div class="mb-3">
+                  <i class="fas fa-lightbulb fa-2x text-warning"></i>
+                </div>
+                <h5 class="card-title">优质内容</h5>
+                <p class="card-text text-muted">推荐实用、有价值的网站，避免重复或低质量内容</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+              <div class="card-body text-center">
+                <div class="mb-3">
+                  <i class="fas fa-info-circle fa-2x text-info"></i>
+                </div>
+                <h5 class="card-title">详细信息</h5>
+                <p class="card-text text-muted">请提供网站名称、链接、简介等完整信息</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+              <div class="card-body text-center">
+                <div class="mb-3">
+                  <i class="fas fa-clock fa-2x text-success"></i>
+                </div>
+                <h5 class="card-title">审核时间</h5>
+                <p class="card-text text-muted">我们会在1-3个工作日内审核并添加优质网站</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 提交表单说明 -->
+        <div class="card mb-4 border-0 shadow-sm">
+          <div class="card-body">
+            <h4 class="card-title mb-3">
+              <i class="fas fa-paper-plane text-primary mr-2"></i>
+              提交你的网站推荐
+            </h4>
+            <div class="alert alert-info border-0" role="alert">
+              <i class="fas fa-info-circle mr-2"></i>
+              <strong>提交格式建议：</strong>
+              <ul class="mb-0 mt-2">
+                <li><strong>网站名称：</strong>网站的中文或英文名称</li>
+                <li><strong>网站链接：</strong>完整的网站URL地址</li>
+                <li><strong>网站简介：</strong>简要描述网站的功能和特色</li>
+                <li><strong>推荐理由：</strong>为什么推荐这个网站</li>
+                <li><strong>分类建议：</strong>建议归类到哪个分类下</li>
+              </ul>
+            </div>
+            <p class="text-muted mb-0">
+              <i class="fas fa-heart text-danger mr-1"></i>
+              感谢你的分享！每一个推荐都让我们的导航站变得更加丰富和实用。
+            </p>
+          </div>
+        </div>
+
+        <!-- 评论区 -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-white border-0 pb-0">
+            <h5 class="mb-0">
+              <i class="fas fa-comments text-primary mr-2"></i>
+              在下方留言提交你的网站推荐
+            </h5>
+          </div>
+          <div class="card-body">
+            <WalineComment />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .io-black-mode .card {
+      background-color: #2d3748;
+      border-color: #4a5568;
+    }
+    
+    .io-black-mode .card-header {
+      background-color: #2d3748 !important;
+      border-color: #4a5568;
+    }
+    
+    .io-black-mode .text-muted {
+      color: #a0aec0 !important;
+    }
+    
+    .io-black-mode .alert-info {
+      background-color: rgba(66, 153, 225, 0.1);
+      border-color: #4299e1;
+      color: #90cdf4;
+    }
+    
+    .io-black-mode h1,
+    .io-black-mode h4,
+    .io-black-mode h5,
+    .io-black-mode .card-title {
+      color: #f7fafc;
+    }
+    
+    .io-black-mode .lead {
+      color: #cbd5e0;
+    }
+    
+    .card {
+      transition: transform 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+    }
+  </style>
 </Layout>
