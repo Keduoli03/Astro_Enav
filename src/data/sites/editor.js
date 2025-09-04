@@ -7,4 +7,11 @@ export default [
     logo: "images/logos/jetbrains.png",
     id: "pansou"
   },
+  {
+    url: "https://javaguide.cn/home.html",
+    title: "Java学习&面试指南",
+    description: "后期java快速学习指南",
+    logo: "",
+    id: "javaguide"
+  },
 ];
