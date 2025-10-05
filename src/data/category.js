@@ -26,6 +26,17 @@ export const CATEGORY_CONFIG = {
       }
     ]
   },
+  music: {
+    name: '音乐资源',
+    icon: 'fas fa-music',
+    subItems: [
+      {
+        id: 'musictool',
+        name: '音乐工具',
+        icon: 'fas fa-music'
+      },
+    ]
+  },
   reader: {
     name: '阅读',
     icon: 'fas  fa-book',

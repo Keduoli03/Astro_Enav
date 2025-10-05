@@ -2,6 +2,12 @@
 export default [
   {
     url: "https://www.blueke.top",
+    title: "主页",
+    description: "作者主页，欢迎来访！",
+    id: "yuque"
+  },
+  {
+    url: "https://www.blueke.top",
     title: "博客",
     description: "作者Blog，欢迎来访！",
     logo: "images/logo.png",
@@ -41,6 +47,12 @@ export default [
     description: "自部署FreshRss阅读器",
     logo: "",
     id: "FreshRss"
+  },
+  {
+    url: "https://memo.blueke.top/",
+    title: "MissKey",
+    description: "自部署MissKey",
+    id: "MissKey"
   },
   {
     url: "https://test.ustc.edu.cn/",
