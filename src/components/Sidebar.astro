@@ -1,11 +1,9 @@
 ---
-// src/components/Sidebar.astro
 import { getCategoryList } from '../data/category';
 import { SITE_LOGO, SITE_LOGO_DARK, SITE_TITLE } from '../settings';
 
 const categories = getCategoryList();
 ---
-
 <div id="sidebar" class="sticky sidebar-nav fade animate-nav" style="width: 170px;">
   <div class="modal-dialog h-100 sidebar-nav-inner">
     <!-- Logo部分 -->
@@ -33,10 +31,11 @@ const categories = getCategoryList();
             
             return (
               <li class={`sidebar-item ${hasSubItems ? 'has-submenu' : ''}`}>
+                <!-- Sidebar 组件中的分类链接部分 -->
                 <a 
-                  href={`#category-${id.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={`#category-${firstSubItemId.toLowerCase().replace(/\s+/g, '-')}`}
                   class="smooth"
-                  data-category-id={id}
+                  data-category-id={firstSubItemId}
                 >
                   <i class={`${category.icon} fa-lg icon-fw icon-lg mr-2`}></i>
                   <span>{category.name}</span>
@@ -99,19 +98,34 @@ const categories = getCategoryList();
 <!-- 修改JavaScript部分 -->
 <script is:inline>
 document.addEventListener('DOMContentLoaded', () => {
-  // 平滑滚动函数
-  // 平滑滚动函数
   function smoothScrollTo(target) {
     target.scrollIntoView({
       behavior: 'smooth',
-      block: 'center'  // 改为 center，让目标元素滚动到屏幕中央
+      block: 'center'
     });
-    
-    // 临时高亮目标区域
-    target.style.backgroundColor = 'rgba(0, 0, 0, 0.10)';
-    setTimeout(() => {
-      target.style.backgroundColor = '';
-    }, 2000);
+    const titleEl = target.querySelector('h4');
+    if (titleEl) {
+      const prevDisplay = titleEl.style.display;
+      const prevPadding = titleEl.style.padding;
+      const prevBg = titleEl.style.backgroundColor;
+      const prevShadow = titleEl.style.boxShadow;
+      const prevRadius = titleEl.style.borderRadius;
+
+      // 仅包裹标题文本宽度
+      titleEl.style.display = 'inline-block';
+      titleEl.style.padding = '2px 8px';
+      titleEl.style.backgroundColor = 'rgba(255, 229, 100, 0.25)';
+      titleEl.style.boxShadow = '0 0 0 2px rgba(255, 196, 0, 0.35)';
+      titleEl.style.borderRadius = '6px';
+
+      setTimeout(() => {
+        titleEl.style.display = prevDisplay;
+        titleEl.style.padding = prevPadding;
+        titleEl.style.backgroundColor = prevBg;
+        titleEl.style.boxShadow = prevShadow;
+        titleEl.style.borderRadius = prevRadius;
+      }, 1200);
+    }
   }
   
   // 检查是否在首页
