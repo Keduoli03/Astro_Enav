@@ -7,7 +7,7 @@ export default [
     id: "yuque"
   },
   {
-    url: "https://www.blueke.top",
+    url: "https://blog.blueke.top",
     title: "博客",
     description: "作者Blog，欢迎来访！",
     logo: "images/logo.png",
