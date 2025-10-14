@@ -1,19 +1,8 @@
 
 ---
-let canonicalPath = Astro.url.pathname;
+let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
 ---
 
-<!-- 1. 先静态显示阅读量/评论数的骨架屏 -->
-<!-- <div class="flex justify-between items-center text-75 mb-4">
-  <div class="flex items-center">
-    阅读量: <span class="artalk-pv-count ml-1">--</span>
-  </div>
-  <div class="flex items-center">
-    评论数：<span class="artalk-comment-count ml-1">--</span>
-  </div>
-</div> -->
-
-<!-- 将服务器端生成的规范 pageKey 通过 data-* 属性传递给客户端 -->
 <div id="Comments" data-page-key={canonicalPath}></div>
 
 <script is:inline>
@@ -26,19 +15,52 @@ let canonicalPath = Astro.url.pathname;
 
     container.innerHTML = '';
 
-    if (!document.querySelector('link[href="https://unpkg.com/artalk@2.9.1/dist/Artalk.css"]')) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/artalk@2.9.1/dist/Artalk.css';
-      document.head.appendChild(link);
-    }
+    // 请改为你的真实 Artalk 后端根路径
+    // 如果你通过子路径反向代理，请用类似 'https://nav.blueke.top/artalk/'
+    // 如果是独立域名，请用类似 'https://artalk.blueke.top/'
+    const serverUrl = 'https://nav.blueke.top/';
 
-    import('https://esm.sh/artalk@2.9.1').then(ArtalkModule => {
-      const Artalk = ArtalkModule.default || ArtalkModule;
+    const tryConfigEndpoints = async () => {
+      const endpoints = [
+        `${serverUrl}api/v2/config`,
+        `${serverUrl}api/config`,
+      ];
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, { mode: 'cors' });
+          if (res.ok) return true;
+        } catch {}
+      }
+      return false;
+    };
+
+    tryConfigEndpoints().then(async ok => {
+      if (!ok) {
+        console.error('Artalk 服务端不可用或路径错误：', serverUrl);
+        container.innerHTML = '<div style="padding:8px;color:#b00;background:#fee;border:1px solid #f99;border-radius:6px;">Artalk 后端未就绪或地址错误，请检查 serverUrl 与反向代理配置</div>';
+        return;
+      }
+
+      if (!document.querySelector('link[href="https://unpkg.com/artalk@2.9.1/dist/Artalk.css"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/artalk@2.9.1/dist/Artalk.css';
+        document.head.appendChild(link);
+      }
+
+      const mod = await import('https://esm.sh/artalk@2.9.1').catch(() =>
+        import('https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/artalk.min.js')
+      );
+      const Artalk = mod.default || mod.Artalk || window.Artalk;
+      if (!Artalk) {
+        console.error('Artalk 模块加载失败');
+        return;
+      }
+
       Artalk.init({
         el: '#Comments',
-        server: 'https://nav.blueke.top/',
-        site: 'Nav',
+        server: serverUrl,
+        site: 'Nav', // 必须与后端站点名一致
         pageKey,
         pageTitle: document.title,
         locale: 'zh-CN',
@@ -52,7 +74,7 @@ let canonicalPath = Astro.url.pathname;
     });
   }
 
-  // 兼容初始化：首屏就执行；若使用客户端导航，再监听 astro:page-load
+  // 首屏执行 + 客户端导航兼容
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initArtalk);
   } else {
@@ -60,7 +82,7 @@ let canonicalPath = Astro.url.pathname;
   }
   document.addEventListener('astro:page-load', initArtalk);
 
-  // 主题切换时重建（保留你原有逻辑）
+  // 主题切换时重建
   if (!window.artalkThemeObserver) {
     const observer = new MutationObserver(() => initArtalk());
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
