@@ -61,7 +61,6 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
 
       import('https://esm.sh/artalk@2.9.1').then(ArtalkModule => {
         const Artalk = ArtalkModule.default || ArtalkModule;
-
         const instance = Artalk.init({
           el: '#Comments',
           server: serverUrl,
@@ -88,9 +87,32 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
   }
   document.addEventListener('astro:page-load', initArtalk);
 
+  // 同步主题：监听 body 和 html 的 class 变化，优先使用 setDarkMode
   if (!window.artalkThemeObserver) {
-    const observer = new MutationObserver(() => initArtalk());
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    const applyTheme = () => {
+      const isDark =
+        document.body.classList.contains('io-black-mode') ||
+        document.documentElement.classList.contains('dark') ||
+        document.body.classList.contains('dark') ||
+        document.body.classList.contains('night') ||
+        document.body.classList.contains('dark-mode');
+
+      if (window.artalkInstance && typeof window.artalkInstance.setDarkMode === 'function') {
+        window.artalkInstance.setDarkMode(isDark);
+      } else {
+        initArtalk();
+      }
+    };
+
+    new MutationObserver(applyTheme).observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    new MutationObserver(applyTheme).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
     window.artalkThemeObserver = true;
   }
 </script>
