@@ -10,13 +10,18 @@ export const CATEGORY_CONFIG = {
       }
     ]
   },
-  anime: {
-    name: '动漫资源',
+  movie: {
+    name: '影视资源',
     icon: 'fa fa-film',
     subItems: [
       {
         id: 'anime',
         name: '动漫网站',
+        icon: 'fa fa-film'
+      },
+      {
+        id: '影视网站',
+        name: '影视网站',
         icon: 'fa fa-film'
       },
       {
