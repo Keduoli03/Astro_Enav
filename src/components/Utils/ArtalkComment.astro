@@ -18,7 +18,18 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
     // 请改为你的真实 Artalk 后端根路径
     // 如果你通过子路径反向代理，请用类似 'https://nav.blueke.top/artalk/'
     // 如果是独立域名，请用类似 'https://artalk.blueke.top/'
-    const serverUrl = 'https://artalk.blueke.top/'; // 改为你的独立 Artalk 服务地址
+    const serverUrl = 'https://artalk.blueke.top/'; // 确保是你的 Artalk 后端地址
+
+    const isNightMode = () => {
+      const b = document.body.classList;
+      const h = document.documentElement.classList;
+      return (
+        b.contains('dark') ||
+        b.contains('night') ||
+        b.contains('dark-mode') ||
+        h.contains('dark')
+      );
+    };
 
     const tryConfigEndpoints = async () => {
       const endpoints = [
@@ -51,24 +62,25 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
         document.head.appendChild(link);
       }
 
-      const mod = await import('https://esm.sh/artalk@2.9.1').catch(() =>
-        import('https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/artalk.min.js')
-      );
-      const Artalk = mod.default || mod.Artalk || window.Artalk;
+      import('https://esm.sh/artalk@2.9.1').then(ArtalkModule => {
+        const Artalk = ArtalkModule.default || ArtalkModule;
 
-      Artalk.init({
-        el: '#Comments',
-        server: serverUrl,
-        site: 'Nav', // 这里必须与后端配置的站点名一致
-        pageKey: document.getElementById('Comments')?.getAttribute('data-page-key') || '/',
-        pageTitle: document.title,
-        locale: 'zh-CN',
-        noComment: '快来评论吧！',
-        darkMode: document.documentElement.classList.contains('dark'),
-        avatar: {
-          default: '/favicon.ico',
-          gravatar: { mirror: 'https://cravatar.cn/avatar/' }
-        }
+        // 初始化并记录实例
+        const instance = Artalk.init({
+          el: '#Comments',
+          server: serverUrl,
+          site: 'Nav',
+          pageKey: container.getAttribute('data-page-key'),
+          pageTitle: document.title,
+          locale: 'zh-CN',
+          noComment: '快来评论吧！',
+          darkMode: isNightMode(),
+          avatar: {
+            default: '/favicon.ico',
+            gravatar: { mirror: 'https://cravatar.cn/avatar/' }
+          }
+        });
+        window.artalkInstance = instance;
       });
     });
   }
@@ -85,6 +97,33 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
   if (!window.artalkThemeObserver) {
     const observer = new MutationObserver(() => initArtalk());
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    window.artalkThemeObserver = true;
+  }
+
+  // 主题切换适配（优先无刷新切换，回退重建）
+  if (!window.artalkThemeObserver) {
+    const applyTheme = () => {
+      const isDark = (
+        document.body.classList.contains('dark') ||
+        document.body.classList.contains('night') ||
+        document.body.classList.contains('dark-mode') ||
+        document.documentElement.classList.contains('dark')
+      );
+      if (window.artalkInstance && typeof window.artalkInstance.setDarkMode === 'function') {
+        window.artalkInstance.setDarkMode(isDark);
+      } else {
+        // 旧版本或无 setDarkMode 时，回退重建
+        initArtalk();
+      }
+    };
+    new MutationObserver(applyTheme).observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    new MutationObserver(applyTheme).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
     window.artalkThemeObserver = true;
   }
 </script>
