@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import CategorySection from '../components/CategorySection.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
 import { CATEGORY_CONFIG } from '../data/category';
-import WalineComment from '@/components/Utils/WalineComment.astro';
+import ArtalkComment from '@/components/Utils/ArtalkComment.astro';
 
 // 动态加载所有二级分类的网站数据
 const loadSubCategorySites = async () => {
@@ -179,7 +179,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
             <p class="text-muted mb-4">
               如果你有任何建议、意见或发现了问题，欢迎在下方留言。你的反馈对我们非常重要！
             </p>
-            <WalineComment />
+            <ArtalkComment />
           </div>
         </div>
       </div>
