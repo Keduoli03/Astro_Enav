@@ -21,14 +21,11 @@ let canonicalPath = Astro.url.pathname;
     const container = document.getElementById('Comments');
     if (!container) return;
 
-    // 从 data-* 属性读取权威的 pageKey
     const pageKey = container.getAttribute('data-page-key');
     if (!pageKey) return;
 
-    // 确保每次都重新创建 Artalk 实例
     container.innerHTML = '';
-    
-    // 如果 CSS 未加载，则动态加载
+
     if (!document.querySelector('link[href="https://unpkg.com/artalk@2.9.1/dist/Artalk.css"]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -36,43 +33,37 @@ let canonicalPath = Astro.url.pathname;
       document.head.appendChild(link);
     }
 
-    // 动态导入并初始化 Artalk
     import('https://esm.sh/artalk@2.9.1').then(ArtalkModule => {
       const Artalk = ArtalkModule.default || ArtalkModule;
       Artalk.init({
         el: '#Comments',
         server: 'https://nav.blueke.top/',
-        site: "Nav",
-        pageKey: pageKey, // 使用从服务器传递的规范 Key
+        site: 'Nav',
+        pageKey,
         pageTitle: document.title,
         locale: 'zh-CN',
         noComment: '快来评论吧！',
         darkMode: document.documentElement.classList.contains('dark'),
         avatar: {
           default: '/favicon.ico',
-          gravatar: {
-            mirror: 'https://cravatar.cn/avatar/'
-          }
+          gravatar: { mirror: 'https://cravatar.cn/avatar/' }
         }
       });
     });
   }
 
-  // astro:page-load 事件会在页面首次加载和后续的客户端导航时触发
+  // 兼容初始化：首屏就执行；若使用客户端导航，再监听 astro:page-load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initArtalk);
+  } else {
+    initArtalk();
+  }
   document.addEventListener('astro:page-load', initArtalk);
 
-  // 仅设置一次主题切换的监听器
+  // 主题切换时重建（保留你原有逻辑）
   if (!window.artalkThemeObserver) {
-    const observer = new MutationObserver(() => {
-      // 当 class 变化时，重新初始化 Artalk 以应用新的主题
-      initArtalk();
-    });
-    
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
+    const observer = new MutationObserver(() => initArtalk());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     window.artalkThemeObserver = true;
   }
 </script>
