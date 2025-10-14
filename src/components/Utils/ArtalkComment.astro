@@ -15,10 +15,7 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
 
     container.innerHTML = '';
 
-    // 请改为你的真实 Artalk 后端根路径
-    // 如果你通过子路径反向代理，请用类似 'https://nav.blueke.top/artalk/'
-    // 如果是独立域名，请用类似 'https://artalk.blueke.top/'
-    const serverUrl = 'https://artalk.blueke.top/'; // 确保是你的 Artalk 后端地址
+    const serverUrl = 'https://artalk.blueke.top/';
 
     const isNightMode = () => {
       const b = document.body.classList;
@@ -27,14 +24,15 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
         b.contains('dark') ||
         b.contains('night') ||
         b.contains('dark-mode') ||
-        h.contains('dark')
+        h.contains('dark') ||
+        b.contains('io-black-mode')
       );
     };
 
     const tryConfigEndpoints = async () => {
       const endpoints = [
-        `${serverUrl}api/v2/conf`, // 正确的配置接口
-        `${serverUrl}api/conf`,    // 兼容旧版本
+        `${serverUrl}api/v2/conf`,
+        `${serverUrl}api/conf`,
       ];
       for (const url of endpoints) {
         try {
@@ -47,7 +45,6 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
 
     tryConfigEndpoints().then(async ok => {
       if (!ok) {
-        console.error('Artalk 服务端不可用或路径错误：', serverUrl);
         const container = document.getElementById('Comments');
         if (container) {
           container.innerHTML = '<div style="padding:8px;color:#b00;background:#fee;border:1px solid #f99;border-radius:6px;">Artalk 后端未就绪或地址错误，请检查 serverUrl 与反向代理配置</div>';
@@ -65,7 +62,6 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
       import('https://esm.sh/artalk@2.9.1').then(ArtalkModule => {
         const Artalk = ArtalkModule.default || ArtalkModule;
 
-        // 初始化并记录实例
         const instance = Artalk.init({
           el: '#Comments',
           server: serverUrl,
@@ -85,7 +81,6 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
     });
   }
 
-  // 首屏执行 + 客户端导航兼容
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initArtalk);
   } else {
@@ -93,37 +88,70 @@ let canonicalPath = Astro.url.pathname === '/' ? '/index' : Astro.url.pathname;
   }
   document.addEventListener('astro:page-load', initArtalk);
 
-  // 主题切换时重建
   if (!window.artalkThemeObserver) {
     const observer = new MutationObserver(() => initArtalk());
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     window.artalkThemeObserver = true;
   }
-
-  // 主题切换适配（优先无刷新切换，回退重建）
-  if (!window.artalkThemeObserver) {
-    const applyTheme = () => {
-      const isDark = (
-        document.body.classList.contains('dark') ||
-        document.body.classList.contains('night') ||
-        document.body.classList.contains('dark-mode') ||
-        document.documentElement.classList.contains('dark')
-      );
-      if (window.artalkInstance && typeof window.artalkInstance.setDarkMode === 'function') {
-        window.artalkInstance.setDarkMode(isDark);
-      } else {
-        // 旧版本或无 setDarkMode 时，回退重建
-        initArtalk();
-      }
-    };
-    new MutationObserver(applyTheme).observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-    new MutationObserver(applyTheme).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-    window.artalkThemeObserver = true;
-  }
 </script>
+
+<style is:global>
+  /* 暗色：基于 io-black-mode（你的站点暗色类）覆盖 Artalk 编辑器输入区 */
+  body.io-black-mode #Comments .atk-editor,
+  html.dark #Comments .atk-editor {
+    background-color: #111827 !important; /* slate-900 */
+    border-color: #374151 !important;     /* gray-700 */
+    color: #e5e7eb !important;            /* gray-200 */
+  }
+
+  body.io-black-mode #Comments .atk-editor textarea,
+  body.io-black-mode #Comments .atk-editor input[type="text"],
+  body.io-black-mode #Comments .atk-editor input[type="email"],
+  body.io-black-mode #Comments .atk-editor .atk-input,
+  body.io-black-mode #Comments .atk-editor .atk-textarea,
+  body.io-black-mode #Comments .atk-editor .form-control,
+  html.dark #Comments .atk-editor textarea,
+  html.dark #Comments .atk-editor input[type="text"],
+  html.dark #Comments .atk-editor input[type="email"],
+  html.dark #Comments .atk-editor .atk-input,
+  html.dark #Comments .atk-editor .atk-textarea,
+  html.dark #Comments .atk-editor .form-control {
+    background-color: #1f2937 !important; /* gray-800 */
+    color: #e5e7eb !important;            /* gray-200 */
+    border-color: #374151 !important;     /* gray-700 */
+    box-shadow: none !important;
+  }
+
+  body.io-black-mode #Comments .atk-editor textarea::placeholder,
+  body.io-black-mode #Comments .atk-editor input::placeholder,
+  html.dark #Comments .atk-editor textarea::placeholder,
+  html.dark #Comments .atk-editor input::placeholder {
+    color: #9aa0a6 !important; /* 更浅的 placeholder */
+    opacity: 1 !important;
+  }
+
+  body.io-black-mode #Comments .atk-editor button,
+  body.io-black-mode #Comments .atk-editor .atk-send,
+  html.dark #Comments .atk-editor button,
+  html.dark #Comments .atk-editor .atk-send {
+    background-color: #374151 !important; /* gray-700 */
+    color: #e5e7eb !important;
+    border-color: #4b5563 !important;     /* gray-600 */
+  }
+
+  body.io-black-mode #Comments .atk-editor button:hover,
+  body.io-black-mode #Comments .atk-editor .atk-send:hover,
+  html.dark #Comments .atk-editor button:hover,
+  html.dark #Comments .atk-editor .atk-send:hover {
+    background-color: #4b5563 !important; /* gray-600 */
+    border-color: #6b7280 !important;     /* gray-500 */
+  }
+
+  /* 提升可读性：标签/提示文字 */
+  body.io-black-mode #Comments .atk-editor label,
+  body.io-black-mode #Comments .atk-editor .atk-editor__header,
+  html.dark #Comments .atk-editor label,
+  html.dark #Comments .atk-editor .atk-editor__header {
+    color: #cbd5e1 !important; /* slate-300 */
+  }
+</style>
