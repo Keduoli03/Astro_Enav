@@ -1031,14 +1031,3 @@ input.nav-link:disabled,input.nav-link[readonly]{background-color:transparent;op
 .io-black-mode .ioch-code-highlight{background-color:#151619;border:0}
 .io-black-mode :not(pre) > code[class*="language-"],.io-black-mode pre[class*="language-"]{background-color:rgba(0,0,0,.15)}
 .io-black-mode .ioch-code-highlight .io-btn-copy{border:1px solid rgba(255,255,255,.5)}
-/*--------------------------------------------------------------
-## webkit scrollbar style
---------------------------------------------------------------*/
-/*@media only screen and (min-device-width:768px){
-::-webkit-scrollbar-thumb{background-color:rgba(130,130,130,.1);-webkit-border-radius:4px;border-radius:4px}
-::-webkit-scrollbar-thumb:hover{background-color:#f1404b;-webkit-border-radius:4px;border-radius:4px}
-::-webkit-scrollbar{width:5px;height:5px} 
-::-webkit-scrollbar-thumb:active{background-color:#f1404b;-webkit-border-radius:4px;border-radius:4px}
-::-webkit-scrollbar-corner{background:rgba(0,0,0,0);border-radius:0 0 8px 0}
-::-webkit-scrollbar-button{background-color:rgba(0,0,0,0);height:2px;width:2px}
-}*/
