@@ -53,6 +53,17 @@ export const CATEGORY_CONFIG = {
        }
     ]
   },
+  website: {
+    name: '网站工具',
+    icon: 'fas fa-globe',
+    subItems: [
+      {
+        id: 'website',
+        name: '网站',
+        icon: 'fas fa-globe'
+      },
+    ]
+  },
   animephoto: {
     name: '壁纸网站',
     icon: 'fas  fa-camera',
