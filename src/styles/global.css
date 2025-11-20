@@ -167,7 +167,7 @@ footer.main-footer .footer-text a:hover {
     .sidebar-nav{background:transparent!important} 
     .sidebar-nav{width:100%!important;height:100%!important;top:0!important;position:fixed;z-index:1090!important;display:none;padding-left:0!important}
     .sidebar-nav.show>div{transform:translate3d(0,0,0)}
-    .sidebar-nav>*{position:fixed;height:100%;transition:.2s cubic-bezier(.25,.8,.25,1);transform:translate3d(100%,0,0);width:14rem;right:0 !important;left:auto !important;margin:0 !important}
+    .sidebar-nav>*{position:fixed;height:100%;transition:.2s cubic-bezier(.25,.8,.25,1);transform:translate3d(100%,0,0);width:12rem;right:0 !important;left:auto !important;margin:0 !important}
     
     /* 移动端按钮位置强制调整 */
     @media (max-width: 767.98px) {
@@ -380,7 +380,7 @@ footer.main-footer .footer-text a:hover {
     .sidebar-nav{background:transparent!important} 
     .sidebar-nav{width:100%!important;height:100%!important;top:0!important;position:fixed;z-index:1090!important;display:none;padding-left:0!important}
     .sidebar-nav.show>div{transform:translate3d(0,0,0)}
-    .sidebar-nav>*{position:fixed;height:100%;transition:.2s cubic-bezier(.25,.8,.25,1);transform:translate3d(100%,0,0);width:14rem;right:0 !important;left:auto !important;margin:0 !important}
+    .sidebar-nav>*{position:fixed;height:100%;transition:.2s cubic-bezier(.25,.8,.25,1);transform:translate3d(100%,0,0);width:12rem;right:0 !important;left:auto !important;margin:0 !important}
     
     /* 移动端按钮位置强制调整 */
     @media (max-width: 767.98px) {
