@@ -70,3 +70,97 @@ const defaultGroupId = (searchGroups.find(g => g.engines.some(e => e.id === defa
         <ul id="word" style="display: none"></ul>
       </div>
 </div>
+<script is:inline>
+  (function(){
+    var STORE_KEY = 'selectedSearchEngineId';
+    var STORE_GROUP_KEY = 'selectedSearchGroupId';
+    var STORE_GROUP_ENGINE_PREFIX = 'selectedEngineIdForGroup:';
+    function getGroupIdByEngine(el){
+      if(!el) return '';
+      var grp = el.closest('.search-group');
+      if(!grp) return '';
+      var classes = Array.prototype.slice.call(grp.classList).filter(function(c){ return c !== 'search-group'; });
+      return classes[0] || '';
+    }
+    function applyGroup(gid){
+      if(!gid) return;
+      document.querySelectorAll('#search-bg .search-group').forEach(function(g){
+        var show = g.classList.contains(gid);
+        g.classList.toggle('s-current', show);
+        (g).style.display = show ? 'block' : 'none';
+      });
+      document.querySelectorAll('#search-list-menu .s-type-list.big label').forEach(function(l){
+        (l).classList.toggle('active', (l).dataset.id === gid);
+      });
+      var savedPer = '';
+      try{ savedPer = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + gid) || ''; }catch(e){}
+      var toCheck = null;
+      if(savedPer){
+        var el = document.getElementById(savedPer);
+        if(el && el.name === 'type') toCheck = el;
+      }
+      if(!toCheck){
+        toCheck = document.querySelector('.search-group.'+gid+' input[name="type"]');
+      }
+      if(toCheck){
+        (toCheck).checked = true;
+        updateEngine();
+      }
+      try{ localStorage.setItem(STORE_GROUP_KEY, gid); }catch(e){}
+    }
+    function updateEngine(){
+      var checked = document.querySelector('#search-bg input[name="type"]:checked');
+      var form = document.querySelector('#search-bg .super-search-fm');
+      var input = document.getElementById('search-text');
+      if(checked && form){ form.action = (checked).value || form.action; }
+      var ph = checked ? (checked).getAttribute('data-placeholder') || '' : '';
+      if(ph && input){ (input).placeholder = ph; }
+      if(checked){
+        var gid = getGroupIdByEngine(checked);
+        try{ localStorage.setItem(STORE_KEY, (checked).id); }catch(e){}
+        if(gid){
+          try{ localStorage.setItem(STORE_GROUP_KEY, gid); }catch(e){}
+          try{ localStorage.setItem(STORE_GROUP_ENGINE_PREFIX + gid, (checked).id); }catch(e){}
+        }
+      }
+    }
+    function init(){
+      // 恢复分组与引擎选择
+      try{
+        var savedGroup = localStorage.getItem(STORE_GROUP_KEY) || '';
+        if(savedGroup){
+          applyGroup(savedGroup);
+          var savedEnginePer = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + savedGroup) || '';
+          if(savedEnginePer){
+            var el = document.getElementById(savedEnginePer);
+            if(el && el.name === 'type'){ (el).checked = true; updateEngine(); }
+          }else{
+            var savedGlobal = localStorage.getItem(STORE_KEY) || '';
+            if(savedGlobal){
+              var el2 = document.getElementById(savedGlobal);
+              if(el2 && el2.name === 'type' && getGroupIdByEngine(el2) === savedGroup){ (el2).checked = true; updateEngine(); }
+            }
+          }
+        }
+      }catch(e){}
+      var labels = document.querySelectorAll('#search-list-menu .s-type-list.big label');
+      labels.forEach(function(l){
+        l.addEventListener('click', function(e){
+          e.preventDefault();
+          var gid = (l).dataset.id || '';
+          if(gid) applyGroup(gid);
+        });
+      });
+      document.querySelectorAll('#search-bg .search-type label').forEach(function(l){
+        l.addEventListener('click', function(){
+          var id = (l).getAttribute('for');
+          if(!id) return;
+          var el = document.getElementById(id);
+          if(el){ (el).checked = true; updateEngine(); }
+        });
+      });
+      updateEngine();
+    }
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  })();
+</script>
