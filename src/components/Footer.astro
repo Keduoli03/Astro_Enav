@@ -1,7 +1,6 @@
 ---
 import SearchModal from "./Utils/SearchModal.astro"
-import uiControlsUrl from "../scripts/ui-controls.ts?url";
-import mobileSidebarUrl from "../scripts/mobile-sidebar.ts?url";
+// 改为内联 ES 模块导入，确保生产环境正确编译并执行 TS 脚本
 import LightDarkSwitch from "./Utils/LightDarkSwitch.astro";
 import  {Icon}  from 'astro-icon/components'
 ---
@@ -92,7 +91,88 @@ var theme = {"ajaxurl":"","addico":"https:\/\/nav.baidu.cn\/wp-content\/themes\/
 })();
 </script>
 
-<script type="module" src={uiControlsUrl}></script>
-<script type="module" src={mobileSidebarUrl}></script>
+<script is:inline>
+(function(){
+  var mm = window.matchMedia('(max-width: 991.98px)');
+  var enabled = false;
+  var btn = document.getElementById('sidebar-switch');
+  var sidebar = document.getElementById('sidebar');
+  var panel = sidebar ? sidebar.querySelector('.sidebar-nav-inner') : null;
+  function isHomePage(){
+    return window.location.pathname === '/' || window.location.pathname === '/index.html';
+  }
+  function openSidebar(){
+    if(!sidebar) return;
+    sidebar.style.display = 'block';
+    sidebar.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar(){
+    if(!sidebar) return;
+    sidebar.classList.remove('show');
+    sidebar.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  function smoothScrollTo(target){
+    if(!target) return;
+    try{ target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }catch(e){}
+  }
+  function onPrimaryClick(e){
+    var link = e.currentTarget;
+    e.preventDefault();
+    e.stopPropagation();
+    var li = link.closest('.sidebar-item');
+    if(!li) return;
+    var arrow = (e.target && e.target.closest) ? e.target.closest('.sidebar-more') : null;
+    var hasSubmenu = li.classList.contains('has-submenu');
+    if(arrow){ li.classList.toggle('sidebar-show'); return; }
+    if(hasSubmenu){
+      var wasOpen = li.classList.contains('sidebar-show');
+      document.querySelectorAll('.sidebar-item.has-submenu').forEach(function(item){ if(item !== li) item.classList.remove('sidebar-show'); });
+      if(!wasOpen){ li.classList.add('sidebar-show'); return; }
+    }
+    var cid = link.getAttribute('data-category-id') || '';
+    if(!cid) return;
+    var targetId = 'category-' + cid.toLowerCase().replace(/\s+/g,'-');
+    if(!isHomePage()){ window.location.href = '/#' + targetId; return; }
+    var targetEl = document.getElementById(targetId);
+    if(targetEl){ smoothScrollTo(targetEl); }
+  }
+  function onSecondaryClick(e){
+    var link = e.currentTarget;
+    e.preventDefault();
+    var cid = link.getAttribute('data-category-id') || '';
+    if(!cid) return;
+    var targetId = 'category-' + cid.toLowerCase().replace(/\s+/g,'-');
+    if(!isHomePage()){ window.location.href = '/#' + targetId; return; }
+    var targetEl = document.getElementById(targetId);
+    if(targetEl){ smoothScrollTo(targetEl); }
+  }
+  function enable(){
+    if(enabled) return; enabled = true;
+    if(btn){ btn.addEventListener('click', function(e){ e.preventDefault(); openSidebar(); }); }
+    if(panel){ panel.addEventListener('click', function(e){ e.stopPropagation(); }); }
+    if(sidebar){
+      sidebar.addEventListener('click', function(e){
+        var t = e.target;
+        if(t === sidebar){ e.preventDefault(); closeSidebar(); return; }
+        e.stopPropagation();
+      });
+    }
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeSidebar(); });
+    document.querySelectorAll('.sidebar-menu-inner .sidebar-item > a').forEach(function(el){ el.addEventListener('click', onPrimaryClick); });
+    document.querySelectorAll('.sidebar-menu-inner .sidebar-item ul li a[data-category-id]').forEach(function(el){ el.addEventListener('click', onSecondaryClick); });
+    document.querySelectorAll('#sidebar a[href="#friendlink"]').forEach(function(el){ el.addEventListener('click', function(e){
+      e.preventDefault();
+      if(!isHomePage()){ window.location.href = '/#friendlink'; return; }
+      var targetEl = document.getElementById('friendlink');
+      if(targetEl){ smoothScrollTo(targetEl); }
+    }); });
+  }
+  function disable(){ if(!enabled) return; enabled = false; closeSidebar(); }
+  function apply(m){ if(m.matches) enable(); else disable(); }
+  try{ apply(mm); mm.addEventListener('change', apply); }catch(e){ enable(); }
+})();
+</script>
  
 
