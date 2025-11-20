@@ -1,8 +1,7 @@
 ---
-// src/components/Search.astro
 import { searchGroups, defaultSearch } from '../data/searchConfig';
 import { Icon } from 'astro-icon/components';
- 
+const defaultGroupId = (searchGroups.find(g => g.engines.some(e => e.id === defaultSearch.id))?.id) || (searchGroups[0]?.id || '');
 ---
 <div id="search" class="s-search mx-auto">
       <!-- 搜索分类标签 -->
@@ -44,7 +43,7 @@ import { Icon } from 'astro-icon/components';
       <!-- 搜索引擎选项 -->
       <div id="search-list" class="hide-type-list">
         {searchGroups.map(group => (
-          <div class={`search-group ${group.id}`}>
+          <div class={`search-group ${group.id} ${group.id === defaultGroupId ? 's-current' : ''}`} style={group.id === defaultGroupId ? 'display:block' : 'display:none'}>
             <ul class="search-type">
               {group.engines.map(engine => (
                 <li>
