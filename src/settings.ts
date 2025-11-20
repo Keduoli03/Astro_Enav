@@ -12,8 +12,8 @@ export const SITE_LOGO_DARK = '/images/logo.png';
 
 export const SEARCH_BG = '';
 export const CONTENT_BG = '/images/好朋友.png';
-export const SEARCH_BG_DARK = '/images/tree.jpg';
-export const CONTENT_BG_DARK = '';
+export const SEARCH_BG_DARK = '';
+export const CONTENT_BG_DARK = '/images/tree.jpg';
 
 // 背景毛玻璃强度（单位：px）
 export const SEARCH_BG_BLUR = 0;
