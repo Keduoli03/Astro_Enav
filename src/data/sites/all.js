@@ -34,6 +34,7 @@ export default [
 
   // picturetool
   { subId: 'picturetool', url: ' https://remove.bg', title: '快速抠图', description: '快速扣透明图，去除背景', logo: '', id: 'koutu' },
+  { subId: 'picturetool', url: 'https://eimg.yujiay.wang/', title: '小E图床', description: '免费稳定的图床工具', logo: '', id: 'eimg' },
 
   // reader
   { subId: 'reader', url: 'https://zh.z-library.sk/', title: 'Z-Library', description: '收录了世界上海量的书籍', logo: 'images/logos/zlib.ico', id: 'zlib' },
