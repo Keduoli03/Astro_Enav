@@ -88,7 +88,7 @@ import { Icon } from 'astro-icon/components'
   </div>
 </div>
 
-<!-- 分组切换脚本 -->
+<!-- 分组切换与模态框控制脚本 -->
 <script is:inline>
 document.addEventListener('DOMContentLoaded', function() {
   const modal = document.getElementById('search-modal');
@@ -148,6 +148,40 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   modal.addEventListener('shown.bs.modal', init);
   init();
+
+  let backdrop = null;
+  const body = document.body;
+  function openModal() {
+    modal.style.display = 'block';
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    body.appendChild(backdrop);
+    body.style.overflow = 'hidden';
+    body.classList.add('modal-open');
+    try { modal.dispatchEvent(new Event('shown.bs.modal')); } catch(e) {}
+  }
+  function closeModal() {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    if (backdrop) { backdrop.remove(); backdrop = null; }
+    body.style.overflow = '';
+    body.classList.remove('modal-open');
+  }
+  document.querySelectorAll('a[data-toggle="modal"][data-target="#search-modal"]').forEach(a => {
+    a.addEventListener('click', function(e) { e.preventDefault(); openModal(); });
+  });
+  container.addEventListener('click', function(e) {
+    if (e.target === container) closeModal();
+  });
+  document.addEventListener('click', function(e) {
+    var t = e.target;
+    if (!t || !(t).closest) return;
+    if ((t).closest('[data-dismiss="modal"]')) { e.preventDefault(); closeModal(); }
+  });
+  window.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 });
 </script>
 <style>
