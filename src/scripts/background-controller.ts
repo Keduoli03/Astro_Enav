@@ -102,6 +102,7 @@ function observeThemeChanges(): void {
 applyBackgrounds();
 observeThemeChanges();
 try {
+  (window as any).__applyBackgrounds = applyBackgrounds;
   const tryApply = () => {
     const el = document.getElementById('search-bg');
     if (el) applyBackgrounds();
