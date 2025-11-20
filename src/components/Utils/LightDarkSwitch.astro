@@ -61,6 +61,7 @@ import { Icon } from 'astro-icon/components';
         setTheme(mode);
         applyThemeToDocument(mode);
         updateIcon();
+        try{ window.dispatchEvent(new CustomEvent('theme:changed', { detail: { mode } })); }catch{}
       };
 
       if (!document.startViewTransition) {

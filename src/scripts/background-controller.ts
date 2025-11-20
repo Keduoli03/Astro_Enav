@@ -91,6 +91,7 @@ function observeThemeChanges(): void {
   window.addEventListener('storage', (e) => {
     if (e.key === 'theme') applyBackgrounds();
   });
+  window.addEventListener('theme:changed', applyBackgrounds);
   if (window.matchMedia) {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     if (mq.addEventListener) mq.addEventListener('change', applyBackgrounds);
