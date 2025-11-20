@@ -101,8 +101,15 @@ import SearchModal from '@/components/Utils/SearchModal.astro';
       try{
         var stored = localStorage.getItem('theme') || DEFAULT_THEME;
         var dark = stored === DARK_MODE ? true : (stored === LIGHT_MODE ? false : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
-        var searchImg = dark ? (SEARCH_BG_DARK || SEARCH_BG || '') : (SEARCH_BG || '');
-        var contentImg = dark ? (CONTENT_BG_DARK || CONTENT_BG || '') : (CONTENT_BG || '');
+        function normalizeUrl(s){
+          if(!s) return '';
+          try{
+            if (/^https?:\/\//i.test(s)) return s;
+          }catch(e){}
+          return s.startsWith('/') ? s : ('/' + s);
+        }
+        var searchImg = normalizeUrl(dark ? (SEARCH_BG_DARK || SEARCH_BG || '') : (SEARCH_BG || ''));
+        var contentImg = normalizeUrl(dark ? (CONTENT_BG_DARK || CONTENT_BG || '') : (CONTENT_BG || ''));
         var root = document.documentElement;
         root.style.setProperty('--search-bg-image', searchImg ? "url('"+searchImg+"')" : 'none');
         root.style.setProperty('--content-bg-image', contentImg ? "url('"+contentImg+"')" : 'none');

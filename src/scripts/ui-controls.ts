@@ -59,7 +59,7 @@ if (modal) {
 }
 
 const imgs = document.querySelectorAll('img[data-src]');
-const fallbackSrc = '/images/logos/default.webp';
+const fallbackSrc = '/images/logo.png';
 const swap = (img: HTMLImageElement) => {
   const src = img.getAttribute('data-src');
   if (!src) return;
