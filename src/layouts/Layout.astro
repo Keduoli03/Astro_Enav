@@ -7,7 +7,9 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE, SEARCH_BG, CONTENT_BG, SEAR
 import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
 import '../styles/global.css';
 import '../styles/external.css';
-// 使用编译后的模块路径，避免在浏览器直接加载 TS 源码
+import searchSuggestUrl from '../scripts/search-suggest.ts?url';
+import backgroundControllerUrl from '../scripts/background-controller.ts?url';
+import sidebarControllerUrl from '../scripts/sidebar-controller.ts?url';
 import SearchModal from '@/components/Utils/SearchModal.astro';
 ---
 <!DOCTYPE html>
@@ -146,11 +148,9 @@ import SearchModal from '@/components/Utils/SearchModal.astro';
     })();
   </script>
   
-  <script type="module">
-    import '../scripts/search-suggest.ts';
-    import '../scripts/sidebar-controller.ts';
-    import '../scripts/background-controller.ts';
-  </script>
+  <script type="module" src={searchSuggestUrl}></script>
+  <script type="module" src={sidebarControllerUrl}></script>
+  <script type="module" src={backgroundControllerUrl}></script>
 </head>
 <SearchModal />
 <body class="page-loading">
