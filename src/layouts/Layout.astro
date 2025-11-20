@@ -7,9 +7,7 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE, SEARCH_BG, CONTENT_BG, SEAR
 import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
 import '../styles/global.css';
 import '../styles/external.css';
-import searchSuggestUrl from '../scripts/search-suggest.ts?url';
-import backgroundControllerUrl from '../scripts/background-controller.ts?url';
-import sidebarControllerUrl from '../scripts/sidebar-controller.ts?url';
+// 改用内联 ES 模块导入，让 Vite 在生产构建中正确转换为 JS
 import SearchModal from '@/components/Utils/SearchModal.astro';
 ---
 <!DOCTYPE html>
@@ -148,9 +146,11 @@ import SearchModal from '@/components/Utils/SearchModal.astro';
     })();
   </script>
   
-  <script type="module" src={searchSuggestUrl}></script>
-  <script type="module" src={sidebarControllerUrl}></script>
-  <script type="module" src={backgroundControllerUrl}></script>
+  <script type="module">
+    import '../scripts/search-suggest.ts';
+    import '../scripts/sidebar-controller.ts';
+    import '../scripts/background-controller.ts';
+  </script>
 </head>
 <SearchModal />
 <body class="page-loading">
