@@ -35,23 +35,14 @@ function applyBackgrounds(): void {
   const searchBlur = dark ? (SEARCH_BG_BLUR_DARK ?? SEARCH_BG_BLUR) : SEARCH_BG_BLUR;
   const contentBlur = dark ? (CONTENT_BG_BLUR_DARK ?? CONTENT_BG_BLUR) : CONTENT_BG_BLUR;
   const root = document.documentElement;
-  const nextSearch = searchImg ? `url('${searchImg}')` : 'none';
-  const nextContent = contentImg ? `url('${contentImg}')` : 'none';
-  if (nextSearch !== lastSearch) {
-    root.style.setProperty('--search-bg-image', nextSearch);
-    lastSearch = nextSearch;
-  }
-  if (nextContent !== lastContent) {
-    root.style.setProperty('--content-bg-image', nextContent);
-    lastContent = nextContent;
-  }
+  /* 背景图片切换由分层元素控制，这里不再写入 URL 变量，仅处理模糊与状态 */
   root.style.setProperty('--search-bg-blur', `${Number(searchBlur) || 0}px`);
   root.style.setProperty('--content-bg-blur', `${Number(contentBlur) || 0}px`);
   const searchEl = document.getElementById('search-bg') as HTMLElement | null;
   if (searchEl) {
     searchEl.style.position = 'relative';
     searchEl.style.zIndex = '1';
-    if (nextSearch !== 'none') {
+    if (!!searchImg) {
       searchEl.classList.add('css-img');
       searchEl.classList.remove('css-color');
     } else {
