@@ -65,7 +65,7 @@
 .header-big.no-bg .search-type input:checked+label:before{border-color:rgba(0,0,0,0.2) transparent transparent}
 .header-big .search-type li.menu-item{padding:5px 10px 0 10px}
 @media screen and (min-width:768px){.header-big{padding-top:80px;padding-bottom:60px}.header-big.no-bg{padding-bottom:20px}.header-big .search-type li label,.header-big .search-type li.menu-item{padding:5px 20px}.header-big .s-type-list label span{padding:10px 20px}}
-@media (max-width:767.98px){.header-big{margin-top:0;padding-top:100px}}
+@media (max-width:767.98px){.header-big{margin-top:-20px;padding-top:72px}}
 .io-black-mode .header-big.bg-gradual:before{background-image: linear-gradient(to top,#1b1d1f 0%,transparent 80%)}
 #search{max-width:800px;position:relative}
 #search form{position:relative}
