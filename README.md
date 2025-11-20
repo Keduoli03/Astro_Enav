@@ -2,13 +2,19 @@
 
 🚀 基于 Astro 和 WebStack-hugo 开发的现代化导航网站
 
-一个简洁、美观、功能丰富的网址导航站点，支持暗色模式、响应式设计和本地搜索功能。
+一个简洁、美观、功能丰富的网址导航站点，支持暗色模式、响应式设计功能。
+
+> [!WARNING] 提示
+> - 本次版本包含代码与数据的重构
+
 
 ## ✨ 特性
 
 - 🎨 **现代化设计** - 基于 Bootstrap 4 的响应式布局
 - 🌙 **暗色模式** - 支持亮色/暗色主题切换，带有平滑过渡动画
-- 🔍 **本地搜索** - 快速搜索收录的网站
+- 🔍 **搜索体验升级**
+  - 顶部搜索支持分组与子项切换，并记忆上次选择
+  - 搜索模态框（页面内弹窗）内置打开/关闭逻辑，无需引入外部 JS 框架
 - 📱 **响应式设计** - 完美适配桌面端、平板和移动设备
 - ⚡ **高性能** - 基于 Astro 静态站点生成器，加载速度极快
 - 🎯 **易于管理** - 简单的配置文件管理网站分类和收录
@@ -50,6 +56,15 @@ pnpm preview
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Keduoli03/Astro_Enav)
 
+## 🔧 配置变化概览
+
+- `src/settings.ts`
+  - 背景图片与站点图片路径统一改为 `public/images` 下的资源，如：`/images/bg-light.jpg`
+- `src/components/Utils/SearchModal.astro`
+  - 内置模态框打开/关闭逻辑与分组切换脚本，兼容无 Bootstrap JS 的环境
+- `src/components/Sidebar.astro` 与 `src/components/Footer.astro`
+  - 移动端交互脚本内联，修复关闭策略与展开逻辑
+
 ## 📝 配置指南
 
 ### 网站基本配置
@@ -65,39 +80,34 @@ export const SITE_FAVICON = '/images/favicon.png';
 
 ### 添加网站分类
 
-1. 编辑 `src/data/category.js` 添加一级和二级菜单
-2. 分类 `id` 需要对应 `src/data/sites/` 目录下的文件名
+1. 编辑 `src/data/category.js` 在 `CATEGORY_CONFIG` 中新增分类与二级菜单
+2. 二级菜单的 `id` 需要对应 `src/data/sites/` 下的数据文件或 `all.js` 中的 `subId`
 
 ```javascript
-export const categories = [
-  {
-    name: "开发工具",
-    id: "dev-tools",
-    icon: "icon-code",
-    subcategories: [
-      { name: "代码编辑器", id: "editors" },
-      { name: "版本控制", id: "version-control" }
+// src/data/category.js（片段）
+export const CATEGORY_CONFIG = {
+  dev: {
+    name: '开发工具',
+    icon: 'ri:code-line',
+    subItems: [
+      { id: 'editors', name: '代码编辑器', icon: 'ri:code-box-line' },
+      { id: 'version-control', name: '版本控制', icon: 'ri:git-branch-line' }
     ]
   }
-];
+};
 ```
 
 ### 添加网站收录
 
-在 `src/data/sites/` 目录下创建对应的 `.js` 文件：
+集中维护到 `src/data/sites/all.js`，通过 `subId` 指向二级分类
 
 ```javascript
-// src/data/sites/editors.js
-export const sites = [
-  {
-    title: "Visual Studio Code",
-    description: "强大的代码编辑器",
-    url: "https://code.visualstudio.com",
-    logo: "/images/logos/vscode.png"
-  }
+// src/data/sites/all.js
+export default [
+  { subId: 'editors', title: 'Visual Studio Code', url: 'https://code.visualstudio.com', description: '强大的代码编辑器' },
+  { subId: 'version-control', title: 'GitHub', url: 'https://github.com', description: '代码托管平台' }
 ];
 ```
-
 
 
 ## 📋 待办事项
