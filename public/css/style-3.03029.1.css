@@ -262,7 +262,7 @@ a>i.sidebar-more{transform:scale(.8)}
 .tooltip-inner p{color:#fff}
 .modal-backdrop{z-index:1089!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);background:rgba(0,0,0,.5)}
 .modal-backdrop.show{opacity:1}
-.modal{z-index:1090}
+.modal{:1090}
 .modal-content,.modal-header,.modal-footer{border:0}
 .btn:not(.go-up){border-radius:3px;white-space:normal;font-size:.875rem}
 .carousel-blog li{width:10px;height:10px;border:0;border-radius:10px}

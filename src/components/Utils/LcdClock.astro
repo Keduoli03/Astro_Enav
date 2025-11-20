@@ -1,0 +1,173 @@
+---
+import { Icon } from 'astro-icon/components'
+---
+<!-- 引入复古液晶字体：Digital-7（经典数码管风格） -->
+<style>
+  @font-face {
+    font-family: 'Digital-7';
+    src: url('https://cdn.jsdelivr.net/npm/digital-7-font@1.0.0/fonts/digital-7.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+</style>
+
+<div class="lcd-clock">
+  <!-- 时间区域 -->
+  <div class="lcd-time" id="lcd-time"></div>
+  <!-- 日期区域（纵向排列：年月日 + 星期） -->
+  <!-- <div class="lcd-date-container">
+    <div class="lcd-date-main" id="lcd-date-main"></div>
+    <div class="lcd-date-week" id="lcd-date-week"></div>
+  </div> -->
+</div>
+
+<script>
+  const pad = (n) => String(n).padStart(2, '0')
+  // 时间格式：复古数码管风格，保持 HH:MM:SS 固定长度
+  const fmtTime = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  // 拆分日期和星期，复古格式呈现
+  const fmtDateMain = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
+  const fmtDateWeek = (d) => {
+    const weeks = ['日', '一', '二', '三', '四', '五', '六']
+    return `周${weeks[d.getDay()]}`
+  }
+
+  const timeEl = document.getElementById('lcd-time')
+  const dateMainEl = document.getElementById('lcd-date-main')
+  const dateWeekEl = document.getElementById('lcd-date-week')
+
+  const tick = () => {
+    const now = new Date()
+    if (timeEl) timeEl.textContent = fmtTime(now)
+    if (dateMainEl) dateMainEl.textContent = fmtDateMain(now)
+    if (dateWeekEl) dateWeekEl.textContent = fmtDateWeek(now)
+  }
+
+  tick()
+  setInterval(tick, 1000)
+</script>
+
+<style>
+  /* 复古液晶字体核心配置：优先 Digital-7（数码管风格） */
+  .lcd-time, .lcd-date-main, .lcd-date-week {
+    font-family: 'Digital-7', 'Orbitron', 'Consolas', monospace;
+    letter-spacing: 1.5px; /* 加大字间距，更显复古 */
+  }
+
+  /* 整体容器：横向排列，加大时间和日期区域间距 */
+  .lcd-clock {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    justify-content: center;
+    margin: 0 auto 16px auto;
+    gap: 35px; /* 加大间距（从20px→35px），提升呼吸感 */
+    min-width: 480px; /* 同步加宽最小宽度，避免拥挤 */
+  }
+
+  /* 时间区域：固定宽度，复古数码管样式 */
+  .lcd-time {
+    font-size: 42px;
+    line-height: 1;
+    font-weight: normal; /* Digital-7 无需加粗，本身就是复古粗体质感 */
+    width: 190px; /* 适配 38px 字体，确保不挤压 */
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* 日期区域：纵向排列，加大右侧间距 */
+  .lcd-date-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px; /* 微调垂直间距，更紧凑复古 */
+    width: 220px; /* 加宽日期容器（从180px→220px），增加右侧留白 */
+    padding-right: 10px; /* 额外添加右侧内边距，加大日期与右边的距离 */
+  }
+
+  /* 年月日：主日期样式 */
+  .lcd-date-main {
+    font-size: 19px;
+    opacity: 0.95;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  /* 星期：次要文本，复古淡色 */
+  .lcd-date-week {
+    font-size: 17px;
+    opacity: 0.85;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  /* 浅色模式：复古灰白风格 */
+  :global(.io-grey-mode) .lcd-time {
+    color: #0a0a0a;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+  }
+  :global(.io-grey-mode) .lcd-date-main {
+    color: #1a1a1a;
+  }
+  :global(.io-grey-mode) .lcd-date-week {
+    color: #333;
+  }
+
+  /* 深色模式：老式数码管暗绿色，更复古 */
+  :global(.io-black-mode) .lcd-time {
+    color: #76c2af; /* 复古暗绿，接近老式液晶屏幕 */
+    text-shadow: 0 0 6px rgba(118, 194, 175, 0.5);
+  }
+  :global(.io-black-mode) .lcd-date-main {
+    color: #9ed9cc;
+    text-shadow: 0 0 3px rgba(158, 217, 204, 0.4);
+  }
+  :global(.io-black-mode) .lcd-date-week {
+    color: #6fb8a8;
+    text-shadow: 0 0 2px rgba(111, 184, 168, 0.3);
+  }
+
+  /* 响应式适配：小屏幕保持复古质感 */
+  @media (max-width: 767px) {
+    .lcd-clock {
+      flex-direction: column;
+      gap: 10px;
+      min-width: auto;
+    }
+    .lcd-time {
+      font-size: 30px;
+      width: auto;
+      text-align: center;
+    }
+    .lcd-date-container {
+      width: auto;
+      padding-right: 0;
+      align-items: center;
+    }
+    .lcd-date-main {
+      font-size: 17px;
+      text-align: center;
+    }
+    .lcd-date-week {
+      font-size: 15px;
+      text-align: center;
+    }
+  }
+
+  /* 大屏适配：放大复古字体，保持比例 */
+  @media (min-width: 768px) {
+    .lcd-time {
+      font-size: 50px;
+      width: 240px;
+    }
+    .lcd-date-container {
+      width: 240px;
+      padding-right: 15px;
+    }
+    .lcd-date-main {
+      font-size: 21px;
+    }
+    .lcd-date-week {
+      font-size: 19px;
+    }
+  }
+</style>

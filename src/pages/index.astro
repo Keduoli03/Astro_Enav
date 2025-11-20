@@ -1,37 +1,38 @@
 ---
 // src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
+import Search from '../components/Search.astro';
+import LcdClock from '../components/Utils/LcdClock.astro';
 import CategorySection from '../components/CategorySection.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
 import { CATEGORY_CONFIG } from '../data/category';
 
-// 动态加载所有二级分类的网站数据
-const loadSubCategorySites = async () => {
-  const allSubCategories = [];
-  
-  for (const [categoryId, categoryInfo] of Object.entries(CATEGORY_CONFIG)) {
-    const subCategories = categoryInfo.subItems || [];
-    
-    for (const subCategory of subCategories) {
-      try {
-        const sitesModule = await import(`../data/sites/${subCategory.id}.js`);
-        allSubCategories.push({
-          ...subCategory,
-          sites: sitesModule.default || []
-        });
-      } catch (error) {
-        console.warn(`加载失败: ${subCategory.id}`, error);
-        allSubCategories.push({ ...subCategory, sites: [] });
-      }
-    }
+const modules = import.meta.glob('../data/sites/*.js', { eager: true });
+const all = (modules['../data/sites/all.js'] as any)?.default || [];
+let sitesBySubcategory = {} as Record<string, any[]>;
+if (Array.isArray(all) && all.length) {
+  for (const s of all) {
+    const key = String((s as any).subId || '')
+    if (!key) continue;
+    (sitesBySubcategory[key] ||= []).push(s);
   }
-  
-  return allSubCategories;
-};
+} else {
+  sitesBySubcategory = Object.fromEntries(
+    Object.entries(modules).map(([path, mod]) => {
+      const name = path.split('/').pop()?.replace('.js','') || '';
+      const list = (mod as any).default || [];
+      return [name, list];
+    })
+  );
+}
 
-const categoryData = (await loadSubCategorySites()).map(item => ({
-  ...item,
-}));
+const categoryData = Object.values(CATEGORY_CONFIG).flatMap((categoryInfo) => {
+  const subs = categoryInfo.subItems || [];
+  return subs.map((sub) => ({
+    ...sub,
+    sites: sitesBySubcategory[sub.id] || [],
+  }));
+});
 ---
 
 <Layout 
@@ -39,6 +40,10 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
   SITE_DESCRIPTION={SITE_DESCRIPTION}
   SITE_FAVICON={SITE_FAVICON}
 >
+  <div slot="searchbar">
+    <LcdClock />
+    <Search />
+  </div>
   {categoryData.map((data) => (
     <CategorySection 
       category={data.id}
@@ -47,4 +52,5 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
       sites={data.sites}
     />
   ))}
+ 
 </Layout>

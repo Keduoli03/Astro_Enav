@@ -1,0 +1,45 @@
+.io-black-mode{background-color:#1b1d1f}
+.io-black-mode .logo-light{display:none!important}
+.io-black-mode .logo-dark{display:initial!important}
+.io-black-mode .btn-move{color:#989da1!important}
+.io-black-mode #add-new-sites button.close{color:#989da1}
+.io-black-mode .bg-light,.io-black-mode .manage-sites .sites-card,.io-black-mode .admin-sites .sites-card{background:#363738!important}
+.io-black-mode .border-light{border-color:#363738!important}
+.io-black-mode .bg-white{background:#2c2e2f!important}
+.io-black-mode .sidebar-nav .top-menu .sub-menu{background-color:rgba(3,4,6,.1)}
+.io-black-mode,.io-black-mode a:not(.btn),.io-black-mode .button>a{color:#c6c9cf}
+.io-black-mode p,.io-black-mode input.nav-link{color:#bbb}
+.io-black-mode .ajax-loading{background:rgba(27,29,31,.7)!important}
+.io-black-mode .card,.io-black-mode .block{background:#2c2e2f;box-shadow:none;border-color:#2c2e2f}
+.io-black-mode .url-card .card{background:#2c2e2f;border-color:#2c2e2f}
+.io-black-mode .text-muted{color:#bbb}
+.io-black-mode .text-gray{color:#888}
+.io-black-mode .page-header{background:#2c2e2f;box-shadow:0 0 25px 5px rgba(10,10,10,.25)}
+/* 保持顶部导航在未滚动时透明，避免覆盖背景 */
+.io-black-mode .big-header-banner:not(.header-bg) .page-header{
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.io-black-mode .big-header-banner.header-bg .page-header{
+  background: rgba(44,46,47,0.5) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 24px rgba(0,0,0,.2);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.io-black-mode #footer-tools .btn{color:#aaa;background:#363738}
+.io-black-mode #footer-tools .btn:hover{color:#fff}
+.io-black-mode .sidebar-logo{background:transparent!important}
+.io-black-mode .sidebar-nav .flex-bottom a,.io-black-mode .sidebar-menu-inner a{color:var(--sidebar-text-color,#fff)!important}
+.io-black-mode .sidebar-menu-inner a .icon-fw,.io-black-mode .sidebar-menu-inner a .icon-lg,.io-black-mode .sidebar-menu-inner a .icon-2x{color:var(--sidebar-text-color,#fff)!important}
+.io-grey-mode .sidebar-logo{background:transparent!important}
+.io-grey-mode .page-header{box-shadow:none}
+.io-grey-mode .sidebar-nav-inner{background:var(--sidebar-bg-color)}
+.io-grey-mode .border-color{border-color:transparent!important}
+.io-grey-mode .sidebar-nav .flex-bottom a,.io-grey-mode .sidebar-menu-inner a{color:var(--sidebar-text-color,#515C6B)}
+.io-grey-mode .sidebar-item ul{background:var(--sidebar-submenu-bg)}
+.io-grey-mode .sidebar-show,.io-grey-mode .sidebar-item>a:hover{color:#f1404b;background:none}
+.io-grey-mode .sidebar-popup div{background:var(--sidebar-popup-bg-color)}
+.io-grey-mode .sidebar-popup::before{border-color:transparent var(--sidebar-popup-bg-color) transparent}
+.io-grey-mode .sidebar-nav,.io-grey-mode .sidebar-popup.sidebar-menu-inner ul li{background:transparent}
+.io-grey-mode .sidebar-item li>a:hover,.io-grey-mode .sidebar-popup>div>ul>li>a:hover{color:#f1404b;background:none}

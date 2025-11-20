@@ -1,6 +1,6 @@
 ---
 import {SITE_TITLE } from "../settings";
-
+import { Icon } from 'astro-icon/components'
 
 ---
 <div class="big-header-banner">
@@ -23,8 +23,8 @@ import {SITE_TITLE } from "../settings";
                         <ul class="navbar-nav site-menu" style="margin-right: 16px;">
 
 			<li >
-				<a href="./">
-                                    <i class="fa fa-home fa-lg mr-2"></i>
+                <a href="./">
+                                    <Icon name="ri:global-line" class="icon-fw icon-lg mr-2" />
                                     <span>首页</span>
                                 </a>
 				<ul class="sub-menu">
@@ -33,8 +33,8 @@ import {SITE_TITLE } from "../settings";
 			    </li>
 
 			<li >
-				<a href="./about">
-                                    <i class="fa fa-book fa-lg mr-2"></i>
+                <a href="./about">
+                                    <Icon name="ri:book-line" class="icon-fw icon-lg mr-2" />
                                     <span>关于</span>
                                 </a>
 				<ul class="sub-menu">
@@ -47,7 +47,7 @@ import {SITE_TITLE } from "../settings";
 
                         <div class="rounded-circle weather">
                             <div id="he-plugin-simple" style="display: contents;"></div>
-                            <script>WIDGET = {
+                            <script>window.WIDGET = {
                                     CONFIG: {
                                         "modules": "01234",
                                         "background": 5,
@@ -95,16 +95,71 @@ import {SITE_TITLE } from "../settings";
 
 
                         <li class="nav-search ml-3 ml-md-4">
-                            <a href="javascript:" data-toggle="modal" data-target="#search-modal"><i
-                                    class="iconfont icon-search icon-2x"></i></a>
+                            <a href="javascript:" data-toggle="modal" data-target="#search-modal"><Icon name="ri:search-line" class="icon-2x" /></a>
                         </li>
                         <li class="nav-item d-md-none mobile-menu ml-3 ml-md-4">
-                            <a href="javascript:" id="sidebar-switch" data-toggle="modal"
-                                data-target="#sidebar"><i class="iconfont icon-classification icon-2x"></i></a>
+                            <a href="javascript:" id="sidebar-switch"><Icon name="ri:apps-2-line" class="icon-2x" /></a>
                         </li>
                     </ul>
                 </div>
             </div>
-        </div>
+    </div>
         <div class="placeholder" style="height:74px"></div>
+        <script is:inline>
+          document.addEventListener('DOMContentLoaded', () => {
+            
+            const banner = document.querySelector('.big-header-banner');
+            const miniBtn = document.getElementById('mini-button');
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const applyMini = (on, initial) => {
+              if (!sidebar) return;
+              const DURATION = 350;
+              if (on) {
+                if (!initial) {
+                  if (mainContent) mainContent.classList.add('sidebar-collapsing');
+                  sidebar.classList.add('collapsing');
+                }
+                requestAnimationFrame(() => { sidebar.classList.add('mini-sidebar'); });
+                try{
+                  const items = sidebar.querySelectorAll('.sidebar-item.has-submenu.sidebar-show');
+                  items.forEach(el => el.classList.remove('sidebar-show'));
+                }catch(e){}
+                if (!initial) {
+                  setTimeout(() => { 
+                    if (mainContent) mainContent.classList.remove('sidebar-collapsing');
+                    sidebar.classList.remove('collapsing');
+                  }, DURATION);
+                }
+              } else {
+                if (!initial) {
+                  if (mainContent) mainContent.classList.add('sidebar-expanding');
+                  sidebar.classList.add('expanding');
+                }
+                requestAnimationFrame(() => { sidebar.classList.remove('mini-sidebar'); });
+                if (!initial) {
+                  setTimeout(() => { 
+                    if (mainContent) mainContent.classList.remove('sidebar-expanding');
+                    sidebar.classList.remove('expanding');
+                  }, DURATION);
+                }
+              }
+              if (miniBtn) miniBtn.checked = !!on;
+              localStorage.setItem('miniSidebar', on ? '1' : '0');
+            };
+            const stored = localStorage.getItem('miniSidebar') === '1';
+            applyMini(stored, true);
+            if (miniBtn) {
+              miniBtn.addEventListener('change', (e) => applyMini(e.target.checked, false));
+            }
+            const toggleHeaderBg = () => {
+              const y = window.scrollY || document.documentElement.scrollTop || 0;
+              if (!banner) return;
+              if (y > 10) banner.classList.add('header-bg');
+              else banner.classList.remove('header-bg');
+            };
+            toggleHeaderBg();
+            window.addEventListener('scroll', toggleHeaderBg, { passive: true });
+          });
+        </script>
     </div>

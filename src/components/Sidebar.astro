@@ -1,19 +1,20 @@
 ---
 import { getCategoryList } from '../data/category';
 import { SITE_LOGO, SITE_LOGO_DARK, SITE_TITLE } from '../settings';
-
 const categories = getCategoryList();
+import { Icon } from 'astro-icon/components';
 ---
-<div id="sidebar" class="sticky sidebar-nav fade animate-nav" style="width: 170px;">
+<div id="sidebar" class="sticky sidebar-nav fade animate-nav">
   <div class="modal-dialog h-100 sidebar-nav-inner">
     <!-- Logo部分 -->
     <div class="sidebar-logo border-bottom border-color">
   <div class="logo overflow-hidden">
-    <a href="/" class="logo-expanded inline-flex items-center gap-2">
+    <a href="/" class="logo-expanded inline-flex items-center gap-2" style="color: var(--sidebar-title-color)">
       <img src={SITE_LOGO} height="40" class="logo-light" alt={SITE_TITLE}>
       <img src={SITE_LOGO_DARK} height="40" class="logo-dark d-none" alt={SITE_TITLE}>
       <span style="font-size: 20px; font-weight: bold;">{SITE_TITLE}</span>
-    <a href="/" class="logo-collapsed inline-flex items-center gap-2">
+    </a>
+    <a href="/" class="logo-collapsed inline-flex items-center gap-2" style="color: var(--sidebar-title-color)">
       <img src={SITE_LOGO} height="40" class="logo-light" alt={SITE_TITLE}>
       <img src={SITE_LOGO_DARK} height="40" class="logo-dark d-none" alt={SITE_TITLE}>
     </a>
@@ -26,7 +27,7 @@ const categories = getCategoryList();
       <ul>
         {
           categories.map(([id, category]) => {
-            const hasSubItems = category.subItems?.length > 1;
+            const hasSubItems = (category.subItems?.length || 0) > 1;
             const firstSubItemId = category.subItems?.[0]?.id || id;
             
             return (
@@ -37,10 +38,10 @@ const categories = getCategoryList();
                   class="smooth"
                   data-category-id={firstSubItemId}
                 >
-                  <i class={`${category.icon} fa-lg icon-fw icon-lg mr-2`}></i>
+                  <Icon name={category.icon} class="icon-fw icon-lg mr-2" />
                   <span>{category.name}</span>
                   {hasSubItems && (
-                    <i class="iconfont icon-arrow-r-m sidebar-more text-sm"></i>
+                    <Icon name="ri:arrow-right-s-line" class="sidebar-more text-sm" />
                   )}
                 </a>
                 {hasSubItems && (
@@ -73,19 +74,19 @@ const categories = getCategoryList();
         <ul>
           <li class="sidebar-item">
             <a href="/submit" target="_blank">
-              <i class="fas fa-file-upload icon-fw icon-lg mr-2"></i>
+              <Icon name="ri:upload-2-line" class="icon-fw icon-lg mr-2" />
               <span>网站提交</span>
             </a>
           </li>
           <li class="sidebar-item">
             <a href="#friendlink" class="smooth">
-              <i class="fab fa-staylinked icon-fw icon-lg mr-2"></i>
+              <Icon name="ri:links-line" class="icon-fw icon-lg mr-2" />
               <span>友情链接</span>
             </a>
           </li>
           <li class="sidebar-item">
             <a href="/about">
-              <i class="fa fa-info-circle icon-fw icon-lg mr-2"></i>
+              <Icon name="ri:information-line" class="icon-fw icon-lg mr-2" />
               <span>关于导航</span>
             </a>
           </li>
@@ -94,94 +95,138 @@ const categories = getCategoryList();
     </div>
 
 
-<!-- 添加平滑滚动脚本 -->
-<!-- 修改JavaScript部分 -->
+<!-- 侧栏交互与平滑滚动脚本 -->
 <script is:inline>
 document.addEventListener('DOMContentLoaded', () => {
   function smoothScrollTo(target) {
-    target.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center'
-    });
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     const titleEl = target.querySelector('h4');
     if (titleEl) {
-      const prevDisplay = titleEl.style.display;
-      const prevPadding = titleEl.style.padding;
-      const prevBg = titleEl.style.backgroundColor;
-      const prevShadow = titleEl.style.boxShadow;
-      const prevRadius = titleEl.style.borderRadius;
-
-      // 仅包裹标题文本宽度
+      const prev = {
+        display: titleEl.style.display,
+        padding: titleEl.style.padding,
+        bg: titleEl.style.backgroundColor,
+        shadow: titleEl.style.boxShadow,
+        radius: titleEl.style.borderRadius,
+      };
       titleEl.style.display = 'inline-block';
       titleEl.style.padding = '2px 8px';
       titleEl.style.backgroundColor = 'rgba(255, 229, 100, 0.25)';
       titleEl.style.boxShadow = '0 0 0 2px rgba(255, 196, 0, 0.35)';
       titleEl.style.borderRadius = '6px';
-
       setTimeout(() => {
-        titleEl.style.display = prevDisplay;
-        titleEl.style.padding = prevPadding;
-        titleEl.style.backgroundColor = prevBg;
-        titleEl.style.boxShadow = prevShadow;
-        titleEl.style.borderRadius = prevRadius;
+        titleEl.style.display = prev.display;
+        titleEl.style.padding = prev.padding;
+        titleEl.style.backgroundColor = prev.bg;
+        titleEl.style.boxShadow = prev.shadow;
+        titleEl.style.borderRadius = prev.radius;
       }, 1200);
     }
   }
-  
-  // 检查是否在首页
+
   function isHomePage() {
     return window.location.pathname === '/' || window.location.pathname === '/index.html';
   }
-  
-  // 处理分类链接点击
-  document.querySelectorAll('.sidebar-menu a[data-category-id]').forEach(link => {
+  function closeSidebarDrawer(){
+    const sb = document.getElementById('sidebar');
+    if (sb) { sb.classList.remove('show'); sb.style.display = 'none'; }
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.style.overflow = '';
+  }
+
+  // 避免与独立的移动端侧栏脚本重复绑定，移动端交互由 mobile-sidebar.ts 负责
+  const isMobile = window.matchMedia('(max-width: 767.98px)').matches;
+  if (isMobile) return;
+
+  // 展开/收起二级菜单：首次点击展开，再次点击导航
+  document.querySelectorAll('.sidebar-menu-inner .sidebar-item > a').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      const li = link.closest('.sidebar-item');
+      if (!li) return;
+      const isArrow = (e.target)?.closest?.('.sidebar-more');
+      const hasSubmenu = li.classList.contains('has-submenu');
+
+      if (isArrow) {
+        li.classList.toggle('sidebar-show');
+        return;
+      }
+
+      // 一级分类：如果有子菜单，第一次点击展开；已展开则导航
+      if (hasSubmenu) {
+        const wasOpen = li.classList.contains('sidebar-show');
+        document.querySelectorAll('.sidebar-item.has-submenu').forEach(item => { if (item !== li) item.classList.remove('sidebar-show'); });
+        if (!wasOpen) {
+          li.classList.add('sidebar-show');
+          return;
+        }
+        const categoryId = link.getAttribute('data-category-id');
+        if (!categoryId) return;
+        const targetId = `category-${categoryId.toLowerCase().replace(/\\s+/g, '-')}`;
+        if (!isHomePage()) {
+          try{sessionStorage.setItem('needHashScroll','1');}catch(_){}
+          closeSidebarDrawer();
+          window.location.href = `/#${targetId}`;
+          return;
+        }
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) { closeSidebarDrawer(); setTimeout(() => smoothScrollTo(targetElement), 0); }
+        return;
+      }
+
       const categoryId = link.getAttribute('data-category-id');
+      if (!categoryId) return;
       const targetId = `category-${categoryId.toLowerCase().replace(/\s+/g, '-')}`;
-      
-      // 如果不在首页，跳转到首页并带上锚点
       if (!isHomePage()) {
+        try{sessionStorage.setItem('needHashScroll','1');}catch(_){}
+        closeSidebarDrawer();
         window.location.href = `/#${targetId}`;
         return;
       }
-      
-      // 如果在首页，直接滚动到目标位置
       const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        smoothScrollTo(targetElement);
-      } else {
-        console.warn(`目标分类区域未找到: ${targetId}`);
-      }
+      if (targetElement) { closeSidebarDrawer(); setTimeout(() => smoothScrollTo(targetElement), 0); }
     });
   });
-  
+
+  // 子项分类链接：在非首页跳到根路径锚点，在首页平滑滚动
+  document.querySelectorAll('.sidebar-menu-inner .sidebar-item ul li a[data-category-id]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const categoryId = link.getAttribute('data-category-id');
+      if (!categoryId) return;
+      const targetId = `category-${categoryId.toLowerCase().replace(/\s+/g, '-')}`;
+      if (!isHomePage()) {
+        closeSidebarDrawer();
+        window.location.href = `/#${targetId}`;
+        return;
+      }
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) { closeSidebarDrawer(); smoothScrollTo(targetElement); }
+    });
+  });
+
   // 处理友情链接
   document.querySelectorAll('a[href="#friendlink"]').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      
       if (!isHomePage()) {
         window.location.href = '/#friendlink';
         return;
       }
-      
       const targetElement = document.getElementById('friendlink');
-      if (targetElement) {
-        smoothScrollTo(targetElement);
-      }
+      if (targetElement) smoothScrollTo(targetElement);
     });
   });
-  
+
   // 页面加载时检查哈希并滚动（仅在首页）
   if (isHomePage() && window.location.hash) {
-    const targetId = window.location.hash.substring(1);
-    const targetElement = document.getElementById(targetId);
-    
-    if (targetElement) {
-      setTimeout(() => {
-        smoothScrollTo(targetElement);
-      }, 300);
+    let need = false;
+    try{need = sessionStorage.getItem('needHashScroll') === '1'; sessionStorage.removeItem('needHashScroll');}catch(_){}
+    if (need) {
+      const targetId = window.location.hash.substring(1);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) setTimeout(() => smoothScrollTo(targetElement), 300);
     }
   }
 });

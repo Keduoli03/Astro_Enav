@@ -1,0 +1,177 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<div class="theme-switch-wrapper">
+  <button 
+    aria-label="切换主题模式"
+    class="btn rounded-circle theme-switch-btn m-1 transition-all duration-200"
+    id="scheme-switch"
+    title="点击切换：亮色 ⇄ 暗色"
+  >
+    <span id="icon-moon" class="text-lg" hidden>
+      <Icon name="ri:moon-line" />
+    </span>
+    <span id="icon-sun" class="text-lg">
+      <Icon name="ri:sun-line" />
+    </span>
+  </button>
+  <script is:inline type="module">
+    const LIGHT_MODE = 'light';
+    const DARK_MODE = 'dark';
+    let mode = LIGHT_MODE;
+    let isAnimating = false;
+
+    const btn = document.getElementById('scheme-switch');
+    const iconMoon = document.getElementById('icon-moon');
+    const iconSun = document.getElementById('icon-sun');
+
+    function getStoredTheme(){
+      try{ const t = localStorage.getItem('theme'); return t === DARK_MODE ? DARK_MODE : LIGHT_MODE; }catch{ return LIGHT_MODE; }
+    }
+    function applyThemeToDocument(theme){
+      const body = document.body; if(!body) return;
+      body.classList.remove('io-grey-mode','io-black-mode');
+      body.classList.add(theme === DARK_MODE ? 'io-black-mode' : 'io-grey-mode');
+    }
+    function setTheme(theme){ try{ localStorage.setItem('theme', theme); }catch{} }
+
+    function updateIcon() {
+      const showMoon = mode === DARK_MODE;
+      if (iconMoon && iconSun) {
+        iconMoon.hidden = !showMoon;
+        iconSun.hidden = showMoon;
+      }
+      if (btn) {
+        btn.classList.toggle('opacity-75', isAnimating);
+      }
+    }
+
+    const storedTheme = getStoredTheme();
+    mode = (storedTheme === LIGHT_MODE || storedTheme === DARK_MODE) ? storedTheme : LIGHT_MODE;
+    applyThemeToDocument(mode);
+    updateIcon();
+
+    function triggerThemeTransition(event, newMode) {
+      if (isAnimating || mode === newMode) return;
+      isAnimating = true;
+
+      const trigger = () => {
+        mode = newMode;
+        setTheme(mode);
+        applyThemeToDocument(mode);
+        updateIcon();
+      };
+
+      if (!document.startViewTransition) {
+        trigger();
+        isAnimating = false;
+        updateIcon();
+        return;
+      }
+
+      const transition = document.startViewTransition(trigger);
+      const x = event.clientX;
+      const y = event.clientY;
+
+      transition.ready.then(() => {
+        const endRadius = Math.hypot(
+          Math.max(x, innerWidth - x),
+          Math.max(y, innerHeight - y),
+        );
+
+        const clipPath = [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${endRadius}px at ${x}px ${y}px)`,
+        ];
+
+        document.documentElement.animate(
+          {
+            clipPath: mode === DARK_MODE ? clipPath : [...clipPath].reverse(),
+          },
+          {
+            duration: 600,
+            easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+            pseudoElement: mode === DARK_MODE ? "::view-transition-new(root)" : "::view-transition-old(root)",
+          },
+        );
+      });
+
+      transition.finished.then(() => {
+        isAnimating = false;
+        updateIcon();
+      });
+    }
+
+    function toggleScheme(event) {
+      const newMode = mode === LIGHT_MODE ? DARK_MODE : LIGHT_MODE;
+      triggerThemeTransition(event, newMode);
+    }
+
+    if (btn) btn.addEventListener('click', toggleScheme);
+  </script>
+</div>
+
+<style>
+.theme-switch-wrapper {
+  position: relative;
+  width: 44px;
+}
+
+.theme-switch-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--btn-bg, rgba(255,255,255,0.1));
+  border: 1px solid var(--btn-border, rgba(255,255,255,0.2));
+  backdrop-filter: blur(10px);
+}
+
+.theme-switch-btn:hover {
+  background: var(--btn-bg-hover, rgba(255,255,255,0.2));
+  transform: scale(1.05);
+}
+
+/* 暗色模式样式 */
+:global(.io-black-mode) .theme-switch-btn {
+  --btn-bg: rgba(0,0,0,0.3);
+  --btn-border: rgba(255,255,255,0.1);
+  --btn-bg-hover: rgba(0,0,0,0.5);
+}
+
+/* 优化 View Transitions 样式 */
+:global(::view-transition-old(root)),
+:global(::view-transition-new(root)) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: none;
+  filter: none;
+}
+
+:global(::view-transition-old(root)) {
+  z-index: 1;
+}
+
+:global(::view-transition-new(root)) {
+  z-index: 2;
+}
+
+:global(::view-transition-group(root)) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+:global(html) {
+  view-transition-name: root;
+}
+
+/* 轻/暗色模式下切换按钮的图标颜色 */
+:global(.io-grey-mode) .theme-switch-btn {
+  color: #000;
+}
+:global(.io-black-mode) .theme-switch-btn {
+  color: #fff;
+}
+</style>

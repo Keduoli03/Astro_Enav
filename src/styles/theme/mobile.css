@@ -1,0 +1,24 @@
+@media (max-width:991.98px){
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5); /* 半透明黑色，方便区分 */
+    z-index: 1999; /* 必须低于侧边栏的 z-index:2000 */
+    pointer-events: auto; /* 确保能点击遮罩层关闭 */
+  }
+  .nav-github{display:none}
+  .sidebar-nav{background:transparent!important;width:100%!important;height:100%!important;top:0!important;position:fixed;z-index:2000!important;display:none;padding-left:0!important;pointer-events:auto}
+  .sidebar-nav.show>div{transform:translate3d(0,0,0)}
+  .sidebar-nav>*{position:fixed;height:100%;transition:.35s cubic-bezier(.25,.8,.25,1);transform:translate3d(100%,0,0);width:14rem;right:0 !important;left:auto !important;margin:0 !important}
+  .sidebar-nav .sidebar-nav-inner{background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);max-width:none;width:14rem;overflow:auto;position:fixed !important;z-index:2001;pointer-events:auto;right:0 !important;left:auto !important}
+  .io-black-mode .sidebar-nav .sidebar-nav-inner{background:rgba(44,46,47,0.92)}
+  .sidebar-menu-inner a{line-height:48px;max-height:48px}
+  .sidebar-menu-inner ul li ul li a{padding-left:2.5rem}
+  .sidebar-nav ul:first-child>li.sidebar-item>a span{display:inline}
+  .mini-sidebar ul:first-child>li.sidebar-item>a span{display:inline}
+  .list-title{font-size:0.9375rem!important}
+  .list-grid.list-grid-padding .list-item{padding:.675rem .75rem;margin-bottom:.75rem}
+}

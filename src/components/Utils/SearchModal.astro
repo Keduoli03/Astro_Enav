@@ -1,6 +1,7 @@
 ---
 // src/components/Utils/SearchModal.astro
 import { searchGroups, defaultSearch } from '@/data/searchConfig';
+import { Icon } from 'astro-icon/components'
 ---
 
 <div class="modal fade search-modal" id="search-modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -11,14 +12,13 @@ import { searchGroups, defaultSearch } from '@/data/searchConfig';
           <div id="search-list" class="hide-type-list">
             <!-- 分类标签 -->
             <div class="s-type">
-              <span></span>
+              <span id="group-current"></span>
               <div class="s-type-list">
                 {searchGroups.map((group, index) => (
                   <label 
                     for={`m_${group.engines[0].id}`}
                     data-id={group.id}
                     class={index === 0 ? 'active' : ''}
-                    key={group.id}
                   >
                     {group.label}
                   </label>
@@ -32,12 +32,10 @@ import { searchGroups, defaultSearch } from '@/data/searchConfig';
                 <div 
                   class={`search-group ${group.id}`}
                   style={`display: ${index === 0 ? 'block' : 'none'};`}
-                  key={group.id}
                 >
-                  <span class="type-text text-muted">{group.label}</span>
                   <ul class="search-type">
                     {group.engines.map(engine => (
-                      <li key={engine.id}>
+                      <li>
                         <input
                           type="radio"
                           name="type2"
@@ -75,7 +73,7 @@ import { searchGroups, defaultSearch } from '@/data/searchConfig';
               required
             />
             <button type="submit">
-              <i class="iconfont icon-search"></i>
+              <Icon name="ri:search-line" />
             </button>
           </form>
         </div>
@@ -83,7 +81,7 @@ import { searchGroups, defaultSearch } from '@/data/searchConfig';
       
       <div style="position: absolute;bottom: -40px;width: 100%;text-align: center;">
         <a href="javascript:" data-dismiss="modal">
-          <i class="iconfont icon-close-circle icon-2x" style="color: #fff;"></i>
+          <Icon name="ri:close-circle-line" class="icon-2x" />
         </a>
       </div>
     </div>
@@ -93,69 +91,113 @@ import { searchGroups, defaultSearch } from '@/data/searchConfig';
 <!-- 分组切换脚本 -->
 <script is:inline>
 document.addEventListener('DOMContentLoaded', function() {
-  // 切换分组函数
+  const modal = document.getElementById('search-modal');
+  const container = modal;
+  if (!container) return;
+
   function switchGroup(groupId) {
-    // 更新标签激活状态
-    document.querySelectorAll('.s-type-list label').forEach(label => {
-      label.classList.toggle('active', label.dataset.id === groupId);
+    container.querySelectorAll('.s-type-list label').forEach(label => {
+      (label).classList.toggle('active', (label).dataset.id === groupId);
     });
-    
-    // 切换分组显示
-    document.querySelectorAll('.search-group').forEach(group => {
-      group.style.display = group.classList.contains(groupId) ? 'block' : 'none';
+
+    container.querySelectorAll('.search-group').forEach(group => {
+      (group).style.display = group.classList.contains(groupId) ? 'block' : 'none';
     });
-    
-    // 更新表单action和placeholder
-    const firstEngine = document.querySelector(`#m_${groupId.replace('group-', 'type-')}`);
+
+    const firstEngine = container.querySelector(`.search-group.${groupId} input[name="type2"]`);
     if (firstEngine) {
-      updateSearchForm(firstEngine.value, firstEngine.dataset.placeholder);
+      updateSearchForm(firstEngine.value, firstEngine.dataset.placeholder || '');
     }
+    const labelEl = container.querySelector(`.s-type-list label[data-id="${groupId}"]`)
+      || container.querySelector('.s-type-list label.active');
+    const display = container.querySelector('#group-current');
+    if (display && labelEl) display.textContent = (labelEl.textContent || '').trim();
   }
 
-  // 更新搜索表单
+
   function updateSearchForm(action, placeholder) {
-    const form = document.querySelector('.super-search-fm');
-    const input = document.getElementById('m_search-text');
+    const form = container.querySelector('.super-search-fm');
+    const input = container.querySelector('#m_search-text');
     if (form) form.action = action;
     if (input && placeholder) input.placeholder = placeholder;
   }
 
-  // 绑定分组切换事件
-  document.querySelectorAll('.s-type-list label').forEach(label => {
+  container.querySelectorAll('.s-type-list label').forEach(label => {
     label.addEventListener('click', function() {
-      switchGroup(this.dataset.id);
+      const gid = (this).dataset.id || '';
+      if (gid) switchGroup(gid);
     });
   });
   
-  // 绑定引擎切换事件
-  document.querySelectorAll('input[name="type2"]').forEach(radio => {
+  container.querySelectorAll('input[name="type2"]').forEach(radio => {
     radio.addEventListener('change', function() {
-      if (this.checked) {
-        updateSearchForm(this.value, this.dataset.placeholder);
+      if ((this).checked) {
+        updateSearchForm((this).value, (this).dataset.placeholder || '');
       }
     });
   });
   
-  // 模态框显示时重新初始化
-  const modal = document.getElementById('search-modal');
-  if (modal) {
-    modal.addEventListener('shown.bs.modal', function() {
-      // 重置为默认分组
-      switchGroup('group-a');
-    });
-  }
+  const init = () => {
+    const active = container.querySelector('.s-type-list label.active');
+    const first = container.querySelector('.s-type-list label');  
+    const gid = (active && active.dataset.id) || (first && first.dataset.id) || 'group-a';
+    switchGroup(gid);
+    const display = container.querySelector('#group-current');
+    const labelEl = container.querySelector(`.s-type-list label[data-id="${gid}"]`) || active || first;
+    if (display && labelEl) display.textContent = (labelEl.textContent || '').trim();
+  };
+  modal.addEventListener('shown.bs.modal', init);
+  init();
 });
 </script>
 <style>
-  .search-type {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0;
-  margin: 0;
-  list-style: none;
+/* 模态框内使用左侧下拉+右侧子类布局 */
+.search-modal #search{max-width:800px;position:relative}
+.search-modal .s-type{position:absolute;top:0;left:0;z-index:23;width:75px}
+.search-modal .s-type>span{display:block;height:31px;width:75px}
+.search-modal .s-type>span{line-height:31px;text-align:center;color:#515C6B;background:#fff;border-radius:5px}
+.search-modal .s-type-list{display:none;position:absolute;top:31px;padding:9pt 0;width:70px;background:#fff;border-radius:5px;box-shadow:0 9px 20px rgba(0,0,0,.16)}
+.search-modal .s-type:hover .s-type-list{display:block}
+.search-modal .search-group{padding-left:75px}
+.search-modal #m_search-text{height:50px}
+.search-modal #search form{position:relative}
+.search-modal #search button{position:absolute;top:0;right:0;margin:0;height:50px;line-height:50px;background:#313437;border:0;color:#fff}
+.search-modal #search button svg{color:#fff;width:18px;height:18px}
+.search-type {display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0;list-style:none}
+.search-type li {margin:0}
+:global(.modal-open) #sidebar{filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
+:global(.modal-open) .page-header{filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
+:global(.modal-open) .main-content > :not(.search-modal){filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
+.modal-backdrop{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1084}
+:global(.modal-backdrop),
+:global(.modal-backdrop.fade.show){
+  background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-.search-type li {
-  margin: 0;
-}
+.search-modal{z-index:1085}
+
+/* 主题自适配 */
+:global(.io-grey-mode) .search-modal .modal-content{background:#fff;color:#282a2d;border-color:#e5e7eb}
+:global(.io-black-mode) .search-modal .modal-content{background:#2c2e2f;color:#c6c9cf;border-color:#404040}
+
+:global(.io-grey-mode) .search-modal .s-type>span{background:#fff;color:#515C6B;border:1px solid #e5e7eb}
+:global(.io-black-mode) .search-modal .s-type>span{background:#2c2e2f;color:#c6c9cf;border:1px solid #404040}
+
+:global(.io-grey-mode) .search-modal .s-type-list{background:#fff;box-shadow:0 9px 20px rgba(0,0,0,.16)}
+:global(.io-black-mode) .search-modal .s-type-list{background:#363738;box-shadow:0 9px 20px rgba(0,0,0,.3)}
+
+:global(.io-grey-mode) .search-modal .s-type-list label{color:#515C6B}
+:global(.io-black-mode) .search-modal .s-type-list label{color:#c6c9cf}
+:global(.io-grey-mode) .search-modal .s-type-list label.active{background:rgba(126,126,126,.1)}
+:global(.io-black-mode) .search-modal .s-type-list label.active{background:rgba(255,255,255,.08)}
+
+:global(.io-grey-mode) .search-modal #m_search-text{background:#fff;color:#282a2d;border:1px solid #e5e7eb}
+:global(.io-black-mode) .search-modal #m_search-text{background:#2c2e2f;color:#fff;border:1px solid #2c2e2f}
+
+:global(.io-grey-mode) .search-modal #search button{background:#313437}
+:global(.io-black-mode) .search-modal #search button{background:#2c2e2f}
+:global(.io-black-mode) .search-modal #search button:hover{background:#313437}
+
+:global(.io-black-mode) .search-modal .text-muted{color:#bbb!important}
 </style>

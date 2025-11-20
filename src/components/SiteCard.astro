@@ -1,5 +1,6 @@
 ---
 // src/components/SiteCard.astro
+import { Icon } from 'astro-icon/components'
 interface SiteCardProps {
   url?: string;
   title?: string;
@@ -97,7 +98,7 @@ const faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
         title="直达" 
         rel="nofollow"
       >
-        <i class="iconfont icon-goto"></i>
+        <Icon name="ri:external-link-line" />
       </a>
     )}
   </div>

@@ -5,6 +5,7 @@ import CategorySection from '../components/CategorySection.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
 import { CATEGORY_CONFIG } from '../data/category';
 import ArtalkComment from '@/components/Utils/ArtalkComment.astro';
+import {Icon} from 'astro-icon/components'
 
 // 动态加载所有二级分类的网站数据
 const loadSubCategorySites = async () => {
@@ -46,7 +47,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
         <!-- 页面标题 -->
         <div class="text-center mb-5">
           <h1 class="display-4 mb-3 font-weight-bold">
-            <i class="iconfont icon-about text-primary mr-3"></i>
+            <Icon name="ri:information-line" class="text-primary mr-3" />
             关于本站
           </h1>
           <p class="lead text-muted">一个简洁、现代的网址导航站点</p>
@@ -58,7 +59,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
             <div class="row align-items-center">
               <div class="col-md-3 text-center mb-3 mb-md-0">
                 <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                  <i class="iconfont icon-rocket text-white" style="font-size: 2rem;"></i>
+                  <Icon name="ri:rocket-2-line" class="text-white" />
                 </div>
               </div>
               <div class="col-md-9">
@@ -76,13 +77,13 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
         <!-- <div class="card shadow-sm mb-4">
           <div class="card-body p-4">
             <h3 class="card-title mb-4">
-              <i class="iconfont icon-features text-success mr-2"></i>
+            <Icon name="ri:settings-3-line" class="text-success mr-2" />
               技术特性
             </h3>
             <div class="row">
               <div class="col-md-6 mb-3">
                 <div class="d-flex align-items-center">
-                  <i class="iconfont icon-responsive text-info mr-3" style="font-size: 1.5rem;"></i>
+                  <Icon name="ri:device-line" class="text-info mr-3" />
                   <div>
                     <h6 class="mb-1">响应式设计</h6>
                     <small class="text-muted">完美适配各种设备</small>
@@ -91,7 +92,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
               </div>
               <div class="col-md-6 mb-3">
                 <div class="d-flex align-items-center">
-                  <i class="iconfont icon-night text-warning mr-3" style="font-size: 1.5rem;"></i>
+                  <Icon name="ri:moon-line" class="text-warning mr-3" />
                   <div>
                     <h6 class="mb-1">暗色模式</h6>
                     <small class="text-muted">护眼的夜间主题</small>
@@ -100,7 +101,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
               </div>
               <div class="col-md-6 mb-3">
                 <div class="d-flex align-items-center">
-                  <i class="iconfont icon-search text-primary mr-3" style="font-size: 1.5rem;"></i>
+                  <Icon name="ri:search-line" class="text-primary mr-3" />
                   <div>
                     <h6 class="mb-1">本地搜索</h6>
                     <small class="text-muted">快速找到目标网站</small>
@@ -109,7 +110,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
               </div>
               <div class="col-md-6 mb-3">
                 <div class="d-flex align-items-center">
-                  <i class="iconfont icon-speed text-success mr-3" style="font-size: 1.5rem;"></i>
+                  <Icon name="ri:speed-line" class="text-success mr-3" />
                   <div>
                     <h6 class="mb-1">高性能</h6>
                     <small class="text-muted">基于 Astro 静态生成</small>
@@ -123,7 +124,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
         <!-- 开发状态 -->
         <div class="alert alert-info border-0 shadow-sm mb-4">
           <div class="d-flex align-items-center">
-            <i class="iconfont icon-info-circle text-info mr-3" style="font-size: 1.5rem;"></i>
+            <Icon name="ri:information-line" class="text-info mr-3" />
             <div>
               <h6 class="alert-heading mb-1">开发状态</h6>
               <p class="mb-0">项目仍在持续开发中，如遇到问题欢迎反馈！我们会及时处理并不断完善功能。</p>
@@ -135,13 +136,13 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
         <div class="card shadow-sm mb-4">
           <div class="card-body p-4">
             <h3 class="card-title mb-4">
-              <i class="iconfont icon-contact text-primary mr-2"></i>
+              <Icon name="ri:mail-line" class="text-primary mr-2" />
               联系方式
             </h3>
             <div class="row">
               <div class="col-md-6 mb-3">
                 <a href="https://github.com/Keduoli03/Astro_Enav" target="_blank" class="btn btn-outline-dark btn-block d-flex align-items-center justify-content-center py-3">
-                  <i class="fab fa-github mr-2" style="font-size: 1.2rem;"></i>
+                  <Icon name="ri:github-line" class="mr-2" />
                   <div class="text-left">
                     <div class="font-weight-bold">GitHub 仓库</div>
                     <small class="text-muted">查看源码 & 提交 Issue</small>
@@ -150,7 +151,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
               </div>
               <div class="col-md-6 mb-3">
                 <a href="mailto:2801429414@qq.com" class="btn btn-outline-primary btn-block d-flex align-items-center justify-content-center py-3">
-                  <i class="fas fa-envelope mr-2" style="font-size: 1.2rem;"></i>
+                  <Icon name="ri:mail-line" class="mr-2" />
                   <div class="text-left">
                     <div class="font-weight-bold">邮箱联系</div>
                     <small class="text-muted" style="color: inherit !important;">2801429414@qq.com</small>
@@ -164,7 +165,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
         <!-- 快速导航 -->
         <div class="text-center mb-5">
           <a href="./" class="btn btn-primary btn-lg px-5 py-3 shadow">
-            <i class="fas fa-home mr-2"></i>
+            <Icon name="ri:global-line" class="mr-2" />
             返回首页
           </a>
         </div>
@@ -173,7 +174,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
         <div class="card shadow-sm mb-5">
           <div class="card-body p-4">
             <h3 class="card-title mb-3">
-              <i class="iconfont icon-comment text-success mr-2"></i>
+              <Icon name="ri:message-3-line" class="text-success mr-2" />
               用户反馈
             </h3>
             <p class="text-muted mb-4">
@@ -247,7 +248,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
     }
     
     /* 确保GitHub图标清晰可见 */
-    :global(.io-black-mode) .btn-outline-dark .fab.fa-github {
+    :global(.io-black-mode) .btn-outline-dark .iconfont.icon-github {
       color: #ffffff !important;
     }
     
@@ -272,7 +273,7 @@ const categoryData = (await loadSubCategorySites()).map(item => ({
     }
     
     /* 确保悬浮时邮箱图标是白色 */
-    :global(.io-black-mode) .btn-outline-primary:hover .fas.fa-envelope {
+    :global(.io-black-mode) .btn-outline-primary:hover .iconfont.icon-contact {
       color: #ffffff !important;
     }
     

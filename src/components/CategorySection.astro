@@ -1,6 +1,7 @@
 ---
 // src/components/CategorySection.astro
 import SiteCard from './SiteCard.astro';
+import { Icon } from 'astro-icon/components';
 
 interface Props {
   category: string;
@@ -19,8 +20,8 @@ const { category, subCategoryName, subCategoryIcon, sites } = Astro.props;
 ---
 
 <div class="category-section" id={`category-${category.toLowerCase().replace(/\s+/g, '-')}`}>
-  <h4 class="text-gray text-lg mb-4">
-    {subCategoryIcon && <i class={`${subCategoryIcon} mr-1 fa-lg`}></i>}
+  <h4 class="text-lg mb-4">
+    {subCategoryIcon && <Icon name={subCategoryIcon} class="mr-1 icon-fw icon-lg" />}
     {subCategoryName && subCategoryName}
   </h4>
   <div class="row">

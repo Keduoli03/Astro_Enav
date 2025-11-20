@@ -2,21 +2,21 @@
 // src/layouts/Layout.astro
 import Sidebar from '../components/Sidebar.astro';
 import Header from '../components/Header.astro';
-import Search from '../components/Search.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE,SITE_BG } from '../settings';
+import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE, SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK, SIDEBAR_BLUR, SIDEBAR_OPACITY, SIDEBAR_OPACITY_DARK, SIDEBAR_POPUP_OPACITY, SIDEBAR_POPUP_OPACITY_DARK, SIDEBAR_BORDER_COLOR_LIGHT, SIDEBAR_BORDER_COLOR_DARK } from '../settings';
 import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
 import '../styles/global.css';
+import '../styles/external.css';
+import searchSuggestUrl from '../scripts/search-suggest.ts?url';
+import backgroundControllerUrl from '../scripts/background-controller.ts?url';
+import sidebarControllerUrl from '../scripts/sidebar-controller.ts?url';
+import SearchModal from '@/components/Utils/SearchModal.astro';
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <link rel="preload" href="/css/block-library.min-5.6.2.css" as="style">
-  <link rel="stylesheet" href="/css/iconfont-3.03029.1.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="/css/bootstrap.min-4.3.1.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="/css/style-3.03029.1.css" type="text/css" media="all" />
-  <link rel="preload" href="/css/block-library.min-5.6.2.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="stylesheet" href="/fontawesome-5.15.4/css/all.min.css" type="text/css" />
+  
+  
   
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
@@ -28,24 +28,19 @@ import '../styles/global.css';
   <meta name="keywords" content={SITE_TITLE} />
   <meta name="description" content={SITE_DESCRIPTION} />
 
-  <!-- 防止FOUC的内联样式 - 必须在CSS加载前定义 -->
   <style>
-    /* 防止白色闪烁的关键样式 */
-    body.io-black-mode {
-      background-color: #1b1d1f !important;
-      color: #c6c9cf !important;
-    }
-    body.io-grey-mode {
-      background-color: #f9f9f9 !important;
-      color: #282a2d !important;
-    }
-    /* 确保过渡动画 */
-    body {
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
+    html, body{background-color:#f9f9f9}
+    @media (prefers-color-scheme: dark){html, body{background-color:#1b1d1f}}
+    body.io-black-mode{background-color:#1b1d1f!important;color:#c6c9cf!important}
+    body.io-grey-mode{background-color:#f9f9f9!important;color:#282a2d!important}
+    body{transition:background-color .3s ease,color .3s ease}
+    body.theme-init{transition:none!important}
+    #search-bg{position:relative;overflow:hidden}
+    #search-bg::before{content:"";position:absolute;inset:0;background-image:var(--search-bg-image,none);background-size:cover;background-position:center;filter:blur(var(--search-bg-blur,0px));z-index:0}
+    #search-bg > *{position:relative;z-index:1}
+    :root{--sidebar-blur:12px;--sidebar-border-color:rgba(0,0,0,.06);--sidebar-bg-color:linear-gradient(to bottom, rgba(255,255,255,.65), rgba(255,255,255,.45));--sidebar-popup-bg-color:linear-gradient(to bottom, rgba(245,245,245,.75), rgba(245,245,245,.64));--sidebar-text-color:#20272b;--sidebar-title-color:#1b2226;--sidebar-hover-bg:rgba(0,0,0,.06);--sidebar-active-bg:rgba(0,0,0,.06);--sidebar-submenu-bg:rgba(0,0,0,.05)}
   </style>
 
-  <!-- 防止FOUC的主题初始化脚本 - 与LightDarkSwitch.svelte保持一致 -->
   <script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE}}>
     (function() {
       // 使用与theme-utils.ts相同的逻辑
@@ -85,8 +80,9 @@ import '../styles/global.css';
       // 如果存储的是AUTO_MODE，LightDarkSwitch会默认设为LIGHT_MODE
       const theme = (storedTheme === LIGHT_MODE || storedTheme === DARK_MODE) ? storedTheme : LIGHT_MODE;
       
-      // 立即尝试应用主题
+      try { (document.body || document.getElementsByTagName('body')[0]).classList.add('theme-init'); } catch(e) {}
       applyThemeToDocument(theme);
+      requestAnimationFrame(function(){ try { (document.body || document.getElementsByTagName('body')[0]).classList.remove('theme-init'); } catch(e) {} });
       
       // 如果body还不存在，监听DOM变化
       if (!document.body) {
@@ -100,17 +96,56 @@ import '../styles/global.css';
       }
     })();
   </script>
+  <script is:inline define:vars={{SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK, DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE}}>
+    (function(){
+      try{
+        var stored = localStorage.getItem('theme') || DEFAULT_THEME;
+        var dark = stored === DARK_MODE ? true : (stored === LIGHT_MODE ? false : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
+        var searchImg = dark ? (SEARCH_BG_DARK || SEARCH_BG || '') : (SEARCH_BG || '');
+        var contentImg = dark ? (CONTENT_BG_DARK || CONTENT_BG || '') : (CONTENT_BG || '');
+        var root = document.documentElement;
+        root.style.setProperty('--search-bg-image', searchImg ? "url('"+searchImg+"')" : 'none');
+        root.style.setProperty('--content-bg-image', contentImg ? "url('"+contentImg+"')" : 'none');
+      }catch(e){}
+    })();
+  </script>
+  <script is:inline>
+    (function(){
+      try{
+        var stored = localStorage.getItem('miniSidebar') === '1';
+        function apply(){
+          var el = document.getElementById('sidebar');
+          if(el){
+            if(stored) el.classList.add('mini-sidebar');
+            return true;
+          }
+          return false;
+        }
+        if(!apply()){
+          var obs = new MutationObserver(function(){ if(apply()) obs.disconnect(); });
+          obs.observe(document.documentElement,{childList:true,subtree:true});
+        }
+      }catch(e){}
+    })();
+  </script>
   
-  <script type="text/javascript" src="/js/jquery.min-3.2.1.js" id="jquery-js"></script>
-  <script src="/js/content-search.js" defer id="content-search-js"></script>
+  <script type="module" src={searchSuggestUrl}></script>
+  <script type="module" src={sidebarControllerUrl}></script>
+  <script type="module" src={backgroundControllerUrl}></script>
 </head>
-
+<SearchModal />
 <body class="page-loading">
+  <div id="global-bg" style="position:fixed;inset:0;background-image:var(--content-bg-image, none);background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0;pointer-events:none;filter:blur(var(--content-bg-blur,0px));"></div>
 <div class="page-container">
+   
   <Sidebar />
-  <div class="main-content flex-fill grid-bg"> 
+  <div class="main-content flex-fill"> 
     <Header />
-    <Search />
+    <div class="header-big post-top css-color mb-4" id="search-bg">
+      <div class="s-search">
+        <slot name="searchbar" />
+      </div>
+    </div>
     <div id="content" class="content-site customize-site">
       <slot />
     </div>

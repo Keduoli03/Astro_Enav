@@ -1,0 +1,85 @@
+.s-type-list{display:none;position:absolute;top:31px;padding:9pt 0;width:70px;background:#fff;border-radius:5px;box-shadow:0 9px 20px rgba(0,0,0,.16)}
+.s-type-list:before{position:absolute;top:-1pc;left:20px;content:'';display:block;width:0;height:0;border:10px solid transparent;border-bottom-color:#fff}
+.s-type-list label{display:block;font-size:15px;text-align:center;font-weight:normal;margin-bottom:0;padding:2px 0;cursor:pointer;transition:.3s}
+.s-type-list label:hover{background:rgba(136,136,136,.1)}
+.s-type-list .tile-lg{color:#fff;width:3pc;height:3pc;font-size:1.25rem;line-height:3rem;border-radius:.3rem;display:block;margin:auto}
+.s-type:hover .s-type-list{display:block}
+.search-type{white-space:nowrap;margin:0;overflow:auto}
+.search-type label{margin:0}
+.search-type li{display:inline-block;list-style:none}
+.search-type li label{display:inline-block;padding:0 11px;font-size:14px;line-height:31px;border-radius:3px 3px 0 0;cursor:pointer}
+.search-type li.menu-item a{display:inline-block;font-size:14px;line-height:31px;border-radius:3px 3px 0 0}
+.search-type input:checked+label,.search-type input:hover+label{background-color:#fff}
+.search-modal #search .search-select,.search-modal .search-type input:checked+label,.search-modal .search-type input:hover+label{background-color:rgba(126,126,126,.1)}
+
+.header-big{position:relative;margin-top:-75px;padding-top:30px;padding-bottom:60px}
+.header-big.bg-gradual:before{content: "";position: absolute;left: 0;height: 80px;right: 0;bottom: 0;background-image: linear-gradient(to top,#f9f9f9 0%,transparent 80%);transition:.3s}
+.header-big.css-img,.header-big.css-bing{background-color:#1b1d1f;background-size:cover;background-position:cover}
+.header-big.canvas-fx{background-color:#1b1d1f}
+.header-big.no-bg{padding-bottom:10px}
+.header-big.css-color{background-size:400%;background-position:0% 100%;animation:gradient 7.5s ease-in-out infinite}
+.header-big .s-search,.header-big #bulletin_box{margin:0 15px}
+.header-big #bulletin_box{background:transparent;box-shadow:none}
+.header-big:not(.no-bg) #bulletin_box a{color:#fff}
+.header-big .bulletin-big #bulletin_box{max-width:600px;margin:0 auto}
+.header-big:not(.no-bg) #bulletin_box .card-body{color:#fff!important;background:rgba(0,0,0,.3);border-radius:50px}
+.header-big .bulletin-close{opacity:.1;transition:opacity .3s}
+.header-big .bulletin-big #bulletin_box:hover .bulletin-close{opacity:.7}
+.header-big .search-group{padding:0;margin:0 auto}
+.header-big #search-list{text-align:center}
+.header-big .search-smart-tips{width:unset;left:20px;right:20px}
+.header-big .search-type input:checked+label,.header-big .search-type input:hover+label{position:relative;background:rgba(0,0,0,.45)!important;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);border-radius:999px!important}
+.header-big .search-type input:checked+label:before{content:'';border-width:8px 8px 0 8px;border-style:solid;border-color:rgba(0,0,0,0.6) transparent transparent;position:absolute;left:50%;top:0;margin-left:-8px}
+.header-big .search-type li label{padding-top:5px}
+.header-big .s-type-list{position:relative!important;display:inline-table;overflow:auto;white-space:nowrap;text-align:center;position:inherit;top:inherit;padding:inherit;width:none;background:none!important;border-radius:inherit;box-shadow:none!important}
+.header-big:not(.no-bg) .s-type-list{color:#fff}
+.s-type:hover .s-type-list.big{display:inline-table}
+.header-big .s-type-list .anchor{background:#888;border-radius:100px;width:10px;height:4px;bottom:5px;transition:.25s}
+.header-big:not(.no-bg) .s-type-list .anchor{background:#fff}
+.header-big .s-type-list label:hover{background:none}
+.header-big .s-type-list:before{display:none}
+.header-big .s-type{position:inherit;top:inherit;left:inherit;z-index:inherit;width:auto}
+.header-big .s-type-list label{position:relative;display:inline-block}
+.header-big .s-type-list label span{display:block;padding:10px 14px;color:#fff;background-color:rgba(0,0,0,.35);border-radius:999px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.header-big .s-type-list label:not(.active)::after{content:'';height:4px;width:4px;border-radius:2px;position:absolute;left:50%;bottom:5px;margin-left:-2px;background-color:rgba(255,255,255,0);transition:.3s}
+.header-big .s-type-list label:not(.active):hover::after{background-color:#fff}
+.header-big .s-type-list label:not(.active),.header-big:not(.no-bg) .search-type label{opacity:.5;transition:opacity .3s}
+.header-big .s-type-list label:not(.active):hover,.header-big:not(.no-bg) .search-type label:hover{opacity:1}
+.header-big .search-type input:checked+label{opacity:1}
+.header-big #search-text{border-radius:50px;color:#fff;border:1px solid rgba(255,255,255,.35);padding:9px 20px;background-color:rgba(255,255,255,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+@@
+.header-big #search-text::placeholder{color:rgba(255,255,255,.85)}
+.header-big #search-text::-webkit-input-placeholder{color:rgba(255,255,255,.85)}
+.header-big #search-text::-moz-placeholder{color:rgba(255,255,255,.85)}
+.header-big #search-text:-ms-input-placeholder{color:rgba(255,255,255,.85)}
+.header-big #search-text::-ms-input-placeholder{color:rgba(255,255,255,.85)}
+@@
+.header-big .search-type li label{display:inline-block;color:#fff;background-color:rgba(0,0,0,.25);border-radius:999px!important;text-shadow:0 1px 2px rgba(0,0,0,.6);padding:6px 12px;line-height:1.5;margin:4px 6px 0}
+.header-big .search-type li.menu-item a{display:inline-block;color:#fff;background-color:rgba(0,0,0,.25);border-radius:999px!important;text-shadow:0 1px 2px rgba(0,0,0,.6);padding:6px 12px;line-height:1.5;margin:4px 6px 0}
+.header-big #search button{position:absolute;top:50%;right:12px;transform:translateY(-50%);background:transparent;border:0!important;width:40px;height:40px;margin:0;border-radius:20px;color:#fff;line-height:40px;cursor:pointer}
+.header-big #search button:hover{background:transparent;box-shadow:none}
+.header-big #search button svg{color:#fff;fill:#fff;width:20px;height:20px}
+.header-big #search button:active,.header-big #search button:focus{box-shadow:none;outline:none;border:0!important}
+.header-big:not(.no-bg) .text-muted,.header-big:not(.no-bg) .search-type .menu-item a,.header-big:not(.no-bg) .big-title .h1{color:#fff!important}
+.header-big.no-bg #search-text{color:#fff;border:none;background-color:rgba(0,0,0,0.2)!important}
+.header-big.no-bg .search-type input:checked+label:before{border-color:rgba(0,0,0,0.2) transparent transparent}
+.header-big .search-type li.menu-item{padding:5px 10px 0 10px}
+@media screen and (min-width:768px){.header-big{padding-top:80px;padding-bottom:60px}.header-big.no-bg{padding-bottom:20px}.header-big .search-type li label,.header-big .search-type li.menu-item{padding:5px 20px}.header-big .s-type-list label span{padding:10px 20px}}
+@media (max-width:767.98px){.header-big{margin-top:0;padding-top:100px}}
+.io-black-mode .header-big.bg-gradual:before{background-image: linear-gradient(to top,#1b1d1f 0%,transparent 80%)}
+#search{max-width:800px;position:relative}
+#search form{position:relative}
+#search-text{z-index:inherit;padding:9pt;height:50px;font-size:1pc;border:0;border-radius:3px;background-color:#fff;transition:.3s}
+#search button{position:absolute;top:0;right:0;background:#313437;border:0;width:60px;height:36px;margin:7px 9pt 0;line-height:36px;border-radius:3px}
+#search button:hover{background:#000;cursor:pointer}
+#search button i{color:#fff;font-size:18px}
+#search .search-select{height:50px;cursor:pointer;border:none;background-color:#fff;transition:.3s}
+#search .input-group-prepend:not(.d-none)+.search-key{border-top-left-radius:0;border-bottom-left-radius:0}
+.search-group{display:none;padding-left:75px}
+.search-group-modal{display:none;padding-left:75px}
+.s-current .search-type{padding-left:0;display:block}
+.s-current{display:block}
+.search-smart-tips{position:absolute;z-index:20;width:100%;overflow:hidden}
+.search-smart-tips ul{padding:10px 0;margin:0}
+.search-smart-tips ul li{line-height:30px;font-size:14px;padding:0 25px;cursor:pointer;list-style:none;transition:.3s}
+.search-smart-tips ul li:hover,.search-smart-tips ul li.current{background-color:rgba(130,130,130,.5)}

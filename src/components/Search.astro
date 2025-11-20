@@ -1,10 +1,10 @@
 ---
 // src/components/Search.astro
 import { searchGroups, defaultSearch } from '../data/searchConfig';
+import { Icon } from 'astro-icon/components';
+ 
 ---
-<div class="header-big post-top css-color mb-4" id="search-bg">
-  <div class="s-search">
-    <div id="search" class="s-search mx-auto">
+<div id="search" class="s-search mx-auto">
       <!-- 搜索分类标签 -->
       <div id="search-list-menu" class="hide-type-list">
         <div class="s-type text-center">
@@ -32,12 +32,13 @@ import { searchGroups, defaultSearch } from '../data/searchConfig';
           type="text" 
           id="search-text" 
           class="form-control smart-tips search-key"
+          name="q"
           placeholder={defaultSearch.placeholder} 
           style="outline:0" 
           autocomplete="off"
         />
         <button class="submit" type="submit">
-          <i class="iconfont icon-search"></i>
+          <Icon name="ri:search-line" />
         </button>
       </form>
       <!-- 搜索引擎选项 -->
@@ -69,6 +70,4 @@ import { searchGroups, defaultSearch } from '../data/searchConfig';
       <div class="card search-smart-tips search-hot-text">
         <ul id="word" style="display: none"></ul>
       </div>
-    </div>
-  </div>
 </div>

@@ -1,0 +1,49 @@
+.navbar-collapse ul li{position:relative;list-style:none}
+.navbar-collapse li>ul{transform:translateY(15px)}
+.navbar-collapse ul li ul{position:absolute;min-width:90px;opacity:0;overflow:hidden;visibility:hidden;background:#fff;border-radius:4px;box-shadow:0 5px 20px 0 rgba(0,0,0,.15);transition:.3s}
+.navbar-collapse ul li.focus>ul,.navbar-collapse ul li:hover>ul{opacity:1;z-index:1;overflow:visible;visibility:visible;transform:translateY(0)}
+.navbar-collapse ul li.menu-item-has-children:after{display:none}
+.navbar .navbar-nav li>a{font-size:14px;padding:10px 15px;display:block;transition:color .2s}
+.navbar .navbar-nav i{margin-right:2px!important}
+.navbar-menu{flex-direction:row;margin-left:auto;align-items:center}
+.navbar-collapse .weather{display:table}
+.navbar-brand img{max-height:40px}
+.nav-github{display:none;position:absolute;top:0;right:0;border:0}
+.page-header{position:fixed;right:0;left:0;background:#fff;box-shadow:0 0 25px 5px rgba(10,10,10,.05);transition:background-color .3s}
+.page-header ul{margin:0;padding:0}
+.header-mini-btn{height:74px;width:40px}
+.header-mini-btn svg{margin:0 -20px;height:74px}
+.header-mini-btn input[type="checkbox"]{display:none}
+.header-mini-btn path{fill:none;stroke:#888;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;--length:24;--offset:-38;stroke-dasharray:var(--length) var(--total-length);stroke-dashoffset:var(--offset);transition:all .8s cubic-bezier(.645,.045,.355,1)}
+.header-mini-btn circle{fill:#fff3;opacity:0;transition:opacity .3s;cursor:pointer}
+.header-mini-btn label{display:block;top:0;right:0}
+.header-mini-btn label circle:hover{opacity:1}
+.header-mini-btn input:checked+svg .line--1,.header-mini-btn input:checked+svg .line--3{--length:12.602325267}
+.header-mini-btn .line--1,.header-mini-btn .line--3{--total-length:126.38166809082031}
+.header-mini-btn .line--2{--total-length:80}
+.header-mini-btn label{cursor:pointer}
+.header-mini-btn path{transition:all .5s cubic-bezier(.645,.045,.355,1),stroke .2s ease}
+.header-mini-btn label:hover path{stroke:#f1404b}
+.bulletin{box-sizing:border-box;height:25px;line-height:25px;overflow:hidden}
+.bulletin ul{margin:0;padding:0;list-style-type:none;font-size:14px}
+@media (min-width:768px){.navbar{padding:0 1rem}.main-content{margin-left:170px}.page-header{left:170px}.sidebar-nav.animate-nav+.main-content{transition:.35s}.sidebar-nav.animate-nav+.main-content .page-header{transition:left .35s,color .3s,background-color .3s}.sidebar-nav.mini-sidebar+.main-content{margin-left:60px}.sidebar-nav.mini-sidebar+.main-content .page-header{left:60px}}
+
+/* ensure main-content shifts smoothly even before sidebar width changes */
+.main-content{transition:margin-left .35s;will-change:margin-left}
+.main-content.sidebar-expanding{margin-left:170px}
+.main-content.sidebar-collapsing{margin-left:60px}
+/* keep header left in sync during pre-transition */
+.main-content.sidebar-expanding .page-header{left:170px}
+.main-content.sidebar-collapsing .page-header{left:60px}
+@media (max-width:767.98px){.nav-github{display:none}}
+ .big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6),0 0 2px rgba(255,255,255,.3)}
+ .big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a .icon-fw,.big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a .icon-lg,.big-header-banner:not(.header-bg) .page-header .navbar .nav-item .icon-2x{filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+ .big-header-banner:not(.header-bg) .page-header #hitokoto a{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6),0 0 2px rgba(255,255,255,.3)}
+  .big-header-banner:not(.header-bg) .page-header .nav-search a{color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+
+.io-grey-mode .big-header-banner.header-bg .page-header .navbar .navbar-nav li>a{color:#313437}
+.io-grey-mode .big-header-banner.header-bg .page-header .navbar .navbar-nav li>a .icon-fw,
+.io-grey-mode .big-header-banner.header-bg .page-header .navbar .navbar-nav li>a .icon-lg,
+.io-grey-mode .big-header-banner.header-bg .page-header .navbar .nav-item .icon-2x{color:#313437}
+.io-grey-mode .big-header-banner.header-bg .page-header .nav-search a{color:#313437}
+.io-grey-mode .big-header-banner.header-bg .page-header .navbar-menu .nav-item a{color:#313437}

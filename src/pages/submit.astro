@@ -3,6 +3,7 @@
 import ArtalkComment from '@/components/Utils/ArtalkComment.astro';
 import Layout from '../layouts/Layout.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
+import { Icon } from 'astro-icon/components';
 ---
 
 <Layout 
@@ -27,7 +28,7 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
             <div class="card h-100 shadow-sm border-0">
               <div class="card-body text-center">
                 <div class="mb-3">
-                  <i class="fas fa-lightbulb fa-2x text-warning"></i>
+                  <Icon name="ri:sun-line" class="icon-2x text-warning" />
                 </div>
                 <h5 class="card-title">优质内容</h5>
                 <p class="card-text text-muted">推荐实用、有价值的网站，避免重复或低质量内容</p>
@@ -38,7 +39,7 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
             <div class="card h-100 shadow-sm border-0">
               <div class="card-body text-center">
                 <div class="mb-3">
-                  <i class="fas fa-info-circle fa-2x text-info"></i>
+                  <Icon name="ri:file-info-line" class="icon-2x text-info" />
                 </div>
                 <h5 class="card-title">详细信息</h5>
                 <p class="card-text text-muted">请提供网站名称、链接、简介等完整信息</p>
@@ -49,7 +50,7 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
             <div class="card h-100 shadow-sm border-0">
               <div class="card-body text-center">
                 <div class="mb-3">
-                  <i class="fas fa-clock fa-2x text-success"></i>
+                  <Icon name="ri:time-line" class="icon-2x text-success" />
                 </div>
                 <h5 class="card-title">审核时间</h5>
                 <p class="card-text text-muted">我们会在1-3个工作日内审核并添加优质网站</p>
@@ -62,11 +63,11 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
         <div class="card mb-4 border-0 shadow-sm">
           <div class="card-body">
             <h4 class="card-title mb-3">
-              <i class="fas fa-paper-plane text-primary mr-2"></i>
+              <Icon name="ri:send-plane-line" class="text-primary mr-2" />
               提交你的网站推荐
             </h4>
             <div class="alert alert-info border-0" role="alert">
-              <i class="fas fa-info-circle mr-2"></i>
+              <Icon name="ri:file-info-line" class="mr-2" />
               <strong>提交格式建议：</strong>
               <ul class="mb-0 mt-2">
                 <li><strong>网站名称：</strong>网站的中文或英文名称</li>
@@ -77,7 +78,7 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
               </ul>
             </div>
             <p class="text-muted mb-0">
-              <i class="fas fa-heart text-danger mr-1"></i>
+              <Icon name="ri:heart-line" class="text-danger mr-1" />
               感谢你的分享！每一个推荐都让我们的导航站变得更加丰富和实用。
             </p>
           </div>
@@ -87,7 +88,7 @@ import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-white border-0 pb-0">
             <h5 class="mb-0">
-              <i class="fas fa-comments text-primary mr-2"></i>
+              <Icon name="ri:message-3-line" class="text-primary mr-2" />
               在下方留言提交你的网站推荐
             </h5>
           </div>
