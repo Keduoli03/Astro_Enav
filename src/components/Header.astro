@@ -1,10 +1,6 @@
 ---
 import { SITE_TITLE } from "../settings";
 import { Icon } from 'astro-icon/components'
-
-// 一言默认文本（请求失败时 fallback）
-const hitokotoDefault = '疏影横斜水清浅，暗香浮动月黄昏。';
-const hitokotoHref = '#'; // 初始默认链接
 ---
 
 <div class="big-header-banner">
@@ -64,45 +60,35 @@ const hitokotoHref = '#'; // 初始默认链接
                                 "key": "085791e805a24491b43b06cf58ab31e7"
                             }
                         }</script>
-                        <!-- 天气，但实际没有用到，后续考虑自己写个 -->
-                        <!-- <script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script> -->
                     </div>
                 </div>
 
                 <ul class="nav navbar-menu text-xs order-1 order-md-2">
-                    <!-- 一言核心部分（修复所有错误，确保请求执行） -->
+                    <!-- 一言核心部分 - 修复缓存问题 -->
                     <li class="nav-item mr-3 mr-lg-0 d-none d-lg-block">
                         <div id="hitokoto">
-                            <!-- 明确 <a> 标签为链接元素，id 正确绑定 -->
-                            <a href={hitokotoHref} target="_blank" id="hitokoto_text">
-                                {hitokotoDefault}
-                            </a>
+                            <script is:inline>
+                              (function(){
+                                var container = document.getElementById('hitokoto');
+                                if(!container) return;
+                                var s = document.createElement('script');
+                                s.type = 'text/javascript';
+                                s.src = 'https://api.yviii.com/yiyan/yi.php/?syz=js&charset=utf-8';
+                                s.onload = function(){
+                                  try{
+                                    var oldWrite = document.write;
+                                    document.write = function(html){
+                                      try{ if(container) container.textContent = String(html || ''); }
+                                      finally{ document.write = oldWrite; }
+                                    };
+                                    if(window && typeof window.hiyi === 'function') window.hiyi();
+                                  }catch(e){ if(container) container.textContent = '疏影横斜水清浅，暗香浮动月黄昏。'; }
+                                };
+                                s.onerror = function(){ if(container) container.textContent = '疏影横斜水清浅，暗香浮动月黄昏。'; };
+                                document.head.appendChild(s);
+                              })();
+                            </script>
                         </div>
-
-                        <!-- 使用站内 API，避免跨域，并确保每次刷新都更新 -->
-                        <script is:inline>
-                          document.addEventListener('DOMContentLoaded', function(){
-                            var link = document.getElementById('hitokoto_text');
-                            if(!link) return;
-                            var url = '/api/hitokoto.json?ts=' + Date.now();
-                            fetch(url, { cache: 'no-store' })
-                              .then(function(r){ return r.json(); })
-                              .then(function(data){
-                                try{
-                                  var text = data && data.hitokoto ? data.hitokoto : '疏影横斜水清浅，暗香浮动月黄昏。';
-                                  var href = (data && data.uuid) ? ('https://hitokoto.cn/?uuid=' + data.uuid) : '#';
-                                  link.textContent = text;
-                                  link.setAttribute('href', href);
-                                }catch(e){}
-                              })
-                              .catch(function(){
-                                try{
-                                  link.textContent = '疏影横斜水清浅，暗香浮动月黄昏。';
-                                  link.setAttribute('href', '#');
-                                }catch(e){}
-                              });
-                          });
-                        </script>
                     </li>
 
                     <li class="nav-search ml-3 ml-md-4">
@@ -121,7 +107,7 @@ const hitokotoHref = '#'; // 初始默认链接
     </div>
     <div class="placeholder" style="height:74px"></div>
 
-    <!-- 原有侧边栏折叠 + 头部背景切换脚本（完全保留） -->
+    <!-- 原有侧边栏折叠 + 头部背景切换脚本 -->
     <script is:inline>
         document.addEventListener('DOMContentLoaded', () => {
             const banner = document.querySelector('.big-header-banner');
