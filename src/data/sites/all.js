@@ -17,6 +17,14 @@ export default [
   { subId: 'anime', url: 'https://bangumi.moe/', title: '萌番组', description: '传统BT动漫资源网站，收录了很多字幕组的动漫资源', logo: '', id: 'bangumi' },
   { subId: 'anime', url: 'https://acg.rip/', title: 'ACG.RIP', description: '传统BT动漫资源网站，收录了很多字幕组的动漫资源', logo: 'images/logos/acgrip.ico', id: 'acgrip' },
   { subId: 'anime', url: 'https://share.dmhy.org/', title: '动漫花园', description: '传统BT动漫资源网站，收录了很多字幕组的动漫资源', logo: 'images/logos/dmhy.ico', id: 'dmhy' },
+  {
+    subId: 'anime',
+    url: 'https://miraitv.netlify.app/',
+    title: 'miraitv',
+    description: '群友写的看番网站,貌似体验不错',
+    logo: '',
+    id: 'miraitv'
+  },
 
   // animephoto
   { subId: 'animephoto', url: 'https://www.someacg.top/', title: 'SomeACG', description: '动漫壁纸网站，质量不错', logo: 'images/logos/someacg.png', id: 'someacg' },
@@ -24,6 +32,14 @@ export default [
 
   // cloud
   { subId: 'cloud', url: 'https://www.pansou.vip/', title: '盘搜', description: '一个优秀的网盘搜索聚合，收录了很多搜索引擎', logo: 'images/logos/pansou.ico', id: 'pansou' },
+  {
+    subId: 'cloud',
+    url: 'https://www.upyunso.com/',
+    title: 'up云搜',
+    description: '一个优秀的网盘搜索聚合',
+    logo: '',
+    id: 'upyunso'
+  },
 
   // editor
   { subId: 'editor', url: 'https://jetbrains.ankio.net/license', title: 'jetbrains许可证生成器', description: '可以使用绝大多数的JetBrains产品', logo: 'images/logos/jetbrains.png', id: 'pansou' },
@@ -31,6 +47,14 @@ export default [
 
   // musictool
   { subId: 'musictool', url: 'https://www.kanxizai.cn/163_music/', title: '网易云音乐解析', description: '解析下载网易云音乐', id: '163music' },
+  {
+    subId:'musictool',
+    url: 'https://iigeek.com/',
+    title: '音乐解锁',
+    description: '解锁多平台音乐加密',
+    logo: '',
+    id: 'iigeek'
+  },
 
   // picturetool
   { subId: 'picturetool', url: ' https://remove.bg', title: '快速抠图', description: '快速扣透明图，去除背景', logo: '', id: 'koutu' },
