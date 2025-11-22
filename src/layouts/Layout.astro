@@ -146,11 +146,9 @@ import SearchModal from '@/components/Utils/SearchModal.astro';
     })();
   </script>
   
-  <script is:inline type="module">
-    import '/src/scripts/search-suggest.ts';
-    import '/src/scripts/sidebar-controller.ts';
-    import '/src/scripts/background-controller.ts';
-  </script>
+  <script src="../scripts/search-suggest.ts"></script>
+  <script src="../scripts/sidebar-controller.ts"></script>
+  <script src="../scripts/background-controller.ts"></script>
 </head>
 <SearchModal />
 <body class="page-loading">
