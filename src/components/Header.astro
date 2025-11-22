@@ -1,165 +1,184 @@
 ---
-import {SITE_TITLE } from "../settings";
+import { SITE_TITLE } from "../settings";
 import { Icon } from 'astro-icon/components'
 
+// 一言默认文本（请求失败时 fallback）
 const hitokotoDefault = '疏影横斜水清浅，暗香浮动月黄昏。';
-let hitokotoData: any = null;
-try {
-  const res = await fetch('https://v1.hitokoto.cn/');
-  hitokotoData = await res.json();
-} catch {}
-const hitokotoText = hitokotoData?.hitokoto ?? hitokotoDefault;
-const hitokotoUuid = hitokotoData?.uuid ?? '';
-const hitokotoHref = hitokotoUuid ? `https://hitokoto.cn/?uuid=${hitokotoUuid}` : '#';
-
+const hitokotoHref = '#'; // 初始默认链接
 ---
+
 <div class="big-header-banner">
-        <div id="header" class="page-header sticky">
-            <div class="navbar navbar-expand-md">
-                <div class="container-fluid p-0">
-                    <div class="collapse navbar-collapse order-2 order-md-1">
-                        <div class="header-mini-btn">
-                            <label>
-                                <input id="mini-button" type="checkbox">
-                                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <path class="line--1" d="M0 40h62c18 0 18-20-17 5L31 55"></path>
-                                    <path class="line--2" d="M0 50h80"></path>
-                                    <path class="line--3" d="M0 60h62c18 0 18 20-17-5L31 45"></path>
-                                </svg>
-                            </label>
-
-                        </div>
-
-                        <ul class="navbar-nav site-menu" style="margin-right: 16px;">
-
-			<li >
-                <a href="./">
-                                    <Icon name="ri:global-line" class="icon-fw icon-lg mr-2" />
-                                    <span>首页</span>
-                                </a>
-				<ul class="sub-menu">
-
-				</ul>
-			    </li>
-
-			<li >
-                <a href="./about">
-                                    <Icon name="ri:book-line" class="icon-fw icon-lg mr-2" />
-                                    <span>关于</span>
-                                </a>
-				<ul class="sub-menu">
-
-				</ul>
-			    </li>
-
-			</ul>
-
-
-                        <div class="rounded-circle weather">
-                            <div id="he-plugin-simple" style="display: contents;"></div>
-                            <script>(window as any).WIDGET = {
-                                    CONFIG: {
-                                        "modules": "01234",
-                                        "background": 5,
-                                        "tmpColor": "E4C600",
-                                        "tmpSize": 14,
-                                        "cityColor": "E4C600",
-                                        "citySize": 14,
-                                        "aqiColor": "#E4C600",
-                                        "aqiSize": 14,
-                                        "weatherIconSize": 24,
-                                        "alertIconSize": 18,
-                                        "padding": "10px 10px 10px 10px",
-                                        "shadow": "1",
-                                        "language": "auto",
-                                        "borderRadius": 5,
-                                        "fixed": "false",
-                                        "vertical": "middle",
-                                        "horizontal": "left",
-                                        "key": "085791e805a24491b43b06cf58ab31e7"
-                                    }
-                                }
-                            </script>
-                            <!-- 天气，但实际没有用到，后续考虑自己写个 -->
-                            <!-- <script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script> -->
-                        </div>
-
+    <div id="header" class="page-header sticky">
+        <div class="navbar navbar-expand-md">
+            <div class="container-fluid p-0">
+                <div class="collapse navbar-collapse order-2 order-md-1">
+                    <div class="header-mini-btn">
+                        <label>
+                            <input id="mini-button" type="checkbox">
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <path class="line--1" d="M0 40h62c18 0 18-20-17 5L31 55"></path>
+                                <path class="line--2" d="M0 50h80"></path>
+                                <path class="line--3" d="M0 60h62c18 0 18 20-17-5L31 45"></path>
+                            </svg>
+                        </label>
                     </div>
 
-                    <ul class="nav navbar-menu text-xs order-1 order-md-2">
-
-
-                        <li class="nav-item mr-3 mr-lg-0 d-none d-lg-block">
-                            <div id="hitokoto"><a href={hitokotoHref} target="_blank" id="hitokoto_text">{hitokotoText}</a></div>
+                    <ul class="navbar-nav site-menu" style="margin-right: 16px;">
+                        <li>
+                            <a href="./">
+                                <Icon name="ri:global-line" class="icon-fw icon-lg mr-2" />
+                                <span>首页</span>
+                            </a>
+                            <ul class="sub-menu"></ul>
                         </li>
-
-
-                        <li class="nav-search ml-3 ml-md-4">
-                            <a href="javascript:" data-toggle="modal" data-target="#search-modal"><Icon name="ri:search-line" class="icon-2x" /></a>
-                        </li>
-                        <li class="nav-item d-md-none mobile-menu ml-3 ml-md-4">
-                            <a href="javascript:" id="sidebar-switch"><Icon name="ri:apps-2-line" class="icon-2x" /></a>
+                        <li>
+                            <a href="./about">
+                                <Icon name="ri:book-line" class="icon-fw icon-lg mr-2" />
+                                <span>关于</span>
+                            </a>
+                            <ul class="sub-menu"></ul>
                         </li>
                     </ul>
+
+                    <div class="rounded-circle weather">
+                        <div id="he-plugin-simple" style="display: contents;"></div>
+                        <script>(window as any).WIDGET = {
+                            CONFIG: {
+                                "modules": "01234",
+                                "background": 5,
+                                "tmpColor": "E4C600",
+                                "tmpSize": 14,
+                                "cityColor": "E4C600",
+                                "citySize": 14,
+                                "aqiColor": "#E4C600",
+                                "aqiSize": 14,
+                                "weatherIconSize": 24,
+                                "alertIconSize": 18,
+                                "padding": "10px 10px 10px 10px",
+                                "shadow": "1",
+                                "language": "auto",
+                                "borderRadius": 5,
+                                "fixed": "false",
+                                "vertical": "middle",
+                                "horizontal": "left",
+                                "key": "085791e805a24491b43b06cf58ab31e7"
+                            }
+                        }</script>
+                        <!-- 天气，但实际没有用到，后续考虑自己写个 -->
+                        <!-- <script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script> -->
+                    </div>
                 </div>
+
+                <ul class="nav navbar-menu text-xs order-1 order-md-2">
+                    <!-- 一言核心部分（修复所有错误，确保请求执行） -->
+                    <li class="nav-item mr-3 mr-lg-0 d-none d-lg-block">
+                        <div id="hitokoto">
+                            <!-- 明确 <a> 标签为链接元素，id 正确绑定 -->
+                            <a href={hitokotoHref} target="_blank" id="hitokoto_text">
+                                {hitokotoDefault}
+                            </a>
+                        </div>
+
+                        <!-- 使用站内 API，避免跨域，并确保每次刷新都更新 -->
+                        <script is:inline>
+                          document.addEventListener('DOMContentLoaded', function(){
+                            var link = document.getElementById('hitokoto_text');
+                            if(!link) return;
+                            var url = '/api/hitokoto.json?ts=' + Date.now();
+                            fetch(url, { cache: 'no-store' })
+                              .then(function(r){ return r.json(); })
+                              .then(function(data){
+                                try{
+                                  var text = data && data.hitokoto ? data.hitokoto : '疏影横斜水清浅，暗香浮动月黄昏。';
+                                  var href = (data && data.uuid) ? ('https://hitokoto.cn/?uuid=' + data.uuid) : '#';
+                                  link.textContent = text;
+                                  link.setAttribute('href', href);
+                                }catch(e){}
+                              })
+                              .catch(function(){
+                                try{
+                                  link.textContent = '疏影横斜水清浅，暗香浮动月黄昏。';
+                                  link.setAttribute('href', '#');
+                                }catch(e){}
+                              });
+                          });
+                        </script>
+                    </li>
+
+                    <li class="nav-search ml-3 ml-md-4">
+                        <a href="javascript:" data-toggle="modal" data-target="#search-modal">
+                            <Icon name="ri:search-line" class="icon-2x" />
+                        </a>
+                    </li>
+                    <li class="nav-item d-md-none mobile-menu ml-3 ml-md-4">
+                        <a href="javascript:" id="sidebar-switch">
+                            <Icon name="ri:apps-2-line" class="icon-2x" />
+                        </a>
+                    </li>
+                </ul>
             </div>
+        </div>
     </div>
-        <div class="placeholder" style="height:74px"></div>
-        <script is:inline>
-          document.addEventListener('DOMContentLoaded', () => {
-            
+    <div class="placeholder" style="height:74px"></div>
+
+    <!-- 原有侧边栏折叠 + 头部背景切换脚本（完全保留） -->
+    <script is:inline>
+        document.addEventListener('DOMContentLoaded', () => {
             const banner = document.querySelector('.big-header-banner');
             const miniBtn = document.getElementById('mini-button');
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.querySelector('.main-content');
+
             const applyMini = (on, initial) => {
-              if (!sidebar) return;
-              const DURATION = 350;
-              if (on) {
-                if (!initial) {
-                  if (mainContent) mainContent.classList.add('sidebar-collapsing');
-                  sidebar.classList.add('collapsing');
+                if (!sidebar) return;
+                const DURATION = 350;
+                if (on) {
+                    if (!initial) {
+                        if (mainContent) mainContent.classList.add('sidebar-collapsing');
+                        sidebar.classList.add('collapsing');
+                    }
+                    requestAnimationFrame(() => { sidebar.classList.add('mini-sidebar'); });
+                    try {
+                        const items = sidebar.querySelectorAll('.sidebar-item.has-submenu.sidebar-show');
+                        items.forEach(el => el.classList.remove('sidebar-show'));
+                    } catch (e) {}
+                    if (!initial) {
+                        setTimeout(() => {
+                            if (mainContent) mainContent.classList.remove('sidebar-collapsing');
+                            sidebar.classList.remove('collapsing');
+                        }, DURATION);
+                    }
+                } else {
+                    if (!initial) {
+                        if (mainContent) mainContent.classList.add('sidebar-expanding');
+                        sidebar.classList.add('expanding');
+                    }
+                    requestAnimationFrame(() => { sidebar.classList.remove('mini-sidebar'); });
+                    if (!initial) {
+                        setTimeout(() => {
+                            if (mainContent) mainContent.classList.remove('sidebar-expanding');
+                            sidebar.classList.remove('expanding');
+                        }, DURATION);
+                    }
                 }
-                requestAnimationFrame(() => { sidebar.classList.add('mini-sidebar'); });
-                try{
-                  const items = sidebar.querySelectorAll('.sidebar-item.has-submenu.sidebar-show');
-                  items.forEach(el => el.classList.remove('sidebar-show'));
-                }catch(e){}
-                if (!initial) {
-                  setTimeout(() => { 
-                    if (mainContent) mainContent.classList.remove('sidebar-collapsing');
-                    sidebar.classList.remove('collapsing');
-                  }, DURATION);
-                }
-              } else {
-                if (!initial) {
-                  if (mainContent) mainContent.classList.add('sidebar-expanding');
-                  sidebar.classList.add('expanding');
-                }
-                requestAnimationFrame(() => { sidebar.classList.remove('mini-sidebar'); });
-                if (!initial) {
-                  setTimeout(() => { 
-                    if (mainContent) mainContent.classList.remove('sidebar-expanding');
-                    sidebar.classList.remove('expanding');
-                  }, DURATION);
-                }
-              }
-              if (miniBtn) miniBtn.checked = !!on;
-              localStorage.setItem('miniSidebar', on ? '1' : '0');
+                if (miniBtn) miniBtn.checked = !!on;
+                localStorage.setItem('miniSidebar', on ? '1' : '0');
             };
+
             const stored = localStorage.getItem('miniSidebar') === '1';
             applyMini(stored, true);
             if (miniBtn) {
-              miniBtn.addEventListener('change', (e) => applyMini(e.target.checked, false));
+                miniBtn.addEventListener('change', (e) => applyMini(e.target.checked, false));
             }
+
             const toggleHeaderBg = () => {
-              const y = window.scrollY || document.documentElement.scrollTop || 0;
-              if (!banner) return;
-              if (y > 10) banner.classList.add('header-bg');
-              else banner.classList.remove('header-bg');
+                const y = window.scrollY || document.documentElement.scrollTop || 0;
+                if (!banner) return;
+                if (y > 10) banner.classList.add('header-bg');
+                else banner.classList.remove('header-bg');
             };
             toggleHeaderBg();
             window.addEventListener('scroll', toggleHeaderBg, { passive: true });
-          });
-        </script>
-    </div>
+        });
+    </script>
+</div>
