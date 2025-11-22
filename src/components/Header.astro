@@ -47,7 +47,7 @@ import { Icon } from 'astro-icon/components'
 
                         <div class="rounded-circle weather">
                             <div id="he-plugin-simple" style="display: contents;"></div>
-                            <script>window.WIDGET = {
+                            <script>(window as any).WIDGET = {
                                     CONFIG: {
                                         "modules": "01234",
                                         "background": 5,
@@ -81,14 +81,17 @@ import { Icon } from 'astro-icon/components'
 
                         <li class="nav-item mr-3 mr-lg-0 d-none d-lg-block">
                             <script>
-                                fetch('https://v1.hitokoto.cn')
+                                document.addEventListener('DOMContentLoaded', () => {
+                                  fetch('https://v1.hitokoto.cn')
                                     .then(response => response.json())
                                     .then(data => {
-                                    const hitokoto = document.getElementById('hitokoto_text')
-                                    hitokoto.href = 'https://hitokoto.cn/?uuid=' + data.uuid
-                                    hitokoto.innerText = data.hitokoto
+                                      const el = document.getElementById('hitokoto_text') as HTMLAnchorElement | null;
+                                      if (!el) return;
+                                      el.href = 'https://hitokoto.cn/?uuid=' + data.uuid;
+                                      el.innerText = data.hitokoto;
                                     })
-                                    .catch(console.error)
+                                    .catch(() => {});
+                                });
                             </script>
                             <div id="hitokoto"><a href="#" target="_blank" id="hitokoto_text">疏影横斜水清浅，暗香浮动月黄昏。</a></div>
                         </li>
