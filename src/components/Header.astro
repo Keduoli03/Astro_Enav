@@ -2,6 +2,16 @@
 import {SITE_TITLE } from "../settings";
 import { Icon } from 'astro-icon/components'
 
+const hitokotoDefault = '疏影横斜水清浅，暗香浮动月黄昏。';
+let hitokotoData: any = null;
+try {
+  const res = await fetch('https://v1.hitokoto.cn/');
+  hitokotoData = await res.json();
+} catch {}
+const hitokotoText = hitokotoData?.hitokoto ?? hitokotoDefault;
+const hitokotoUuid = hitokotoData?.uuid ?? '';
+const hitokotoHref = hitokotoUuid ? `https://hitokoto.cn/?uuid=${hitokotoUuid}` : '#';
+
 ---
 <div class="big-header-banner">
         <div id="header" class="page-header sticky">
@@ -80,20 +90,7 @@ import { Icon } from 'astro-icon/components'
 
 
                         <li class="nav-item mr-3 mr-lg-0 d-none d-lg-block">
-                            <script>
-                                document.addEventListener('DOMContentLoaded', () => {
-                                  fetch('https://v1.hitokoto.cn')
-                                    .then(response => response.json())
-                                    .then(data => {
-                                      const el = document.getElementById('hitokoto_text') as HTMLAnchorElement | null;
-                                      if (!el) return;
-                                      el.href = 'https://hitokoto.cn/?uuid=' + data.uuid;
-                                      el.innerText = data.hitokoto;
-                                    })
-                                    .catch(() => {});
-                                });
-                            </script>
-                            <div id="hitokoto"><a href="#" target="_blank" id="hitokoto_text">疏影横斜水清浅，暗香浮动月黄昏。</a></div>
+                            <div id="hitokoto"><a href={hitokotoHref} target="_blank" id="hitokoto_text">{hitokotoText}</a></div>
                         </li>
 
 
