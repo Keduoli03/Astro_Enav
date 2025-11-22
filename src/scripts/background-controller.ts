@@ -38,6 +38,10 @@ function applyBackgrounds(): void {
   /* 背景图片切换由分层元素控制，这里不再写入 URL 变量，仅处理模糊与状态 */
   root.style.setProperty('--search-bg-blur', `${Number(searchBlur) || 0}px`);
   root.style.setProperty('--content-bg-blur', `${Number(contentBlur) || 0}px`);
+  const sVal = `${Number(searchBlur) || 0}px`;
+  const cVal = `${Number(contentBlur) || 0}px`;
+  document.querySelectorAll('.search-bg-layer').forEach(el => { (el as HTMLElement).style.setProperty('filter', `blur(${sVal})`, 'important'); });
+  document.querySelectorAll('.global-bg-layer').forEach(el => { (el as HTMLElement).style.setProperty('filter', `blur(${cVal})`, 'important'); });
   const searchEl = document.getElementById('search-bg') as HTMLElement | null;
   if (searchEl) {
     searchEl.style.position = 'relative';
@@ -94,13 +98,17 @@ applyBackgrounds();
 observeThemeChanges();
 try {
   (window as any).__applyBackgrounds = applyBackgrounds;
-  const tryApply = () => {
-    const el = document.getElementById('search-bg');
-    if (el) applyBackgrounds();
-    return !!el;
+  const exists = () => {
+    return (
+      !!document.getElementById('search-bg') ||
+      !!document.querySelector('.search-bg-layer') ||
+      !!document.querySelector('.global-bg-layer')
+    );
   };
+  const tryApply = () => { if (exists()) { applyBackgrounds(); return true; } return false; };
   if (!tryApply()) {
     const obs = new MutationObserver(() => { if (tryApply()) obs.disconnect(); });
     obs.observe(document.documentElement, { childList: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', tryApply);
   }
 } catch {}

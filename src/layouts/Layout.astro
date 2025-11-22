@@ -146,10 +146,10 @@ import SearchModal from '@/components/Utils/SearchModal.astro';
     })();
   </script>
   
-  <script type="module">
-    import '../scripts/search-suggest.ts';
-    import '../scripts/sidebar-controller.ts';
-    import '../scripts/background-controller.ts';
+  <script is:inline type="module">
+    import '/src/scripts/search-suggest.ts';
+    import '/src/scripts/sidebar-controller.ts';
+    import '/src/scripts/background-controller.ts';
   </script>
 </head>
 <SearchModal />
