@@ -162,11 +162,11 @@ var theme = {"ajaxurl":"","addico":"https:\/\/nav.baidu.cn\/wp-content\/themes\/
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeSidebar(); });
     document.querySelectorAll('.sidebar-menu-inner .sidebar-item > a').forEach(function(el){ el.addEventListener('click', onPrimaryClick); });
     document.querySelectorAll('.sidebar-menu-inner .sidebar-item ul li a[data-category-id]').forEach(function(el){ el.addEventListener('click', onSecondaryClick); });
-    document.querySelectorAll('#sidebar a[href="#friendlink"]').forEach(function(el){ el.addEventListener('click', function(e){
+    document.querySelectorAll('#sidebar a[href="#friend-links"]').forEach(function(el){ el.addEventListener('click', function(e){
       e.preventDefault();
-      if(!isHomePage()){ window.location.href = '/#friendlink'; return; }
-      var targetEl = document.getElementById('friendlink');
-      if(targetEl){ smoothScrollTo(targetEl); }
+      if(!isHomePage()){ window.location.href = '/#friend-links'; return; }
+      var targetEl = document.getElementById('friend-links');
+      if(targetEl){ closeSidebar(); smoothScrollTo(targetEl); }
     }); });
   }
   function disable(){ if(!enabled) return; enabled = false; closeSidebar(); }

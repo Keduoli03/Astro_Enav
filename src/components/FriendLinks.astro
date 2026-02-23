@@ -1,0 +1,23 @@
+---
+import { friendLinks } from '../data/links';
+import SiteCard from './SiteCard.astro';
+import { Icon } from 'astro-icon/components';
+
+const hasLinks = friendLinks && friendLinks.length > 0;
+---
+
+{
+  hasLinks && (
+    <div class="category-section" id="friend-links">
+      <h4 class="text-lg mb-4">
+        <Icon name="ri:link-m" class="mr-1 icon-fw icon-lg" />
+        友情链接
+      </h4>
+      <div class="row">
+        {friendLinks.map((link) => (
+          <SiteCard data={link} />
+        ))}
+      </div>
+    </div>
+  )
+}

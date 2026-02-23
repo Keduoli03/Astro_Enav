@@ -1,6 +1,9 @@
 ---
 // src/components/SiteCard.astro
 import { Icon } from 'astro-icon/components'
+import fs from 'node:fs';
+import path from 'node:path';
+
 interface SiteCardProps {
   url?: string;
   title?: string;
@@ -44,7 +47,31 @@ const getDomain = (url: string) => {
 };
 
 const domain = getDomain(url);
-const faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
+const isDefaultLogo = logo === defaultData.logo;
+const isLogoEmpty = !logo || logo.trim() === '';
+
+let faviconUrl = logo;
+
+if (isLogoEmpty) {
+  faviconUrl = domain ? `https://favicon.im/${domain}` : defaultData.logo;
+} else if (!isDefaultLogo) {
+  // Check if local file exists
+  if (!logo.startsWith('http') && !logo.startsWith('//')) {
+     const publicPath = path.join(process.cwd(), 'public');
+     // Remove leading slash if present to avoid absolute path confusion
+     const relativeLogoPath = logo.startsWith('/') ? logo.slice(1) : logo;
+     const filePath = path.join(publicPath, relativeLogoPath);
+     try {
+       if (!fs.existsSync(filePath)) {
+         faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
+       }
+     } catch (e) {
+       faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
+     }
+  }
+} else {
+  faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
+}
 ---
 
 <div class="url-card col-6 col-sm-6 col-md-4 col-xl-5a col-xxl-6a">

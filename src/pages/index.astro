@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import Search from '../components/Search.astro';
 import LcdClock from '../components/Utils/LcdClock.astro';
 import CategorySection from '../components/CategorySection.astro';
+import FriendLinks from '../components/FriendLinks.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
 import { CATEGORY_CONFIG } from '../data/category';
 
@@ -52,5 +53,6 @@ const categoryData = Object.values(CATEGORY_CONFIG).flatMap((categoryInfo) => {
       sites={data.sites}
     />
   ))}
- 
+  
+  <FriendLinks />
 </Layout>

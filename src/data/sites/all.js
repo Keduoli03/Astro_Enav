@@ -119,7 +119,7 @@ export default [
         url: 'https://www.someacg.top/',
         title: 'SomeACG',
         description: '动漫壁纸网站，质量不错',
-        logo: 'images/logos/someacg.png',
+        logo: '',
         id: 'someacg'
     },
     {
@@ -127,7 +127,7 @@ export default [
         url: 'https://konachan.net/',
         title: 'konachan.net',
         description: '动漫壁纸网站，质量还行',
-        logo: 'images/logos/konachan.net.ico',
+        logo: '',
         id: 'konachan'
     },
 
@@ -155,15 +155,15 @@ export default [
         url: 'https://jetbrains.ankio.net/license',
         title: 'jetbrains许可证生成器',
         description: '可以使用绝大多数的JetBrains产品',
-        logo: 'images/logos/jetbrains.png',
-        id: 'pansou'
+        logo: 'logos/jetbrains.png',
+        id: 'jetbrains'
     },
     {
         subId: 'editor',
         url: 'https://javaguide.cn/home.html',
         title: 'Java学习&面试指南',
         description: '后期java快速学习指南',
-        logo: '',
+        logo: 'logos/java.png',
         id: 'javaguide'
     },
 
@@ -208,7 +208,7 @@ export default [
         url: 'https://zh.z-library.sk/',
         title: 'Z-Library',
         description: '收录了世界上海量的书籍',
-        logo: 'images/logos/zlib.ico',
+        logo: '',
         id: 'zlib'
     },
     {
@@ -216,7 +216,6 @@ export default [
         url: 'https://zh.annas-archive.org/',
         title: '安娜的橱窗',
         description: '人类历史上最大的开放完全的图书馆，免费下载速度较慢',
-        logo: 'images/logos/annas.ico',
         id: 'annas'
     },
 
@@ -226,7 +225,6 @@ export default [
         url: 'https://assrt.net/',
         title: '射手网',
         description: '非常不错的字幕网站，很多资源',
-        logo: 'images/logos/assrt.png',
         id: 'assrt'
     },
     {
@@ -277,22 +275,19 @@ export default [
         description: '收录了很多影视资源',
         id: '319312'
     },
+    {
+        subId: 'windows',
+        url: 'https://kms.ikxin.com/zh-cn/activate/windows',
+        title: 'Windows 11 激活',
+        description: 'Windows 11 激活工具',
+        id: 'kms'
+    },
+    {
+        subId: 'drawing',
+        url: 'https://modern-mermaid.live/?theme=notion&lang=zh-CN',
+        title: 'Mermaid 图表',
+        description: 'Mermaid 图表工具',
+        id: 'mermaid'
+    }
     
-    // 休闲游戏
-    {
-        subId: 'games',
-        url: '/games/snake',
-        title: '贪吃蛇',
-        description: '简易贪吃蛇',
-        logo: '/images/favicon-48.png',
-        id: 'snake'
-    },
-    {
-        subId: 'games',
-        url: '/games/tetris',
-        title: '俄罗斯方块',
-        description: '简易俄罗斯方块',
-        logo: '/images/favicon-48.png',
-        id: 'tetris'
-    },
 ]

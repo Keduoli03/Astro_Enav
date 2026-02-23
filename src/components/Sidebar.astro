@@ -79,7 +79,7 @@ import { Icon } from 'astro-icon/components';
             </a>
           </li>
           <li class="sidebar-item">
-            <a href="#friendlink" class="smooth">
+            <a href="#friend-links" class="smooth">
               <Icon name="ri:links-line" class="icon-fw icon-lg mr-2" />
               <span>友情链接</span>
             </a>
@@ -207,15 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 处理友情链接
-  document.querySelectorAll('a[href="#friendlink"]').forEach(link => {
+  document.querySelectorAll('a[href="#friend-links"]').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
+      // 在非首页跳转
       if (!isHomePage()) {
-        window.location.href = '/#friendlink';
+        window.location.href = '/#friend-links';
         return;
       }
-      const targetElement = document.getElementById('friendlink');
-      if (targetElement) smoothScrollTo(targetElement);
+      // 在首页滚动
+      const targetElement = document.getElementById('friend-links');
+      if (targetElement) {
+        closeSidebarDrawer();
+        smoothScrollTo(targetElement);
+      }
     });
   });
 

@@ -80,11 +80,14 @@ function enable() {
   document.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Escape') closeSidebar(); });
   document.querySelectorAll('.sidebar-menu-inner .sidebar-item > a').forEach(el => el.addEventListener('click', onPrimaryClick));
   document.querySelectorAll('.sidebar-menu-inner .sidebar-item ul li a[data-category-id]').forEach(el => el.addEventListener('click', onSecondaryClick));
-  document.querySelectorAll('#sidebar a[href="#friendlink"]').forEach(el => el.addEventListener('click', (e) => {
+  document.querySelectorAll('#sidebar a[href="#friend-links"]').forEach(el => el.addEventListener('click', (e) => {
     e.preventDefault();
-    if (!isHomePage()) { window.location.href = '/#friendlink'; return; }
-    const targetElement = document.getElementById('friendlink');
-    if (targetElement) { smoothScrollTo(targetElement); }
+    if (!isHomePage()) { window.location.href = '/#friend-links'; return; }
+    const targetElement = document.getElementById('friend-links');
+    if (targetElement) {
+      closeSidebar();
+      smoothScrollTo(targetElement);
+    }
   }));
 }
 

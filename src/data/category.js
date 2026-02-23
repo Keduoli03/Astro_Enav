@@ -107,16 +107,20 @@ export const CATEGORY_CONFIG = {
         icon: 'ri:image-line'
       },
     ]
-  }
-  ,
-  games: {
-    name: '休闲游戏',
-    icon: 'ri:gamepad-line',
+  },
+  windows: {
+    name: '专业工具',
+    icon: 'ri:briefcase-line',
     subItems: [
       {
-        id: 'games',
-        name: '小游戏',
-        icon: 'ri:gamepad-line'
+        id: 'windows',
+        name: 'Windows 工具',
+        icon: 'ri:windows-line'
+      },
+      {
+        id: 'drawing',
+        name: '绘图工具',
+        icon: 'ri:image-edit-line'
       }
     ]
   }
