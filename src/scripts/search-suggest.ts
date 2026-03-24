@@ -3,75 +3,14 @@ let list: HTMLUListElement | null = null;
 let mInput: HTMLInputElement | null = null;
 let mList: HTMLUListElement | null = null;
 let currentSearch = '';
-const STORE_KEY = 'selectedSearchEngineId';
-const STORE_GROUP_KEY = 'selectedSearchGroupId';
-const STORE_GROUP_ENGINE_PREFIX = 'selectedEngineIdForGroup:';
-function getGroupIdByEngine(el: Element | null): string {
-  if (!el) return '';
-  const grp = (el.closest('.search-group') as HTMLElement | null);
-  if (!grp) return '';
-  const classes = Array.from(grp.classList).filter(c => c !== 'search-group');
-  return classes[0] || '';
-}
-function applyGroup(gid: string) {
-  if (!gid) return;
-  const groups = document.querySelectorAll('#search-bg .search-group') as NodeListOf<HTMLElement>;
-  groups.forEach(g => {
-    const show = g.classList.contains(gid);
-    g.classList.toggle('s-current', show);
-    g.style.display = show ? 'block' : 'none';
-  });
-  const labels = document.querySelectorAll('#search-list-menu .s-type-list.big label') as NodeListOf<HTMLLabelElement>;
-  labels.forEach(l => l.classList.toggle('active', (l.dataset.id || '') === gid));
-}
-function switchGroupMain(gid: string) {
-  if (!gid) return;
-  applyGroup(gid);
-  const first = document.querySelector(`.search-group.${gid} input[name="type"]`) as HTMLInputElement | null;
-  if (first) {
-    first.checked = true;
-    updatePlaceholderAndEngine();
-  }
-  try { localStorage.setItem(STORE_GROUP_KEY, gid); } catch {}
-}
-function applyGroupAndRestoreEngine(gid: string) {
-  if (!gid) return;
-  applyGroup(gid);
-  let target: HTMLInputElement | null = null;
-  const savedPerGroup = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + gid) || '';
-  if (savedPerGroup) {
-    const el = document.getElementById(savedPerGroup) as HTMLInputElement | null;
-    if (el && el.name === 'type') target = el;
-  }
-  if (!target) {
-    const savedGlobal = localStorage.getItem(STORE_KEY) || '';
-    if (savedGlobal) {
-      const el = document.getElementById(savedGlobal) as HTMLInputElement | null;
-      if (el && el.name === 'type' && getGroupIdByEngine(el) === gid) target = el;
-    }
-  }
-  if (!target) target = document.querySelector(`.search-group.${gid} input[name="type"]`) as HTMLInputElement | null;
-  if (target) {
-    target.checked = true;
-    updatePlaceholderAndEngine();
-  }
-  try { localStorage.setItem(STORE_GROUP_KEY, gid); } catch {}
-}
 function updatePlaceholderAndEngine() {
   const checked = document.querySelector('input[name="type"]:checked') as HTMLInputElement | null;
   if (checked) {
     currentSearch = checked.value || '';
     const ph = checked.getAttribute('data-placeholder');
     if (ph && input) input.placeholder = ph;
-    try { localStorage.setItem(STORE_KEY, checked.id); } catch {}
     const mainForm = document.querySelector('#search-bg .super-search-fm') as HTMLFormElement | null;
     if (mainForm) mainForm.action = currentSearch;
-    const gid = getGroupIdByEngine(checked);
-    if (gid) {
-      try { localStorage.setItem(STORE_GROUP_KEY, gid); } catch {}
-      try { localStorage.setItem(STORE_GROUP_ENGINE_PREFIX + gid, checked.id); } catch {}
-      applyGroup(gid);
-    }
     return;
   }
   const mf = document.querySelector('#search-bg .super-search-fm') as HTMLFormElement | null;
@@ -98,28 +37,8 @@ function init(): boolean {
   const engineRadios = document.querySelectorAll('input[name="type"]') as NodeListOf<HTMLInputElement>;
   const modalRadios = document.querySelectorAll('input[name="type2"]') as NodeListOf<HTMLInputElement>;
   if (!forms.length) return false;
-  try {
-    const defaultChecked = document.querySelector('#search-bg input[name="type"][checked]') as HTMLInputElement | null;
-    const isDefaultLocal = !!(defaultChecked && defaultChecked.id === 'type-local');
-    if (!isDefaultLocal) {
-      const saved = localStorage.getItem(STORE_KEY);
-      if (saved) {
-        const el = document.getElementById(saved) as HTMLInputElement | null;
-        if (el) el.checked = true;
-      }
-      const savedGroup = localStorage.getItem(STORE_GROUP_KEY) || '';
-      if (savedGroup) applyGroupAndRestoreEngine(savedGroup);
-    }
-  } catch {}
   updatePlaceholderAndEngine();
   if (engineRadios.length) engineRadios.forEach(r => r.addEventListener('change', updatePlaceholderAndEngine));
-  const catLabels = document.querySelectorAll('#search-list-menu .s-type-list.big label') as NodeListOf<HTMLLabelElement>;
-  if (catLabels.length) catLabels.forEach(l => {
-    l.addEventListener('click', (e) => {
-      const gid = (l.dataset.id || '');
-      if (gid) applyGroupAndRestoreEngine(gid);
-    });
-  });
   if (modalRadios.length) modalRadios.forEach(r => r.addEventListener('change', () => {
     const checked = document.querySelector('input[name="type2"]:checked') as HTMLInputElement | null;
     const ph = checked?.getAttribute('data-placeholder') || '';
@@ -189,12 +108,6 @@ function init(): boolean {
       }
       fetchSuggestionsTo(q, mList);
     });
-  }
-  // Fallback: 若仍无选中项，默认切换到首个分类
-  if (!document.querySelector('#search-bg input[name="type"]:checked')) {
-    const firstLabel = document.querySelector('#search-list-menu .s-type-list.big label') as HTMLLabelElement | null;
-    const gid = firstLabel?.dataset.id || '';
-    if (gid) applyGroupAndRestoreEngine(gid);
   }
   return true;
 }
@@ -301,10 +214,14 @@ document.addEventListener('click', (e) => {
   }
 });
 const modalEl = document.getElementById('search-modal') as HTMLElement | null;
-if (modalEl) modalEl.addEventListener('shown.bs.modal', () => {
+const onModalShown = () => {
   const q = (mInput?.value.trim() || '');
   if (!q) return;
   const checked = document.querySelector('#search-modal input[name="type2"]:checked') as HTMLInputElement | null;
   const isLocal = !!(checked && checked.id === 'm_type-local');
   if (!isLocal) fetchSuggestionsTo(q, mList);
-});
+};
+if (modalEl) {
+  modalEl.addEventListener('shown.bs.modal', onModalShown);
+  modalEl.addEventListener('modal:shown', onModalShown);
+}

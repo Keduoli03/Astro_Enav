@@ -1,8 +1,6 @@
 ---
 // src/components/SiteCard.astro
 import { Icon } from 'astro-icon/components'
-import fs from 'node:fs';
-import path from 'node:path';
 
 interface SiteCardProps {
   url?: string;
@@ -55,19 +53,10 @@ let faviconUrl = logo;
 if (isLogoEmpty) {
   faviconUrl = domain ? `https://favicon.im/${domain}` : defaultData.logo;
 } else if (!isDefaultLogo) {
-  // Check if local file exists
   if (!logo.startsWith('http') && !logo.startsWith('//')) {
-     const publicPath = path.join(process.cwd(), 'public');
-     // Remove leading slash if present to avoid absolute path confusion
-     const relativeLogoPath = logo.startsWith('/') ? logo.slice(1) : logo;
-     const filePath = path.join(publicPath, relativeLogoPath);
-     try {
-       if (!fs.existsSync(filePath)) {
-         faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
-       }
-     } catch (e) {
-       faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
-     }
+    faviconUrl = logo.startsWith('/')
+      ? logo
+      : (domain ? `https://favicon.im/${domain}` : defaultData.logo);
   }
 } else {
   faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
@@ -92,12 +81,12 @@ if (isLogoEmpty) {
           <!-- 网站图标 -->
           <div class="url-img mr-2 d-flex align-items-center justify-content-center">
             <img 
-              class="lazy" 
-              src="/images/logos/default.webp" 
+              class="lazy site-favicon"
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
               data-src={faviconUrl}
-              onerror="this.src='/images/logos/default.webp'" 
               alt={title}
               loading="lazy"
+              decoding="async"
               width="40"
               height="40"
             />
@@ -130,3 +119,13 @@ if (isLogoEmpty) {
     )}
   </div>
 </div>
+
+<style>
+  .site-favicon {
+    opacity: 0;
+    transition: opacity 0.16s ease;
+  }
+  .site-favicon.is-ready {
+    opacity: 1;
+  }
+</style>

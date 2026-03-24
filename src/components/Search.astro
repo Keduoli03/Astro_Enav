@@ -236,7 +236,7 @@ import allSites from '../data/sites/all.js';
       var input = document.getElementById('search-text');
       var form = document.querySelector('#search-bg .super-search-fm');
       if(input){ input.addEventListener('input', function(){ localSearch((input).value || ''); }); }
-      if(form){ form.addEventListener('submit', function(e){ var checked = document.querySelector('#search-bg input[name="type"]:checked'); if(checked && checked.id==='type-local'){ e.preventDefault(); var tips = document.getElementById('local-word'); var first = tips && tips.querySelector('a'); if(first){ first.click(); } } }); }
+      if(form){ form.addEventListener('submit', function(e){ var checked = document.querySelector('#search-bg input[name="type"]:checked'); if(checked && checked.id==='type-local'){ e.preventDefault(); var tips = document.getElementById('local-word'); var first = tips && tips.querySelector('li[data-url]'); var u = first ? (first).getAttribute('data-url') : ''; if(u){ try{ window.open(u, '_blank'); }catch(err){} } } }); }
     }
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   })();

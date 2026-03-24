@@ -96,11 +96,33 @@ import { Icon } from 'astro-icon/components'
 <!-- 分组切换与模态框控制脚本 -->
 <script is:inline define:vars={{allSites}}>
 document.addEventListener('DOMContentLoaded', function() {
+  const STORE_KEY = 'selectedSearchEngineId';
+  const STORE_GROUP_KEY = 'selectedSearchGroupId';
+  const STORE_GROUP_ENGINE_PREFIX = 'selectedEngineIdForGroup:';
   const modal = document.getElementById('search-modal');
   const container = modal;
   if (!container) return;
 
-  function switchGroup(groupId) {
+  function toMainEngineId(modalEngineId) {
+    return String(modalEngineId || '').replace(/^m_/, '');
+  }
+
+  function toModalEngineId(mainEngineId) {
+    return mainEngineId ? ('m_' + mainEngineId) : '';
+  }
+
+  function persistSelection(groupId, modalEngineId) {
+    const mainEngineId = toMainEngineId(modalEngineId);
+    try {
+      if (groupId) localStorage.setItem(STORE_GROUP_KEY, groupId);
+      if (mainEngineId) {
+        localStorage.setItem(STORE_KEY, mainEngineId);
+        if (groupId) localStorage.setItem(STORE_GROUP_ENGINE_PREFIX + groupId, mainEngineId);
+      }
+    } catch (e) {}
+  }
+
+  function switchGroup(groupId, preferredMainEngineId) {
     container.querySelectorAll('.s-type-list label').forEach(label => {
       (label).classList.toggle('active', (label).dataset.id === groupId);
     });
@@ -109,14 +131,33 @@ document.addEventListener('DOMContentLoaded', function() {
       (group).style.display = group.classList.contains(groupId) ? 'block' : 'none';
     });
 
-    const firstEngine = container.querySelector(`.search-group.${groupId} input[name="type2"]`);
-    if (firstEngine) {
-      updateSearchForm(firstEngine.value, firstEngine.dataset.placeholder || '');
+    let targetEngine = null;
+    const preferredModalId = toModalEngineId(preferredMainEngineId || '');
+    if (preferredModalId) {
+      targetEngine = container.querySelector(`#${preferredModalId}`);
     }
+    if (!targetEngine) {
+      let savedPerGroup = '';
+      try { savedPerGroup = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + groupId) || ''; } catch (e) {}
+      if (savedPerGroup) {
+        targetEngine = container.querySelector(`#${toModalEngineId(savedPerGroup)}`);
+      }
+    }
+    if (!targetEngine) {
+      targetEngine = container.querySelector(`.search-group.${groupId} input[name="type2"]`);
+    }
+    if (targetEngine) {
+      (targetEngine).checked = true;
+      updateSearchForm((targetEngine).value, (targetEngine).dataset.placeholder || '');
+      persistSelection(groupId, (targetEngine).id || '');
+    }
+
     const labelEl = container.querySelector(`.s-type-list label[data-id="${groupId}"]`)
       || container.querySelector('.s-type-list label.active');
     const display = container.querySelector('#group-current');
     if (display && labelEl) display.textContent = (labelEl.textContent || '').trim();
+    const typeWrap = container.querySelector('.s-type');
+    if (typeWrap) (typeWrap).classList.remove('open');
   }
 
 
@@ -157,15 +198,34 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   container.querySelectorAll('.s-type-list label').forEach(label => {
-    label.addEventListener('click', function() {
+    label.addEventListener('click', function(e) {
+      e.preventDefault();
       const gid = (this).dataset.id || '';
       if (gid) switchGroup(gid);
     });
   });
+
+  const typeWrap = container.querySelector('.s-type');
+  const typeToggle = container.querySelector('.s-type > span');
+  if (typeWrap && typeToggle) {
+    typeToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      (typeWrap).classList.toggle('open');
+    });
+    container.addEventListener('click', function(e) {
+      var t = e.target;
+      if (!t || !(t).closest) return;
+      if (!(t).closest('.s-type')) (typeWrap).classList.remove('open');
+    });
+  }
   
   container.querySelectorAll('input[name="type2"]').forEach(radio => {
     radio.addEventListener('change', function() {
       if ((this).checked) {
+        const grp = (this).closest('.search-group');
+        const gid = grp ? Array.prototype.slice.call((grp).classList).filter(function(c){ return c !== 'search-group'; })[0] || '' : '';
+        persistSelection(gid, (this).id || '');
         updateSearchForm((this).value, (this).dataset.placeholder || '');
         var inputEl2 = container.querySelector('#m_search-text');
         var val = ((inputEl2 && inputEl2.value) ? inputEl2.value : '').trim();
@@ -184,15 +244,22 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   const init = () => {
+    let savedGroup = '';
+    let savedEngine = '';
+    try {
+      savedGroup = localStorage.getItem(STORE_GROUP_KEY) || '';
+      savedEngine = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + savedGroup) || localStorage.getItem(STORE_KEY) || '';
+    } catch (e) {}
     const active = container.querySelector('.s-type-list label.active');
     const first = container.querySelector('.s-type-list label');  
-    const gid = (active && active.dataset.id) || (first && first.dataset.id) || 'group-a';
-    switchGroup(gid);
+    const gid = savedGroup || (active && active.dataset.id) || (first && first.dataset.id) || 'group-a';
+    switchGroup(gid, savedEngine);
     const display = container.querySelector('#group-current');
     const labelEl = container.querySelector(`.s-type-list label[data-id="${gid}"]`) || active || first;
     if (display && labelEl) display.textContent = (labelEl.textContent || '').trim();
   };
   modal.addEventListener('shown.bs.modal', init);
+  modal.addEventListener('modal:shown', init);
   init();
 
   const mInputEl = container.querySelector('#m_search-text');
@@ -202,39 +269,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (checked && checked.id === 'm_type-local') localSearchModal(val);
   });
 
-  let backdrop = null;
-  const body = document.body;
-  function openModal() {
-    modal.style.display = 'block';
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden', 'false');
-    backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop fade show';
-    body.appendChild(backdrop);
-    body.style.overflow = 'hidden';
-    body.classList.add('modal-open');
-    try { modal.dispatchEvent(new Event('shown.bs.modal')); } catch(e) {}
-  }
-  function closeModal() {
-    modal.classList.remove('show');
-    modal.style.display = 'none';
-    modal.setAttribute('aria-hidden', 'true');
-    if (backdrop) { backdrop.remove(); backdrop = null; }
-    body.style.overflow = '';
-    body.classList.remove('modal-open');
-  }
-  document.querySelectorAll('a[data-toggle="modal"][data-target="#search-modal"]').forEach(a => {
-    a.addEventListener('click', function(e) { e.preventDefault(); openModal(); });
-  });
-  container.addEventListener('click', function(e) {
-    if (e.target === container) closeModal();
-  });
-  document.addEventListener('click', function(e) {
-    var t = e.target;
-    if (!t || !(t).closest) return;
-    if ((t).closest('[data-dismiss="modal"]')) { e.preventDefault(); closeModal(); }
-  });
-  window.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 });
 </script>
 <style>
@@ -245,8 +279,11 @@ document.addEventListener('DOMContentLoaded', function() {
 .search-modal .s-type>span{line-height:31px;text-align:center;color:#515C6B;background:#fff;border-radius:5px}
 .search-modal .s-type-list{display:none;position:absolute;top:31px;padding:9pt 0;width:70px;background:#fff;border-radius:5px;box-shadow:0 9px 20px rgba(0,0,0,.16)}
 .search-modal .s-type:hover .s-type-list{display:block}
+.search-modal .s-type.open .s-type-list{display:block}
 .search-modal .search-group{padding-left:75px}
 .search-modal #m_search-text{height:50px}
+.search-modal .modal-dialog{max-width:860px;margin:1rem auto;padding:0 .5rem}
+.search-modal .modal-content{max-height:calc(100vh - 2rem);overflow:auto}
 .search-modal #search form{position:relative}
 .search-modal #search button{position:absolute;top:0;right:0;margin:0;height:50px;line-height:50px;background:#313437;border:0;color:#fff}
 .search-modal #search button svg{color:#fff;width:18px;height:18px}
@@ -287,4 +324,18 @@ document.addEventListener('DOMContentLoaded', function() {
 :global(.io-black-mode) .search-modal #search button:hover{background:#313437}
 
 :global(.io-black-mode) .search-modal .text-muted{color:#bbb!important}
+
+@media (max-width: 768px) {
+  .search-modal .modal-dialog{max-width:100%;margin:.5rem}
+  .search-modal .modal-body{padding:12px}
+  .search-modal #search{max-width:none}
+  .search-modal .s-type{position:relative;width:100%;margin-bottom:10px}
+  .search-modal .s-type>span{width:100%;text-align:left;padding:0 12px}
+  .search-modal .s-type-list{position:static;display:flex;flex-wrap:wrap;gap:8px;width:100%;padding:8px 0;box-shadow:none}
+  .search-modal .s-type:hover .s-type-list{display:flex}
+  .search-modal .s-type.open .s-type-list{display:flex}
+  .search-modal .search-group{padding-left:0}
+  .search-modal #m_search-text{height:44px;padding-right:46px}
+  .search-modal #search button{height:44px;line-height:44px;width:44px}
+}
 </style>

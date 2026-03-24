@@ -7,33 +7,19 @@ import { CATEGORY_CONFIG } from '../data/category';
 import ArtalkComment from '@/components/Utils/ArtalkComment.astro';
 import {Icon} from 'astro-icon/components'
 
-// 动态加载所有二级分类的网站数据
-const loadSubCategorySites = async () => {
-  const allSubCategories = [];
-  
-  for (const [categoryId, categoryInfo] of Object.entries(CATEGORY_CONFIG)) {
-    const subCategories = categoryInfo.subItems || [];
-    
-    for (const subCategory of subCategories) {
-      try {
-        const sitesModule = await import(`../data/sites/${subCategory.id}.js`);
-        allSubCategories.push({
-          ...subCategory,
-          sites: sitesModule.default || []
-        });
-      } catch (error) {
-        console.warn(`加载失败: ${subCategory.id}`, error);
-        allSubCategories.push({ ...subCategory, sites: [] });
-      }
-    }
-  }
-  
-  return allSubCategories;
-};
+const siteModules = import.meta.glob('../data/sites/*.js', { eager: true });
 
-const categoryData = (await loadSubCategorySites()).map(item => ({
-  ...item,
-}));
+const categoryData = Object.values(CATEGORY_CONFIG).flatMap((categoryInfo) => {
+  const subCategories = categoryInfo.subItems || [];
+  return subCategories.map((subCategory) => {
+    const modulePath = `../data/sites/${subCategory.id}.js`;
+    const sites = (siteModules[modulePath] as { default?: unknown[] } | undefined)?.default || [];
+    return {
+      ...subCategory,
+      sites: Array.isArray(sites) ? sites : [],
+    };
+  });
+});
 ---
 
 <Layout 
