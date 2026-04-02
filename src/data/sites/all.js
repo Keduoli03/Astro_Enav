@@ -62,6 +62,15 @@ export default [
     logo: "",
     id: "favicon",
   },
+  // api
+  {
+    subId: "api",
+    url: "https://api-v2.cenguigui.cn/api/speech/AiChat/",
+    title: "曼波语音",
+    description: "文字转语音API，支持曼波音色",
+    logo: "",
+    id: "mambo",
+  },
 
   // anime
   {
@@ -280,5 +289,15 @@ export default [
     title: "Mermaid 图表",
     description: "Mermaid 图表工具",
     id: "mermaid",
+  },
+
+  // videotool
+  {
+    subId: "videotool",
+    url: "https://opencut.app/",
+    title: "OpenCut",
+    description: "在线视频剪辑网站",
+    logo: "",
+    id: "opencut",
   },
 ];
