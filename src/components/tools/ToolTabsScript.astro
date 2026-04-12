@@ -1,0 +1,36 @@
+<script is:inline>
+  (function () {
+    function initToolTabs() {
+      var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tool-tab[data-tab]'));
+      var panels = Array.prototype.slice.call(document.querySelectorAll('.tool-panel[data-panel]'));
+      if (!tabButtons.length || !panels.length) return;
+
+      function switchTab(tabName) {
+        tabButtons.forEach(function (tab) {
+          tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
+        });
+        panels.forEach(function (panel) {
+          var active = panel.getAttribute('data-panel') === tabName;
+          panel.classList.toggle('d-none', !active);
+        });
+      }
+
+      tabButtons.forEach(function (tab) {
+        if (tab.dataset.tabsBound === '1') return;
+        tab.dataset.tabsBound = '1';
+        tab.addEventListener('click', function () {
+          switchTab(tab.getAttribute('data-tab') || '');
+        });
+      });
+
+      var activeTab = tabButtons.find(function (tab) { return tab.classList.contains('active'); });
+      switchTab((activeTab && activeTab.getAttribute('data-tab')) || tabButtons[0].getAttribute('data-tab') || '');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initToolTabs, { once: true });
+    } else {
+      initToolTabs();
+    }
+  })();
+</script>
