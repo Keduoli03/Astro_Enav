@@ -1,0 +1,68 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import Base64Tool from '../../components/tools/Base64Tool';
+import 'antd/dist/reset.css';
+import '../../styles/tailwind.css';
+---
+
+<ToolLayout title="Base64 编解码" description="支持文本编解码、图片转 Base64、Base64 转图片预览与下载。">
+  <div class="base64-tool-shell">
+    <Base64Tool client:load />
+  </div>
+
+  <style>
+    :global(.base64-tool-shell) {
+      min-height: 520px;
+    }
+    :global(.base64-tool-shell > div) {
+      min-height: 520px;
+    }
+    :global(.tool-page .ant-card) {
+      border: 0;
+    }
+    :global(.tool-page .ant-card .ant-card-body) {
+      padding: 24px;
+    }
+    :global(.tool-page .ant-btn) {
+      font-weight: 600;
+    }
+    :global(.tool-page .ant-input),
+    :global(.tool-page .ant-input-affix-wrapper),
+    :global(.tool-page .ant-input-outlined) {
+      border: 0 !important;
+    }
+    :global(.tool-page .ant-tabs-nav::before) {
+      border-bottom: 0 !important;
+    }
+    :global(.tool-page .ant-tabs-tab) {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      font-weight: 600;
+    }
+    :global(.tool-page .ant-tabs-content-holder) {
+      overflow: visible;
+    }
+    :global(.io-black-mode .tool-page .ant-card) {
+      background: rgba(30, 33, 36, 0.82) !important;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18) !important;
+    }
+    :global(.io-black-mode .tool-page .ant-typography),
+    :global(.io-black-mode .tool-page .ant-tabs-tab-btn) {
+      color: #d9dde3;
+    }
+    :global(.io-black-mode .tool-page .ant-typography.ant-typography-secondary) {
+      color: #9ba6b2 !important;
+    }
+    :global(.io-black-mode .tool-page .ant-input),
+    :global(.io-black-mode .tool-page .ant-input-affix-wrapper),
+    :global(.io-black-mode .tool-page textarea.ant-input) {
+      background: rgba(20, 22, 24, 0.84) !important;
+      color: #d9dde3 !important;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 10px 24px rgba(0, 0, 0, 0.14) !important;
+    }
+    :global(.io-black-mode .tool-page .ant-alert) {
+      background: rgba(45, 140, 255, 0.1);
+      border: 0;
+    }
+  </style>
+</ToolLayout>

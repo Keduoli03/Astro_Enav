@@ -1,0 +1,112 @@
+---
+import Layout from './Layout.astro';
+import { SITE_FAVICON, SITE_TITLE } from '../settings';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = '' } = Astro.props;
+const pageTitle = `${title} - ${SITE_TITLE}`;
+const pageDescription = description || `${title}，${SITE_TITLE}内置工具页面`;
+---
+
+<Layout
+  SITE_TITLE={pageTitle}
+  SITE_DESCRIPTION={pageDescription}
+  SITE_FAVICON={SITE_FAVICON}
+>
+  <div class="container-fluid tool-page">
+    <div class="row justify-content-center">
+      <div class="col-12 col-xl-10">
+        <div class="tool-header card mb-4">
+          <div class="card-body p-4 p-md-4">
+            <div class="tool-headline">
+              <h1 class="tool-title mb-0">{title}</h1>
+              <div class="tool-kicker">Tools</div>
+            </div>
+            {description && <p class="tool-desc mt-1 mb-0">{description}</p>}
+          </div>
+        </div>
+        <div class="tool-content card">
+          <div class="card-body p-4 p-md-5">
+            <slot />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .tool-page {
+      padding-bottom: 24px;
+    }
+    .tool-header,
+    .tool-content {
+      border: 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      border-radius: 22px;
+      overflow: hidden;
+    }
+    .tool-header {
+      background:
+        radial-gradient(circle at top right, rgba(64, 158, 255, 0.14), transparent 34%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.95));
+    }
+    .tool-headline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .tool-kicker {
+      flex: 0 0 auto;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(64, 158, 255, 0.1);
+      color: #1677ff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .tool-title {
+      font-size: clamp(1.45rem, 3vw, 2.15rem);
+      font-weight: 800;
+      line-height: 1.15;
+    }
+    .tool-desc {
+      max-width: 720px;
+      color: #66707a;
+      font-size: 1rem;
+    }
+    @media (max-width: 768px) {
+      .tool-headline {
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .tool-kicker {
+        margin-top: 4px;
+      }
+    }
+    :global(.io-black-mode) .tool-header,
+    :global(.io-black-mode) .tool-content {
+      background: #26282b !important;
+      color: #d9dde3;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    }
+    :global(.io-black-mode) .tool-header {
+      background:
+        radial-gradient(circle at top right, rgba(64, 158, 255, 0.2), transparent 34%),
+        linear-gradient(135deg, rgba(38, 40, 43, 0.98), rgba(31, 33, 36, 0.98)) !important;
+    }
+    :global(.io-black-mode) .tool-kicker {
+      background: rgba(64, 158, 255, 0.16);
+      color: #7cb8ff;
+    }
+    :global(.io-black-mode) .tool-desc {
+      color: #a9b1ba;
+    }
+  </style>
+</Layout>

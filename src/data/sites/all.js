@@ -62,6 +62,14 @@ export default [
     logo: "",
     id: "favicon",
   },
+  {
+    subId: "common",
+    url: "/tools/base64",
+    title: "Base64工具",
+    description: "站内自建的 Base64 编码与解码工具",
+    logo: "",
+    id: "tool-base64",
+  },
   // api
   {
     subId: "api",

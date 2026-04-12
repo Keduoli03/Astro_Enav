@@ -47,6 +47,7 @@ const getDomain = (url: string) => {
 const domain = getDomain(url);
 const isDefaultLogo = logo === defaultData.logo;
 const isLogoEmpty = !logo || logo.trim() === '';
+const isInternalUrl = url.startsWith('/');
 
 let faviconUrl = logo;
 
@@ -68,13 +69,14 @@ if (isLogoEmpty) {
     <!-- 主卡片链接 -->
     <a 
       href={url} 
-      target="_blank" 
+      target={isInternalUrl ? undefined : '_blank'} 
       data-id={id}
       data-url={url}
       class="card no-c mb-4"
       data-toggle="tooltip"
       data-placement="bottom"
       title={description}
+      rel={isInternalUrl ? undefined : 'noopener noreferrer'}
     >
       <div class="card-body">
         <div class="url-content d-flex align-items-center">
@@ -112,7 +114,8 @@ if (isLogoEmpty) {
         data-toggle="tooltip" 
         data-placement="right" 
         title="直达" 
-        rel="nofollow"
+        rel={isInternalUrl ? undefined : 'nofollow noopener noreferrer'}
+        target={isInternalUrl ? undefined : '_blank'}
       >
         <Icon name="ri:external-link-line" />
       </a>
