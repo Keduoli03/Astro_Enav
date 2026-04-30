@@ -8,6 +8,9 @@ interface SiteCardProps {
   description?: string;
   id?: string;
   logo?: string;
+  icon?: string;
+  iconColor?: string;
+  iconBg?: string;
   showDirectLink?: boolean;
 }
 
@@ -18,6 +21,9 @@ const defaultData: Required<SiteCardProps> = {
   description: "暂无描述",
   id: "",
   logo: "/images/logos/default.webp",
+  icon: "",
+  iconColor: "",
+  iconBg: "",
   showDirectLink: true
 };
 
@@ -28,6 +34,9 @@ const {
   description,
   id,
   logo,
+  icon,
+  iconColor,
+  iconBg,
   showDirectLink
 } = {
   ...defaultData,
@@ -48,10 +57,13 @@ const domain = getDomain(url);
 const isDefaultLogo = logo === defaultData.logo;
 const isLogoEmpty = !logo || logo.trim() === '';
 const isInternalUrl = url.startsWith('/');
+const hasCustomIcon = Boolean(icon && icon.trim());
 
 let faviconUrl = logo;
 
-if (isLogoEmpty) {
+if (hasCustomIcon) {
+  faviconUrl = '';
+} else if (isLogoEmpty) {
   faviconUrl = domain ? `https://favicon.im/${domain}` : defaultData.logo;
 } else if (!isDefaultLogo) {
   if (!logo.startsWith('http') && !logo.startsWith('//')) {
@@ -82,16 +94,26 @@ if (isLogoEmpty) {
         <div class="url-content d-flex align-items-center">
           <!-- 网站图标 -->
           <div class="url-img mr-2 d-flex align-items-center justify-content-center">
-            <img 
-              class="lazy site-favicon"
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-              data-src={faviconUrl}
-              alt={title}
-              loading="lazy"
-              decoding="async"
-              width="40"
-              height="40"
-            />
+            {hasCustomIcon ? (
+              <span
+                class="site-icon d-inline-flex align-items-center justify-content-center"
+                style={`color:${iconColor || 'var(--primary-color)'};background:${iconBg || 'rgba(64, 158, 255, 0.12)'}`}
+                aria-hidden="true"
+              >
+                <Icon name={icon} />
+              </span>
+            ) : (
+              <img 
+                class="lazy site-favicon"
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                data-src={faviconUrl}
+                alt={title}
+                loading="lazy"
+                decoding="async"
+                width="40"
+                height="40"
+              />
+            )}
           </div>
           
           <!-- 网站信息 -->
@@ -130,5 +152,12 @@ if (isLogoEmpty) {
   }
   .site-favicon.is-ready {
     opacity: 1;
+  }
+  .site-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 22px;
+    line-height: 1;
   }
 </style>

@@ -63,11 +63,13 @@ export default [
     id: "favicon",
   },
   {
-    subId: "common",
+    subId: "api",
     url: "/tools/base64",
     title: "Base64工具",
     description: "站内自建的 Base64 编码与解码工具",
-    logo: "",
+    icon: "ri:file-code-line",
+    iconColor: "#2563eb",
+    iconBg: "rgba(37, 99, 235, 0.12)",
     id: "tool-base64",
   },
   // api
@@ -210,6 +212,16 @@ export default [
     logo: "",
     id: "eimg",
   },
+  {
+    subId: "picturetool",
+    url: "https://imagecompressor.com/zh/",
+    title: "Image Compressor",
+    description: "在线图片压缩与格式转换工具，适合快速处理图片体积与格式",
+    icon: "ri:image-edit-line",
+    iconColor: "#0f766e",
+    iconBg: "rgba(15, 118, 110, 0.12)",
+    id: "imagecompressor",
+  },
 
   // reader
   {
@@ -274,6 +286,13 @@ export default [
     title: "17ce",
     description: "国内网站性能分析",
     id: "17ce",
+  },
+  {
+    subId: "website",
+    url: "https://ip.ping0.cc/",
+    title: "Ping0 IP 查询",
+    description: "查看当前 IP 信息，也可用于域名与 IP 相关查询",
+    id: "ping0-ip",
   },
 
   // 影视网站

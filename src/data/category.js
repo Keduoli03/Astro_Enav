@@ -10,9 +10,9 @@ export const CATEGORY_CONFIG = {
       },
     ],
   },
-  movie: {
-    name: "影视资源",
-    icon: "ri:movie-2-line",
+  media: {
+    name: "影音资源",
+    icon: "ri:film-line",
     subItems: [
       {
         id: "anime",
@@ -29,45 +29,11 @@ export const CATEGORY_CONFIG = {
         name: "字幕资源",
         icon: "ri:price-tag-3-line",
       },
-    ],
-  },
-  music: {
-    name: "音乐资源",
-    icon: "ri:music-2-line",
-    subItems: [
       {
         id: "musictool",
         name: "音乐工具",
         icon: "ri:music-2-line",
       },
-    ],
-  },
-  reader: {
-    name: "阅读",
-    icon: "ri:book-line",
-    subItems: [
-      {
-        id: "reader",
-        name: "电子书",
-        icon: "ri:book-line",
-      },
-    ],
-  },
-  website: {
-    name: "网站工具",
-    icon: "ri:global-line",
-    subItems: [
-      {
-        id: "website",
-        name: "网站",
-        icon: "ri:global-line",
-      },
-    ],
-  },
-  animephoto: {
-    name: "壁纸网站",
-    icon: "ri:image-line",
-    subItems: [
       {
         id: "animephoto",
         name: "动漫壁纸",
@@ -75,43 +41,36 @@ export const CATEGORY_CONFIG = {
       },
     ],
   },
-  cloud: {
-    name: "网盘搜索",
-    icon: "ri:cloud-line",
+  search: {
+    name: "资源搜索",
+    icon: "ri:search-line",
     subItems: [
       {
         id: "cloud",
         name: "网盘搜索",
         icon: "ri:cloud-line",
       },
+      {
+        id: "reader",
+        name: "电子书",
+        icon: "ri:book-line",
+      },
     ],
   },
-  editor: {
-    name: "编程资源",
-    icon: "ri:macbook-line",
+  webdev: {
+    name: "网站与开发",
+    icon: "ri:code-box-line",
     subItems: [
+      {
+        id: "website",
+        name: "站点检测",
+        icon: "ri:global-line",
+      },
       {
         id: "editor",
         name: "编程资源",
         icon: "ri:macbook-line",
       },
-    ],
-  },
-  picturetool: {
-    name: "图片工具",
-    icon: "ri:image-line",
-    subItems: [
-      {
-        id: "picturetool",
-        name: "图片工具",
-        icon: "ri:image-line",
-      },
-    ],
-  },
-  api: {
-    name: "API工具",
-    icon: "ri:code-line",
-    subItems: [
       {
         id: "api",
         name: "API工具",
@@ -119,30 +78,35 @@ export const CATEGORY_CONFIG = {
       },
     ],
   },
-  videotool: {
-    name: "视频工具",
-    icon: "ri:video-line",
+  creative: {
+    name: "创作工具",
+    icon: "ri:palette-line",
     subItems: [
+      {
+        id: "picturetool",
+        name: "图片工具",
+        icon: "ri:image-line",
+      },
       {
         id: "videotool",
         name: "视频工具",
         icon: "ri:video-line",
       },
+      {
+        id: "drawing",
+        name: "绘图工具",
+        icon: "ri:image-edit-line",
+      },
     ],
   },
-  windows: {
-    name: "专业工具",
-    icon: "ri:briefcase-line",
+  system: {
+    name: "系统工具",
+    icon: "ri:computer-line",
     subItems: [
       {
         id: "windows",
         name: "Windows 工具",
         icon: "ri:windows-line",
-      },
-      {
-        id: "drawing",
-        name: "绘图工具",
-        icon: "ri:image-edit-line",
       },
     ],
   },
