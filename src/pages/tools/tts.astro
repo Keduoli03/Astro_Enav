@@ -12,6 +12,7 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
         <div class="d-flex flex-wrap align-items-center gap-2">
           <select id="tts-api-select" class="form-control form-control-sm" style="max-width:240px;border-radius:10px;">
             <option value="https://api.milorapart.top/apis/mbAIsc">api.milorapart.top</option>
+            <option value="https://api.milorapart.top/apis/mbAIscvip">api.milorapart.top (VIP)</option>
             <option value="https://apis.uctb.cn/api/mbAIsc">apis.uctb.cn</option>
           </select>
           <div class="input-group input-group-sm" style="max-width:280px;">
@@ -19,6 +20,11 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
             <button id="tts-add-api" class="btn btn-sm btn-outline-secondary" type="button" style="border-radius:0 10px 10px 0;font-size:.75rem;padding:0.25rem .6rem;">添加</button>
           </div>
         </div>
+      </div>
+
+      <div class="tool-field mb-3">
+        <div class="tool-label mb-2">API Key <small class="text-muted">(VIP 接口必填)</small></div>
+        <input id="tts-api-key" class="form-control form-control-sm" type="text" placeholder="输入 API Key" style="max-width:320px;border-radius:10px;">
       </div>
 
       <div class="tool-field mb-3">
@@ -47,10 +53,10 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
 
       <div id="tts-progress-box" class="mb-3 d-none">
         <div class="d-flex align-items-center justify-content-between mb-1">
-          <small class="text-muted">生成进度</small>
+          <small id="tts-progress-label" class="text-muted">生成进度</small>
           <small id="tts-progress-text" class="text-muted"></small>
         </div>
-        <div class="progress" style="height:8px;border-radius:12px;">
+        <div class="progress" style="height:10px;border-radius:12px;background:rgba(0,0,0,0.06);">
           <div id="tts-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;border-radius:12px;"></div>
         </div>
       </div>
@@ -58,11 +64,11 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
       <div id="tts-status" class="tool-status text-muted mb-3"></div>
 
       <div id="tts-audio-list" class="d-none">
-        <label class="font-weight-bold mb-2 d-block tool-label">生成结果</label>
-        <div id="tts-audio-items" class="d-flex flex-column gap-2"></div>
-        <div class="d-flex flex-wrap gap-2 mt-3 tool-actions">
-          <button id="tts-download-all" class="btn btn-outline-primary" type="button">下载全部音频</button>
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+          <label class="font-weight-bold mb-0 tool-label">生成结果</label>
+          <button id="tts-download-all" class="btn btn-sm btn-primary" type="button" style="border-radius:10px;font-size:.75rem;">下载全部</button>
         </div>
+        <div id="tts-audio-items" class="d-flex flex-column gap-2"></div>
       </div>
 
     </div>
@@ -73,6 +79,7 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
       var apiSelect = document.getElementById('tts-api-select');
       var customApi = document.getElementById('tts-custom-api');
       var addApiBtn = document.getElementById('tts-add-api');
+      var apiKey = document.getElementById('tts-api-key');
       var formatSelect = document.getElementById('tts-format');
       var input = document.getElementById('tts-input');
       var fileInput = document.getElementById('tts-file-input');
@@ -81,6 +88,7 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
       var warning = document.getElementById('tts-warning');
       var progressBox = document.getElementById('tts-progress-box');
       var progressBar = document.getElementById('tts-progress-bar');
+      var progressLabel = document.getElementById('tts-progress-label');
       var progressText = document.getElementById('tts-progress-text');
       var status = document.getElementById('tts-status');
       var audioList = document.getElementById('tts-audio-list');
@@ -133,48 +141,69 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
         return div.innerHTML;
       }
 
-      async function downloadFile(url, filename) {
+      async function downloadFile(url, filename, showStatus) {
+        showStatus = showStatus !== false;
+        if (showStatus) setStatus('正在下载 ' + filename + ' ...', false);
         try {
           var response = await fetch(url);
-          var blob = await response.blob();
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          var buffer = await response.arrayBuffer();
+          if (!buffer || buffer.byteLength === 0) throw new Error('empty');
+          var contentType = response.headers.get('Content-Type') || 'audio/wav';
+          var blob = new Blob([buffer], { type: contentType });
           var blobUrl = URL.createObjectURL(blob);
           var a = document.createElement('a');
           a.href = blobUrl;
           a.download = filename;
+          a.style.display = 'none';
           document.body.appendChild(a);
           a.click();
-          document.body.removeChild(a);
-          setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 100);
+          setTimeout(function () { a.remove(); }, 2000);
+          if (showStatus) setStatus(filename + ' 下载完成', false);
         } catch (e) {
-          console.error('下载失败:', e);
+          console.error('blob 下载失败，尝试直接链接:', e);
+          var a2 = document.createElement('a');
+          a2.href = url;
+          a2.download = filename;
+          a2.rel = 'noopener';
+          a2.style.display = 'none';
+          document.body.appendChild(a2);
+          a2.click();
+          setTimeout(function () { a2.remove(); }, 2000);
         }
       }
 
       function renderAudioList() {
         audioItems.innerHTML = '';
+        var padLen = String(audioUrls.length).length;
         audioUrls.forEach(function (url, i) {
-          var fullUrl = url.startsWith('http') ? url : new URL(url, 'https://api.milorapart.top/').href;
-          var filename = 'voice_' + String(i + 1).padStart(String(audioUrls.length).length, '0') + '.' + formatSelect.value;
+          var fullUrl = url;
+          if (!/^https?:\/\//i.test(url)) {
+            fullUrl = url.startsWith('/') ? new URL(url, 'https://api.milorapart.top').href : 'https://api.milorapart.top/' + url;
+          }
+          var seq = String(i + 1).padStart(padLen, '0');
+          var filename = 'voice_' + seq + '.' + formatSelect.value;
           var div = document.createElement('div');
-          div.className = 'd-flex flex-wrap align-items-center gap-2 p-2 rounded';
+          div.className = 'd-flex flex-wrap align-items-center gap-2 p-3 rounded';
           div.style.background = 'rgba(0,0,0,0.02)';
 
-          var label = document.createElement('small');
-          label.className = 'text-muted';
-          label.textContent = '第 ' + (i + 1) + ' 段';
+          var label = document.createElement('span');
+          label.className = 'badge';
+          label.style.cssText = 'background:#1677ff;color:#fff;border-radius:8px;font-size:.75rem;min-width:44px;text-align:center;flex-shrink:0;';
+          label.textContent = seq;
 
           var audio = document.createElement('audio');
           audio.controls = true;
           audio.preload = 'metadata';
           audio.src = fullUrl;
-          audio.style.maxWidth = '320px';
-          audio.style.height = '32px';
+          audio.style.cssText = 'flex:1;min-width:200px;max-width:320px;height:36px;';
 
           var dlBtn = document.createElement('button');
-          dlBtn.className = 'btn btn-sm btn-outline-secondary';
-          dlBtn.style.borderRadius = '12px';
+          dlBtn.className = 'btn btn-sm btn-primary';
+          dlBtn.style.cssText = 'border-radius:10px;font-size:.75rem;padding:0.25rem .75rem;flex-shrink:0;';
           dlBtn.textContent = '下载';
-          dlBtn.addEventListener('click', function () {
+          dlBtn.addEventListener('click', function (e) {
+            e.preventDefault();
             downloadFile(fullUrl, filename);
           });
 
@@ -186,13 +215,18 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
         audioList.classList.remove('d-none');
       }
 
-      function updateProgress() {
+      function updateProgress(current) {
         var total = pages.length;
         var done = audioUrls.length;
         if (total > 0) {
           var pct = Math.round(done / total * 100);
           progressBar.style.width = pct + '%';
           progressText.textContent = done + ' / ' + total;
+          if (current !== undefined && current < total) {
+            progressLabel.textContent = '正在生成第 ' + (current + 1) + ' 段...';
+          } else {
+            progressLabel.textContent = '生成进度';
+          }
         }
       }
 
@@ -226,7 +260,9 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
         var baseUrl = apiSelect.value;
 
         for (var i = 0; i < pages.length; i++) {
+          var key = (apiKey.value || '').trim();
           var apiUrl = baseUrl + '?format=' + format + '&text=' + encodeURIComponent(pages[i]);
+          if (key) apiUrl += '&key=' + encodeURIComponent(key);
           var success = false;
           var retries = 0;
           
@@ -246,7 +282,7 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
               await new Promise(function (resolve) { setTimeout(resolve, 2000); });
             }
           }
-          updateProgress();
+          updateProgress(i);
         }
 
         renderAudioList();
@@ -294,11 +330,20 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
 
       downloadAllBtn.addEventListener('click', async function () {
         if (!audioUrls.length) return;
+        setStatus('正在批量下载 ' + audioUrls.length + ' 个文件...', false);
         var format = formatSelect.value;
+        var padLen = String(audioUrls.length).length;
         for (var i = 0; i < audioUrls.length; i++) {
-          var filename = 'voice_' + String(i + 1).padStart(String(audioUrls.length).length, '0') + '.' + format;
-          await downloadFile(audioUrls[i], filename);
+          var url = audioUrls[i];
+          if (!/^https?:\/\//i.test(url)) {
+            url = url.startsWith('/') ? new URL(url, 'https://api.milorapart.top').href : 'https://api.milorapart.top/' + url;
+          }
+          var seq = String(i + 1).padStart(padLen, '0');
+          var filename = 'voice_' + seq + '.' + format;
+          await downloadFile(url, filename, false);
+          await new Promise(function (r) { setTimeout(r, 300); });
         }
+        setStatus('批量下载完成', false);
       });
 
     })();
