@@ -25,6 +25,22 @@ export default [
   },
   {
     subId: "common",
+    url: "https://chatgpt.com/",
+    title: "ChatGPT",
+    description: "OpenAI 推出的通用对话式 AI",
+    logo: "",
+    id: "chatgpt",
+  },
+  {
+    subId: "common",
+    url: "https://chat.deepseek.com/",
+    title: "DeepSeek",
+    description: "深度求索出品的 AI 对话助手",
+    logo: "",
+    id: "deepseek",
+  },
+  {
+    subId: "common",
     url: "https://github.com",
     title: "GitHub",
     description: "代码托管平台",
@@ -75,7 +91,7 @@ export default [
   // api
   {
     subId: "api",
-    url: "https://api-v2.cenguigui.cn/api/speech/AiChat/",
+    url: "http://api.milorapart.top/docs/45/mbAIsc",
     title: "曼波语音",
     description: "文字转语音API，支持曼波音色",
     logo: "",
@@ -186,14 +202,6 @@ export default [
     id: "javaguide",
   },
 
-  // musictool
-  {
-    subId: "musictool",
-    url: "https://www.kanxizai.cn/163_music/",
-    title: "网易云音乐解析",
-    description: "解析下载网易云音乐",
-    id: "163music",
-  },
 
   // picturetool
   {

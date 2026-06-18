@@ -1,0 +1,324 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
+---
+
+<ToolLayout title="曼波 TTS 语音生成" description="调用 API 将文本转为曼波语音，自动切割文本保证断句正常，支持 WAV/MP3 格式下载与在线试听。">
+  <div class="card border-0 shadow-sm mb-4 tool-card">
+    <div class="card-body p-4 p-md-4">
+
+      <div class="tool-field mb-3">
+        <div class="tool-label mb-2">API 接口</div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <select id="tts-api-select" class="form-control form-control-sm" style="max-width:240px;border-radius:10px;">
+            <option value="https://api.milorapart.top/apis/mbAIsc">api.milorapart.top</option>
+            <option value="https://apis.uctb.cn/api/mbAIsc">apis.uctb.cn</option>
+          </select>
+          <div class="input-group input-group-sm" style="max-width:280px;">
+            <input id="tts-custom-api" class="form-control" type="text" placeholder="自定义 API" style="border-radius:10px 0 0 10px;">
+            <button id="tts-add-api" class="btn btn-sm btn-outline-secondary" type="button" style="border-radius:0 10px 10px 0;font-size:.75rem;padding:0.25rem .6rem;">添加</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-field mb-3">
+        <div class="tool-label mb-2">音频格式</div>
+        <select id="tts-format" class="form-control form-control-sm" style="max-width:120px;border-radius:10px;">
+          <option value="wav">WAV</option>
+          <option value="mp3">MP3</option>
+        </select>
+      </div>
+
+      <div class="tool-field mb-3">
+        <div class="tool-label mb-2">输入文本</div>
+        <textarea id="tts-input" class="form-control tts-textarea mb-2" rows="5" placeholder="请输入要转换为语音的文本内容...&#10;&#10;支持按行断句，每行作为一句处理。&#10;超出 100 字的长句会自动切割。"></textarea>
+        <button id="tts-upload-btn" class="btn btn-sm btn-outline-secondary" type="button" style="border-radius:10px;font-size:.75rem;" onclick="document.getElementById('tts-file-input').click()">上传文本文件</button>
+        <input id="tts-file-input" type="file" accept=".txt" hidden>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 mb-3 tool-actions">
+        <button id="tts-submit" class="btn btn-primary" type="button">提交生成语音</button>
+        <button id="tts-clear" class="btn btn-outline-secondary" type="button">清空</button>
+      </div>
+
+      <div id="tts-warning" class="alert alert-warning py-2 mb-3 d-none" style="font-size:.88rem;border-radius:12px;">
+        文本中包含特殊字符，已自动替换
+      </div>
+
+      <div id="tts-progress-box" class="mb-3 d-none">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+          <small class="text-muted">生成进度</small>
+          <small id="tts-progress-text" class="text-muted"></small>
+        </div>
+        <div class="progress" style="height:8px;border-radius:12px;">
+          <div id="tts-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%;border-radius:12px;"></div>
+        </div>
+      </div>
+
+      <div id="tts-status" class="tool-status text-muted mb-3"></div>
+
+      <div id="tts-audio-list" class="d-none">
+        <label class="font-weight-bold mb-2 d-block tool-label">生成结果</label>
+        <div id="tts-audio-items" class="d-flex flex-column gap-2"></div>
+        <div class="d-flex flex-wrap gap-2 mt-3 tool-actions">
+          <button id="tts-download-all" class="btn btn-outline-primary" type="button">下载全部音频</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script is:inline>
+    (function () {
+      var apiSelect = document.getElementById('tts-api-select');
+      var customApi = document.getElementById('tts-custom-api');
+      var addApiBtn = document.getElementById('tts-add-api');
+      var formatSelect = document.getElementById('tts-format');
+      var input = document.getElementById('tts-input');
+      var fileInput = document.getElementById('tts-file-input');
+      var submitBtn = document.getElementById('tts-submit');
+      var clearBtn = document.getElementById('tts-clear');
+      var warning = document.getElementById('tts-warning');
+      var progressBox = document.getElementById('tts-progress-box');
+      var progressBar = document.getElementById('tts-progress-bar');
+      var progressText = document.getElementById('tts-progress-text');
+      var status = document.getElementById('tts-status');
+      var audioList = document.getElementById('tts-audio-list');
+      var audioItems = document.getElementById('tts-audio-items');
+      var downloadAllBtn = document.getElementById('tts-download-all');
+
+      var urlIllegalRegex = /[!#$&*+\/=?@\[\]]/g;
+      var pages = [];
+      var audioUrls = [];
+      var isProcessing = false;
+
+      function setStatus(text, isError) {
+        if (!status) return;
+        status.textContent = text || '';
+        status.classList.toggle('text-danger', !!isError);
+        status.classList.toggle('text-muted', !isError);
+      }
+
+      function textToPages(text, pageSize) {
+        var res = [];
+        pageSize = pageSize || 100;
+        var currentText = '';
+
+        text
+          .replace(/\n+/g, '\n')
+          .replace(urlIllegalRegex, '')
+          .replace(/,/g, '，')
+          .replace(/\?/g, '？')
+          .replace(/:/g, '：')
+          .replace(/;/g, '；')
+          .replace(/\(/g, '（')
+          .replace(/\)/g, '）')
+          .split('\n')
+          .forEach(function (line) {
+            var next = line + '。';
+            if (currentText.length + next.length > pageSize) {
+              if (currentText) res.push(currentText);
+              currentText = '';
+            }
+            currentText += next;
+          });
+
+        if (currentText) res.push(currentText);
+        return res;
+      }
+
+      function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+      }
+
+      async function downloadFile(url, filename) {
+        try {
+          var response = await fetch(url);
+          var blob = await response.blob();
+          var blobUrl = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 100);
+        } catch (e) {
+          console.error('下载失败:', e);
+        }
+      }
+
+      function renderAudioList() {
+        audioItems.innerHTML = '';
+        audioUrls.forEach(function (url, i) {
+          var fullUrl = url.startsWith('http') ? url : new URL(url, 'https://api.milorapart.top/').href;
+          var filename = 'voice_' + String(i + 1).padStart(String(audioUrls.length).length, '0') + '.' + formatSelect.value;
+          var div = document.createElement('div');
+          div.className = 'd-flex flex-wrap align-items-center gap-2 p-2 rounded';
+          div.style.background = 'rgba(0,0,0,0.02)';
+
+          var label = document.createElement('small');
+          label.className = 'text-muted';
+          label.textContent = '第 ' + (i + 1) + ' 段';
+
+          var audio = document.createElement('audio');
+          audio.controls = true;
+          audio.preload = 'metadata';
+          audio.src = fullUrl;
+          audio.style.maxWidth = '320px';
+          audio.style.height = '32px';
+
+          var dlBtn = document.createElement('button');
+          dlBtn.className = 'btn btn-sm btn-outline-secondary';
+          dlBtn.style.borderRadius = '12px';
+          dlBtn.textContent = '下载';
+          dlBtn.addEventListener('click', function () {
+            downloadFile(fullUrl, filename);
+          });
+
+          div.appendChild(label);
+          div.appendChild(audio);
+          div.appendChild(dlBtn);
+          audioItems.appendChild(div);
+        });
+        audioList.classList.remove('d-none');
+      }
+
+      function updateProgress() {
+        var total = pages.length;
+        var done = audioUrls.length;
+        if (total > 0) {
+          var pct = Math.round(done / total * 100);
+          progressBar.style.width = pct + '%';
+          progressText.textContent = done + ' / ' + total;
+        }
+      }
+
+      async function apiSubmit() {
+        if (isProcessing) return;
+        var text = (input.value || '').trim();
+        if (!text) {
+          setStatus('请先输入文本内容', true);
+          return;
+        }
+
+        isProcessing = true;
+        submitBtn.disabled = true;
+        audioUrls = [];
+        audioItems.innerHTML = '';
+        audioList.classList.add('d-none');
+
+        pages = textToPages(text, 100);
+        progressBox.classList.remove('d-none');
+        progressBar.style.width = '0%';
+        progressText.textContent = '0 / ' + pages.length;
+        setStatus('正在生成语音...', false);
+
+        if (urlIllegalRegex.test(text)) {
+          warning.classList.remove('d-none');
+        } else {
+          warning.classList.add('d-none');
+        }
+
+        var format = formatSelect.value;
+        var baseUrl = apiSelect.value;
+
+        for (var i = 0; i < pages.length; i++) {
+          var apiUrl = baseUrl + '?format=' + format + '&text=' + encodeURIComponent(pages[i]);
+          var success = false;
+          var retries = 0;
+          
+          while (!success && retries < 10) {
+            try {
+              var res = await fetch(apiUrl);
+              var data = await res.json();
+              if (data.code === 200 && data.url) {
+                audioUrls.push(data.url);
+                success = true;
+              } else {
+                throw new Error(data.code ? data.code.toString() : 'unknown');
+              }
+            } catch (e) {
+              console.error('fetch error', e, apiUrl);
+              retries++;
+              await new Promise(function (resolve) { setTimeout(resolve, 2000); });
+            }
+          }
+          updateProgress();
+        }
+
+        renderAudioList();
+        setStatus(audioUrls.length === pages.length ? '生成完成，共 ' + audioUrls.length + ' 段音频' : '部分成功: ' + audioUrls.length + '/' + pages.length, audioUrls.length < pages.length);
+        progressBar.classList.remove('progress-bar-animated');
+        submitBtn.disabled = false;
+        isProcessing = false;
+      }
+
+      addApiBtn.addEventListener('click', function () {
+        var url = (customApi.value || '').trim();
+        if (!url) return;
+        var label = url.replace(/^https?:\/\//, '').replace(/\/.*/, '');
+        var opt = document.createElement('option');
+        opt.value = url;
+        opt.textContent = label;
+        apiSelect.appendChild(opt);
+        apiSelect.value = url;
+        customApi.value = '';
+      });
+
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          input.value = String(reader.result || '');
+          fileInput.value = '';
+        };
+        reader.readAsText(file);
+      });
+
+      submitBtn.addEventListener('click', apiSubmit);
+
+      clearBtn.addEventListener('click', function () {
+        input.value = '';
+        pages = [];
+        audioUrls = [];
+        audioItems.innerHTML = '';
+        audioList.classList.add('d-none');
+        progressBox.classList.add('d-none');
+        warning.classList.add('d-none');
+        setStatus('', false);
+      });
+
+      downloadAllBtn.addEventListener('click', async function () {
+        if (!audioUrls.length) return;
+        var format = formatSelect.value;
+        for (var i = 0; i < audioUrls.length; i++) {
+          var filename = 'voice_' + String(i + 1).padStart(String(audioUrls.length).length, '0') + '.' + format;
+          await downloadFile(audioUrls[i], filename);
+        }
+      });
+
+    })();
+  </script>
+
+  <ToolPageStyles />
+
+  <style>
+    .tts-textarea {
+      min-height: 120px !important;
+      padding: 12px 14px !important;
+      font-size: .9rem;
+    }
+    .tool-field {
+      line-height: 1.4;
+    }
+    .io-black-mode .tts-textarea {
+      background: rgba(20, 22, 24, 0.78);
+      color: #d9dde3;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</ToolLayout>
