@@ -2,14 +2,14 @@
 // src/pages/submit.astro
 import ArtalkComment from '@/components/Utils/ArtalkComment.astro';
 import Layout from '../layouts/Layout.astro';
-import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
+import { SITE_FAVICON, SITE_TITLE } from '../settings';
 import { Icon } from 'astro-icon/components';
 ---
 
 <Layout 
-  SITE_TITLE={SITE_TITLE + ' - 网站提交'}
-  SITE_DESCRIPTION="分享你喜欢的网站，让更多人发现优质内容"
-  SITE_FAVICON={SITE_FAVICON}
+  title={`网站提交 - ${SITE_TITLE}`}
+  description="分享你喜欢的网站，让更多人发现优质内容"
+  favicon={SITE_FAVICON}
 >
   <div class="container-fluid">
     <div class="row justify-content-center">

@@ -1,5 +1,5 @@
 import { SIDEBAR_BLUR, SIDEBAR_OPACITY, SIDEBAR_OPACITY_DARK, SIDEBAR_POPUP_OPACITY, SIDEBAR_POPUP_OPACITY_DARK, SIDEBAR_BORDER_COLOR_LIGHT, SIDEBAR_BORDER_COLOR_DARK } from '../settings';
-import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
+import { DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
 
 function getStoredTheme(): string {
   try { const t = localStorage.getItem('theme'); return t || DEFAULT_THEME; } catch { return DEFAULT_THEME; }
@@ -48,8 +48,7 @@ function init(): void {
   } catch {}
   try {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    if (mq && mq.addEventListener) mq.addEventListener('change', applySidebarVars);
-    else if (mq && mq.addListener) mq.addListener(applySidebarVars);
+    mq?.addEventListener('change', applySidebarVars);
   } catch {}
   window.addEventListener('storage', (e) => { if (e.key === 'theme') applySidebarVars(); });
 }

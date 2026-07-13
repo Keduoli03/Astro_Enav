@@ -3,7 +3,7 @@
 import Sidebar from '../components/Sidebar.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE, SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK, SIDEBAR_BLUR, SIDEBAR_OPACITY, SIDEBAR_OPACITY_DARK, SIDEBAR_POPUP_OPACITY, SIDEBAR_POPUP_OPACITY_DARK, SIDEBAR_BORDER_COLOR_LIGHT, SIDEBAR_BORDER_COLOR_DARK } from '../settings';
+import { SITE_DESCRIPTION as DEFAULT_SITE_DESCRIPTION, SITE_FAVICON as DEFAULT_SITE_FAVICON, SITE_TITLE as DEFAULT_SITE_TITLE, SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK } from '../settings';
 import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
 import '../styles/global.css';
 import '../styles/external.css';
@@ -13,8 +13,21 @@ import type { ImageMetadata } from 'astro';
 const isImageMeta = (v: unknown): v is ImageMetadata => !!v && typeof v === 'object' && 'src' in (v as any) && 'width' in (v as any) && 'height' in (v as any);
 const darkSearchBg: ImageMetadata | null = (SEARCH_BG_DARK && isImageMeta(SEARCH_BG_DARK)) ? SEARCH_BG_DARK : (isImageMeta(SEARCH_BG) ? SEARCH_BG : null);
 const contentDark: ImageMetadata | null = (CONTENT_BG_DARK && isImageMeta(CONTENT_BG_DARK)) ? CONTENT_BG_DARK : (isImageMeta(CONTENT_BG) ? CONTENT_BG : null);
+interface Props {
+  title?: string;
+  description?: string;
+  favicon?: string;
+  hideFooter?: boolean;
+}
+
 const hasSearch = Astro.slots.has('searchbar');
-const { hideFooter = false } = Astro.props;
+const {
+  title = DEFAULT_SITE_TITLE,
+  description = DEFAULT_SITE_DESCRIPTION,
+  favicon = DEFAULT_SITE_FAVICON,
+  hideFooter = false,
+} = Astro.props;
+const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -24,10 +37,15 @@ const { hideFooter = false } = Astro.props;
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f9f9f9" />
   <link rel="sitemap" href="/sitemap-index.xml" />
-  <title>{SITE_TITLE}</title>
-  <link rel="shortcut icon" href={SITE_FAVICON} />
-  <meta name="keywords" content={SITE_TITLE} />
-  <meta name="description" content={SITE_DESCRIPTION} />
+  <title>{title}</title>
+  <link rel="icon" href={favicon} />
+  <meta name="keywords" content={title} />
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalURL} />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalURL} />
 
   <style>
     html, body{background-color:#f9f9f9}
@@ -101,7 +119,7 @@ const { hideFooter = false } = Astro.props;
       
       // 如果body还不存在，监听DOM变化
       if (!document.body) {
-        const observer = new MutationObserver(function(mutations) {
+        const observer = new MutationObserver(function() {
           if (document.body) {
             observer.disconnect();
             applyThemeToDocument(theme);
@@ -109,24 +127,6 @@ const { hideFooter = false } = Astro.props;
         });
         observer.observe(document.documentElement, { childList: true, subtree: true });
       }
-    })();
-  </script>
-  <script is:inline define:vars={{SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK, DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE}}>
-    (function(){
-      try{
-        var stored = localStorage.getItem('theme') || DEFAULT_THEME;
-        var dark = stored === DARK_MODE ? true : (stored === LIGHT_MODE ? false : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
-        function normalizeUrl(s){
-          if(!s) return '';
-          try{
-            if (/^https?:\/\//i.test(s)) return s;
-          }catch(e){}
-          return s.startsWith('/') ? s : ('/' + s);
-        }
-        var searchImg = normalizeUrl(dark ? (SEARCH_BG_DARK || SEARCH_BG || '') : (SEARCH_BG || ''));
-        var contentImg = normalizeUrl(dark ? (CONTENT_BG_DARK || CONTENT_BG || '') : (CONTENT_BG || ''));
-        /* 由分层背景负责显示切换，不在此处写入 URL */
-      }catch(e){}
     })();
   </script>
   <script is:inline>
@@ -155,8 +155,8 @@ const { hideFooter = false } = Astro.props;
   <script src="../scripts/ui-controls.ts"></script>
   <script src="../scripts/mobile-sidebar.ts"></script>
 </head>
-<SearchModal />
 <body class="page-loading io-grey-mode">
+  <SearchModal />
   {isImageMeta(CONTENT_BG) ? (
     <div id="global-bg-light" class="global-bg-layer">
       <Image 

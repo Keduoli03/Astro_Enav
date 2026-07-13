@@ -1,5 +1,4 @@
 ---
-import SearchModal from "./Utils/SearchModal.astro"
 // 改为内联 ES 模块导入，确保生产环境正确编译并执行 TS 脚本
 import LightDarkSwitch from "./Utils/LightDarkSwitch.astro";
 import  {Icon}  from 'astro-icon/components'
@@ -7,12 +6,12 @@ import  {Icon}  from 'astro-icon/components'
 
 <footer class="main-footer footer-type-1 text-xs">
     <div id="footer-tools" class="d-flex flex-column">
-        <a href="javascript:" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top">
+        <a href="#" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top" role="button" aria-label="返回顶部">
             <Icon name="ri:arrow-up-line" />
         </a>
 
-        <a href="javascript:" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1"
-            rel="search" one-link-mark="yes">
+        <a href="#" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1"
+            rel="search" role="button" aria-label="打开搜索" one-link-mark="yes">
             <Icon name="ri:search-line" />
         </a>
         
@@ -34,30 +33,27 @@ import  {Icon}  from 'astro-icon/components'
         </div>
     </div>
 
-    <script type="text/javascript">function runtime() {
-        const t = new Date("06/25/2025 15:00:00"),
-            n = new Date,
-            s = n - t,
-            e = Math.floor(s / 1e3),
-            o = Math.floor(e / 86400),
-            i = Math.floor(e % 86400 / 3600),
-            a = Math.floor(e % 3600 / 60),
-            r = e % 60;
-        document.getElementById("runningtime").innerHTML = `⏱️本站已运行: ${o}天${i}小时${a}分${r}秒 `;
+    <script>
+    function runtime() {
+        const startedAt = new Date('2025-06-25T15:00:00+08:00').getTime();
+        const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+        const days = Math.floor(elapsedSeconds / 86400);
+        const hours = Math.floor(elapsedSeconds % 86400 / 3600);
+        const minutes = Math.floor(elapsedSeconds % 3600 / 60);
+        const seconds = elapsedSeconds % 60;
+        const output = document.getElementById('runningtime');
+        if (output) output.textContent = `⏱️本站已运行: ${days}天${hours}小时${minutes}分${seconds}秒 `;
     }
-    setInterval(runtime, 1e3);
+    runtime();
+    setInterval(runtime, 1000);
     </script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script is:inline async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </footer>
 
 
 
 <!-- 移除未使用的交互脚本：Touch Punch 与 Clipboard -->
 
-<!-- 控制右下角搜索栏>... -->
-<script type='text/javascript' id='popper-js-extra'>
-var theme = {"ajaxurl":"","addico":"https:\/\/nav.baidu.cn\/wp-content\/themes\/onenav\/images\/add.png","order":"asc","formpostion":"top","defaultclass":"io-grey-mode","isCustomize":"1","icourl":"","icopng":".png","urlformat":"1","customizemax":"10","newWindow":"0","lazyload":"1","minNav":"1","loading":"1","hotWords":"baidu","classColumns":" col-sm-6 col-md-4 col-xl-5a col-xxl-6a ","apikey":"TWpBeU1UVTNOekk1TWpVMEIvZ1M2bFVIQllUMmxsV1dZelkxQTVPVzB3UW04eldGQmxhM3BNWW14bVNtWk4="};
-</script>
 <!-- <script type='text/javascript' src='/js/popper.min.js' id='popper-js'></script> -->
 <!-- 貌似是适配不同设备的js，不能换成网络引用，影响侧栏 -->
 <!-- <script type='text/javascript' src='/js/theia-sticky-sidebar-1.5.0.js' id='sidebar-js'></script> -->

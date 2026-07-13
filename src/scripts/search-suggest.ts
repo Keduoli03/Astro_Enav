@@ -3,8 +3,10 @@ let list: HTMLUListElement | null = null;
 let mInput: HTMLInputElement | null = null;
 let mList: HTMLUListElement | null = null;
 let currentSearch = '';
+let mainSuggestTimer: ReturnType<typeof setTimeout> | undefined;
+let modalSuggestTimer: ReturnType<typeof setTimeout> | undefined;
 function updatePlaceholderAndEngine() {
-  const checked = document.querySelector('input[name="type"]:checked') as HTMLInputElement | null;
+  const checked = document.querySelector('#search-bg input[name="type"]:checked') as HTMLInputElement | null;
   if (checked) {
     currentSearch = checked.value || '';
     const ph = checked.getAttribute('data-placeholder');
@@ -16,17 +18,17 @@ function updatePlaceholderAndEngine() {
   const mf = document.querySelector('#search-bg .super-search-fm') as HTMLFormElement | null;
   if (mf) currentSearch = mf.action || '';
 }
-function openSearch(q: string) {
+function openSearch(q: string, useModalEngine = false) {
   let use = '';
-  const checked = document.querySelector('input[name="type"]:checked') as HTMLInputElement | null;
+  const checked = document.querySelector(useModalEngine ? '#search-modal input[name="type2"]:checked' : '#search-bg input[name="type"]:checked') as HTMLInputElement | null;
   if (checked) use = checked.value || '';
   if (!use) {
-    const mf = document.querySelector('#search-bg .super-search-fm') as HTMLFormElement | null;
+    const mf = document.querySelector(useModalEngine ? '#search-modal .super-search-fm' : '#search-bg .super-search-fm') as HTMLFormElement | null;
     if (mf) use = mf.action || '';
   }
   if (!use) return;
   const url = use + encodeURIComponent(q);
-  window.open(url, '_blank');
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 function init(): boolean {
   input = document.getElementById('search-text') as HTMLInputElement | null;
@@ -69,7 +71,7 @@ function init(): boolean {
       const use = (c1?.value || c2?.value || f.action || '');
       if (!use) return;
       const url = use + encodeURIComponent(q);
-      window.open(url, '_blank');
+      window.open(url, '_blank', 'noopener,noreferrer');
     });
   });
   if (input) {
@@ -85,7 +87,8 @@ function init(): boolean {
         if (list) list.style.display = 'none';
         return;
       }
-      fetchSuggestions(q);
+      clearTimeout(mainSuggestTimer);
+      mainSuggestTimer = setTimeout(() => fetchSuggestions(q), 180);
     });
   }
   if (mInput) {
@@ -106,7 +109,8 @@ function init(): boolean {
         if (card) card.style.display = 'none';
         return;
       }
-      fetchSuggestionsTo(q, mList);
+      clearTimeout(modalSuggestTimer);
+      modalSuggestTimer = setTimeout(() => fetchSuggestionsTo(q, mList), 180);
     });
   }
   return true;
@@ -157,13 +161,14 @@ function fetchSuggestionsTo(q: string, target: HTMLUListElement | null) {
   document.head.appendChild(script);
 }
 function renderSuggestions(items: string[]) {
-  if (!list) return;
-  list.innerHTML = '';
+  const targetList = list;
+  if (!targetList) return;
+  targetList.innerHTML = '';
   if (!items || !items.length) {
-    if (list) list.style.display = 'none';
+    targetList.style.display = 'none';
     return;
   }
-  if (list) list.style.display = 'block';
+  targetList.style.display = 'block';
   items.forEach((text, i) => {
     const li = document.createElement('li');
     const span = document.createElement('span');
@@ -173,10 +178,10 @@ function renderSuggestions(items: string[]) {
     li.addEventListener('click', () => {
       const field = input as HTMLInputElement | null;
       if (field) field.value = text;
-      if (list) list.style.display = 'none';
+      targetList.style.display = 'none';
       openSearch(text);
     });
-    list.appendChild(li);
+    targetList.appendChild(li);
   });
 }
 function renderSuggestionsTo(target: HTMLUListElement | null, items: string[]) {
@@ -199,7 +204,7 @@ function renderSuggestionsTo(target: HTMLUListElement | null, items: string[]) {
       const field = mInput as HTMLInputElement | null;
       if (field) field.value = text;
       target.style.display = 'none';
-      openSearch(text);
+      openSearch(text, true);
     });
     target.appendChild(li);
   });

@@ -1,16 +1,16 @@
 ---
 // src/components/Utils/SearchModal.astro
 import { searchGroups, defaultSearch } from '@/data/searchConfig';
-import allSites from '@/data/sites/all.js';
 import { Icon } from 'astro-icon/components'
+
 ---
 
-<div class="modal fade search-modal" id="search-modal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade search-modal" id="search-modal" tabindex="-1" role="dialog" aria-modal="true" aria-label="搜索" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-body">
-        <div id="search" class="s-search mx-auto my-4">
-          <div id="search-list" class="hide-type-list">
+        <div id="modal-search" class="s-search mx-auto my-4">
+          <div id="modal-search-list" class="hide-type-list">
             <!-- 分类标签 -->
             <div class="s-type">
               <span id="group-current"></span>
@@ -73,8 +73,8 @@ import { Icon } from 'astro-icon/components'
               style="outline:0"
               required
             />
-            <button type="submit">
-              <Icon name="ri:search-line" />
+            <button type="submit" aria-label="搜索">
+              <Icon name="ri:search-line" aria-hidden="true" />
             </button>
           </form>
           <div id="smart-card-modal" class="card search-smart-tips search-hot-text" style="display:none">
@@ -85,16 +85,17 @@ import { Icon } from 'astro-icon/components'
       </div>
       
       <div style="position: absolute;bottom: -40px;width: 100%;text-align: center;">
-        <a href="javascript:" data-dismiss="modal">
-          <Icon name="ri:close-circle-line" class="icon-2x" />
-        </a>
+        <button type="button" class="search-modal-close" data-dismiss="modal" aria-label="关闭搜索弹窗">
+          <Icon name="ri:close-circle-line" class="icon-2x" aria-hidden="true" />
+        </button>
       </div>
     </div>
   </div>
 </div>
 
+
 <!-- 分组切换与模态框控制脚本 -->
-<script is:inline define:vars={{allSites}}>
+<script is:inline>
 document.addEventListener('DOMContentLoaded', function() {
   const STORE_KEY = 'selectedSearchEngineId';
   const STORE_GROUP_KEY = 'selectedSearchGroupId';
@@ -168,15 +169,25 @@ document.addEventListener('DOMContentLoaded', function() {
     if (input && placeholder) input.placeholder = placeholder;
   }
 
-  function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]||c;}); }
-  function getLocalSites(){ try{ return Array.isArray(allSites) ? allSites.map(s=>({ title: s.title||'', url: s.url||'', description: s.description||'', subId: s.subId||'' })) : []; }catch(e){ return []; } }
-  function localSearchModal(keyword){
-    const list = getLocalSites();
+  let localSitesPromise;
+  function getLocalSites(){
+    if (!localSitesPromise) {
+      localSitesPromise = fetch('/search-index.json')
+        .then(function(response) { if (!response.ok) throw new Error('Search index request failed'); return response.json(); })
+        .then(function(data) { return Array.isArray(data) ? data : []; })
+        .catch(function() { return []; });
+    }
+    return localSitesPromise;
+  }
+  async function localSearchModal(keyword){
     const tips = container.querySelector('#m_local_word');
     const smartCard = container.querySelector('#smart-card-modal');
     if (!tips) return;
     keyword = (keyword||'').trim().toLowerCase();
-    if (!keyword){ (tips).innerHTML=''; (tips).style.display='none'; if(smartCard){ var mword = container.querySelector('#m_word'); var netLen = mword && mword.children ? mword.children.length : 0; (smartCard).style.display = netLen ? 'block' : 'none'; } return; }
+    if (!keyword){ (tips).replaceChildren(); (tips).style.display='none'; if(smartCard){ var mword = container.querySelector('#m_word'); var netLen = mword && mword.children ? mword.children.length : 0; (smartCard).style.display = netLen ? 'block' : 'none'; } return; }
+    const list = await getLocalSites();
+    const currentKeyword = String((container.querySelector('#m_search-text') || {}).value || '').trim().toLowerCase();
+    if (currentKeyword !== keyword) return;
     const results = [];
     for (let i=0;i<list.length;i++){
       const item = list[i];
@@ -187,13 +198,22 @@ document.addEventListener('DOMContentLoaded', function() {
       if (results.length>=10) break;
     }
     (tips).style.display = results.length ? 'block' : 'none';
-    (tips).innerHTML = results.map(r=>{
-      const title = escapeHtml(r.title||r.url);
-      const desc = escapeHtml(r.description||'');
-      const text = desc ? (title + ' - ' + desc) : title;
-      return '<li data-url="'+r.url+'"><span class="local">本地</span>'+ text +'</li>';
-    }).join('');
-    Array.prototype.slice.call(tips.querySelectorAll('li')).forEach(function(li){ li.addEventListener('click', function(){ var u = (li).getAttribute('data-url')||''; if(u){ try{ window.open(u,'_blank'); }catch(e){} } }); });
+    (tips).replaceChildren();
+    results.forEach(function(result) {
+      const li = document.createElement('li');
+      li.dataset.url = result.url || '';
+      const badge = document.createElement('span');
+      badge.className = 'local';
+      badge.textContent = '本地';
+      const text = result.description ? ((result.title || result.url) + ' - ' + result.description) : (result.title || result.url);
+      li.appendChild(badge);
+      li.appendChild(document.createTextNode(text));
+      li.addEventListener('click', function() {
+        const url = li.dataset.url || '';
+        if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      });
+      tips.appendChild(li);
+    });
     if(smartCard){ var mword2 = container.querySelector('#m_word'); var netLen2 = mword2 && mword2.children ? mword2.children.length : 0; (smartCard).style.display = (results.length || netLen2) ? 'block' : 'none'; }
   }
 
@@ -272,8 +292,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <style>
+.search-modal-close{border:0;background:transparent;color:inherit;padding:0;cursor:pointer}
 /* 模态框内使用左侧下拉+右侧子类布局 */
-.search-modal #search{max-width:800px;position:relative}
+.search-modal #modal-search{max-width:800px;position:relative}
 .search-modal .s-type{position:absolute;top:0;left:0;z-index:23;width:75px}
 .search-modal .s-type>span{display:block;height:31px;width:75px}
 .search-modal .s-type>span{line-height:31px;text-align:center;color:#515C6B;background:#fff;border-radius:5px}
@@ -284,9 +305,9 @@ document.addEventListener('DOMContentLoaded', function() {
 .search-modal #m_search-text{height:50px}
 .search-modal .modal-dialog{max-width:860px;margin:1rem auto;padding:0 .5rem}
 .search-modal .modal-content{max-height:calc(100vh - 2rem);overflow:auto}
-.search-modal #search form{position:relative}
-.search-modal #search button{position:absolute;top:0;right:0;margin:0;height:50px;line-height:50px;background:#313437;border:0;color:#fff}
-.search-modal #search button svg{color:#fff;width:18px;height:18px}
+.search-modal #modal-search form{position:relative}
+.search-modal #modal-search button{position:absolute;top:0;right:0;margin:0;height:50px;line-height:50px;background:#313437;border:0;color:#fff}
+.search-modal #modal-search button svg{color:#fff;width:18px;height:18px}
 .search-type {display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0;list-style:none}
 .search-type li {margin:0}
 :global(.modal-open) #sidebar{filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
@@ -319,16 +340,16 @@ document.addEventListener('DOMContentLoaded', function() {
 :global(.io-grey-mode) .search-modal #m_search-text{background:#fff;color:#282a2d;border:1px solid #e5e7eb}
 :global(.io-black-mode) .search-modal #m_search-text{background:#2c2e2f;color:#fff;border:1px solid #2c2e2f}
 
-:global(.io-grey-mode) .search-modal #search button{background:#313437}
-:global(.io-black-mode) .search-modal #search button{background:#2c2e2f}
-:global(.io-black-mode) .search-modal #search button:hover{background:#313437}
+:global(.io-grey-mode) .search-modal #modal-search button{background:#313437}
+:global(.io-black-mode) .search-modal #modal-search button{background:#2c2e2f}
+:global(.io-black-mode) .search-modal #modal-search button:hover{background:#313437}
 
 :global(.io-black-mode) .search-modal .text-muted{color:#bbb!important}
 
 @media (max-width: 768px) {
   .search-modal .modal-dialog{max-width:100%;margin:.5rem}
   .search-modal .modal-body{padding:12px}
-  .search-modal #search{max-width:none}
+  .search-modal #modal-search{max-width:none}
   .search-modal .s-type{position:relative;width:100%;margin-bottom:10px}
   .search-modal .s-type>span{width:100%;text-align:left;padding:0 12px}
   .search-modal .s-type-list{position:static;display:flex;flex-wrap:wrap;gap:8px;width:100%;padding:8px 0;box-shadow:none}
@@ -336,6 +357,6 @@ document.addEventListener('DOMContentLoaded', function() {
   .search-modal .s-type.open .s-type-list{display:flex}
   .search-modal .search-group{padding-left:0}
   .search-modal #m_search-text{height:44px;padding-right:46px}
-  .search-modal #search button{height:44px;line-height:44px;width:44px}
+  .search-modal #modal-search button{height:44px;line-height:44px;width:44px}
 }
 </style>

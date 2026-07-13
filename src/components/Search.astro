@@ -2,7 +2,6 @@
 import { searchGroups, defaultSearch } from '../data/searchConfig';
 import { Icon } from 'astro-icon/components';
 const defaultGroupId = (searchGroups.find(g => g.engines.some(e => e.id === defaultSearch.id))?.id) || (searchGroups[0]?.id || '');
-import allSites from '../data/sites/all.js';
 ---
 <div id="search" class="s-search mx-auto">
       <!-- 搜索分类标签 -->
@@ -37,8 +36,8 @@ import allSites from '../data/sites/all.js';
           style="outline:0" 
           autocomplete="off"
         />
-        <button class="submit" type="submit">
-          <Icon name="ri:search-line" />
+        <button class="submit" type="submit" aria-label="搜索">
+          <Icon name="ri:search-line" aria-hidden="true" />
         </button>
       </form>
       <!-- 搜索引擎选项 -->
@@ -72,8 +71,7 @@ import allSites from '../data/sites/all.js';
         <ul id="local-word" style="display: none"></ul>
       </div>
 </div>
-<script type="application/json" id="local-sites-json">{JSON.stringify(allSites.map(s => ({ title: s.title || '', url: s.url || '', description: s.description || '', subId: s.subId || '' })))}</script>
-<script is:inline define:vars={{allSites}}>
+<script is:inline>
   (function(){
     var STORE_KEY = 'selectedSearchEngineId';
     var STORE_GROUP_KEY = 'selectedSearchGroupId';
@@ -142,20 +140,26 @@ import allSites from '../data/sites/all.js';
         }
       }
     }
+    var localSitesPromise = null;
     function getLocalSites(){
-      try{
-        if(Array.isArray(allSites)) return allSites.map(function(s){ return { title: s.title || '', url: s.url || '', description: s.description || '', subId: s.subId || '' }; });
-      }catch(e){}
-      try{ var el = document.getElementById('local-sites-json'); if(!el) return []; var txt = el.textContent || el.innerText || ''; return JSON.parse(txt || '[]'); }catch(e){ return []; }
+      if(!localSitesPromise){
+        localSitesPromise = fetch('/search-index.json')
+          .then(function(response){ if(!response.ok) throw new Error('Search index request failed'); return response.json(); })
+          .then(function(data){ return Array.isArray(data) ? data : []; })
+          .catch(function(){ return []; });
+      }
+      return localSitesPromise;
     }
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]||c;}); }
-    function localSearch(keyword){
-      var list = getLocalSites();
+
+    async function localSearch(keyword){
       keyword = (keyword || '').trim().toLowerCase();
       var tips = document.getElementById('local-word');
       var smartCard = document.getElementById('smart-card');
       if(!tips){ return; }
-      if(!keyword){ tips.innerHTML = ''; tips.style.display = 'none'; return; }
+      if(!keyword){ tips.replaceChildren(); tips.style.display = 'none'; return; }
+      var list = await getLocalSites();
+      var currentInput = document.getElementById('search-text');
+      if(!currentInput || String(currentInput.value || '').trim().toLowerCase() !== keyword) return;
       var results = [];
       for(var i=0;i<list.length;i++){
         var item = list[i];
@@ -166,17 +170,21 @@ import allSites from '../data/sites/all.js';
         if(results.length>=10) break;
       }
       tips.style.display = results.length ? 'block' : 'none';
-      tips.innerHTML = results.map(function(r){
-        var title = escapeHtml(r.title||r.url);
-        var desc = escapeHtml(r.description||'');
-        var text = desc ? (title + ' - ' + desc) : title;
-        return '<li data-url="'+r.url+'"><span class="local">本</span>'+ text +'</li>';
-      }).join('');
-      Array.prototype.slice.call(tips.querySelectorAll('li')).forEach(function(li){
+      tips.replaceChildren();
+      results.forEach(function(result){
+        var li = document.createElement('li');
+        li.dataset.url = result.url || '';
+        var badge = document.createElement('span');
+        badge.className = 'local';
+        badge.textContent = '本';
+        var text = result.description ? ((result.title || result.url) + ' - ' + result.description) : (result.title || result.url);
+        li.appendChild(badge);
+        li.appendChild(document.createTextNode(text));
         li.addEventListener('click', function(){
-          var u = (li).getAttribute('data-url') || '';
-          if(u){ try{ window.open(u, '_blank'); }catch(e){} }
+          var url = li.dataset.url || '';
+          if(url) window.open(url, '_blank', 'noopener,noreferrer');
         });
+        tips.appendChild(li);
       });
       if(smartCard){ smartCard.style.display = results.length ? 'block' : 'none'; }
     }
@@ -236,7 +244,7 @@ import allSites from '../data/sites/all.js';
       var input = document.getElementById('search-text');
       var form = document.querySelector('#search-bg .super-search-fm');
       if(input){ input.addEventListener('input', function(){ localSearch((input).value || ''); }); }
-      if(form){ form.addEventListener('submit', function(e){ var checked = document.querySelector('#search-bg input[name="type"]:checked'); if(checked && checked.id==='type-local'){ e.preventDefault(); var tips = document.getElementById('local-word'); var first = tips && tips.querySelector('li[data-url]'); var u = first ? (first).getAttribute('data-url') : ''; if(u){ try{ window.open(u, '_blank'); }catch(err){} } } }); }
+      if(form){ form.addEventListener('submit', function(e){ var checked = document.querySelector('#search-bg input[name="type"]:checked'); if(checked && checked.id==='type-local'){ e.preventDefault(); var tips = document.getElementById('local-word'); var first = tips && tips.querySelector('li[data-url]'); var u = first ? (first).getAttribute('data-url') : ''; if(u){ try{ window.open(u, '_blank', 'noopener,noreferrer'); }catch(err){} } } }); }
     }
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   })();

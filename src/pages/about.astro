@@ -1,31 +1,16 @@
 ---
 // src/pages/about.astro
 import Layout from '../layouts/Layout.astro';
-import CategorySection from '../components/CategorySection.astro';
 import { SITE_DESCRIPTION, SITE_FAVICON, SITE_TITLE } from '../settings';
-import { CATEGORY_CONFIG } from '../data/category';
 import ArtalkComment from '@/components/Utils/ArtalkComment.astro';
 import {Icon} from 'astro-icon/components'
 
-const siteModules = import.meta.glob('../data/sites/*.js', { eager: true });
-
-const categoryData = Object.values(CATEGORY_CONFIG).flatMap((categoryInfo) => {
-  const subCategories = categoryInfo.subItems || [];
-  return subCategories.map((subCategory) => {
-    const modulePath = `../data/sites/${subCategory.id}.js`;
-    const sites = (siteModules[modulePath] as { default?: unknown[] } | undefined)?.default || [];
-    return {
-      ...subCategory,
-      sites: Array.isArray(sites) ? sites : [],
-    };
-  });
-});
 ---
 
 <Layout 
-  SITE_TITLE={SITE_TITLE}
-  SITE_DESCRIPTION={SITE_DESCRIPTION}
-  SITE_FAVICON={SITE_FAVICON}
+  title={`关于本站 - ${SITE_TITLE}`}
+  description={`关于 ${SITE_TITLE}：${SITE_DESCRIPTION}`}
+  favicon={SITE_FAVICON}
 >
   <div class="container-fluid">
     <div class="row justify-content-center">

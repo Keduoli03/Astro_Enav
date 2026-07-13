@@ -1,10 +1,7 @@
 import { SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK, SEARCH_BG_BLUR, CONTENT_BG_BLUR, SEARCH_BG_BLUR_DARK, CONTENT_BG_BLUR_DARK } from '../settings';
-import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
+import { DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
 
 let applying = false;
-let lastSearch = '';
-let lastContent = '';
-let lastSearchEl = '';
 let lastHasContent = false;
 let lastGrid = false;
 

@@ -10,7 +10,7 @@
 .search-type li label{display:inline-block;padding:0 11px;font-size:14px;line-height:31px;border-radius:3px 3px 0 0;cursor:pointer}
 .search-type li.menu-item a{display:inline-block;font-size:14px;line-height:31px;border-radius:3px 3px 0 0}
 .search-type input:checked+label,.search-type input:hover+label{background-color:#fff}
-.search-modal #search .search-select,.search-modal .search-type input:checked+label,.search-modal .search-type input:hover+label{background-color:rgba(126,126,126,.1)}
+.search-modal #modal-search .search-select,.search-modal .search-type input:checked+label,.search-modal .search-type input:hover+label{background-color:rgba(126,126,126,.1)}
 
 .header-big{position:relative;margin-top:-75px;padding-top:30px;padding-bottom:60px}
 .header-big.bg-gradual:before{content: "";position: absolute;left: 0;height: 80px;right: 0;bottom: 0;background-image: linear-gradient(to top,#f9f9f9 0%,transparent 80%);transition:.3s}

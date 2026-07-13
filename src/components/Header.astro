@@ -1,5 +1,4 @@
 ---
-import { SITE_TITLE } from "../settings";
 import { Icon } from 'astro-icon/components'
 ---
 
@@ -76,12 +75,15 @@ import { Icon } from 'astro-icon/components'
                                 s.src = 'https://api.yviii.com/yiyan/yi.php/?syz=js&charset=utf-8';
                                 s.onload = function(){
                                   try{
-                                    var oldWrite = document.write;
-                                    document.write = function(html){
-                                      try{ if(container) container.textContent = String(html || ''); }
-                                      finally{ document.write = oldWrite; }
-                                    };
-                                    if(window && typeof window.hiyi === 'function') window.hiyi();
+                                    var oldWrite = Reflect.get(document, 'write');
+                                    Reflect.set(document, 'write', function(html){
+                                      if(container) container.textContent = String(html || '');
+                                    });
+                                    try {
+                                      if(window && typeof window.hiyi === 'function') window.hiyi();
+                                    } finally {
+                                      Reflect.set(document, 'write', oldWrite);
+                                    }
                                   }catch(e){ if(container) container.textContent = '疏影横斜水清浅，暗香浮动月黄昏。'; }
                                 };
                                 s.onerror = function(){ if(container) container.textContent = '疏影横斜水清浅，暗香浮动月黄昏。'; };
@@ -92,12 +94,12 @@ import { Icon } from 'astro-icon/components'
                     </li>
 
                     <li class="nav-search ml-3 ml-md-4">
-                        <a href="javascript:" data-toggle="modal" data-target="#search-modal">
+                        <a href="#" data-toggle="modal" data-target="#search-modal" role="button" aria-label="打开搜索">
                             <Icon name="ri:search-line" class="icon-2x" />
                         </a>
                     </li>
                     <li class="nav-item d-md-none mobile-menu ml-3 ml-md-4">
-                        <a href="javascript:" id="sidebar-switch">
+                        <a href="#" id="sidebar-switch" role="button" aria-label="打开侧边栏">
                             <Icon name="ri:apps-2-line" class="icon-2x" />
                         </a>
                     </li>

@@ -206,7 +206,7 @@ export default [
   // picturetool
   {
     subId: "picturetool",
-    url: " https://remove.bg",
+    url: "https://remove.bg",
     title: "快速抠图",
     description: "快速扣透明图，去除背景",
     logo: "",

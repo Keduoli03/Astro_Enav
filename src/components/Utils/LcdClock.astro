@@ -1,5 +1,4 @@
 ---
-import { Icon } from 'astro-icon/components'
 ---
 <!-- 引入复古液晶字体：Digital-7（经典数码管风格） -->
 <style>
@@ -23,12 +22,12 @@ import { Icon } from 'astro-icon/components'
 </div>
 
 <script>
-  const pad = (n) => String(n).padStart(2, '0')
+  const pad = (n: number) => String(n).padStart(2, '0')
   // 时间格式：复古数码管风格，保持 HH:MM:SS 固定长度
-  const fmtTime = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  const fmtTime = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
   // 拆分日期和星期，复古格式呈现
-  const fmtDateMain = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
-  const fmtDateWeek = (d) => {
+  const fmtDateMain = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
+  const fmtDateWeek = (d: Date) => {
     const weeks = ['日', '一', '二', '三', '四', '五', '六']
     return `周${weeks[d.getDay()]}`
   }

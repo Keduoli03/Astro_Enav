@@ -13,10 +13,8 @@ export const SITE_LOGO_DARK = '/images/favicon-192.png';
 // - 仅 CONTENT_BG ：整页全屏图
 // - 夜间模式同理，若配置了 _DARK 变量则使用夜间图，否则自动回退到浅色图
 
-import contentBg from 'src/assets/好朋友.png';
+import contentBg from 'src/assets/好朋友.webp';
 import contentBgDark from 'src/assets/tree.jpg';
-import searchBg from 'src/assets/好朋友.png';
-import searchBgDark from 'src/assets/tree.jpg';
 
 export const SEARCH_BG: ImageMetadata | '' = ''; 
 export const SEARCH_BG_DARK: ImageMetadata | '' = '';

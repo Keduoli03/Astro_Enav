@@ -99,6 +99,18 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
       var pages = [];
       var audioUrls = [];
       var isProcessing = false;
+      var MAX_TEXT_LENGTH = 20000;
+      var MAX_DOWNLOAD_BYTES = 25 * 1024 * 1024;
+
+      async function fetchWithTimeout(url, options, timeoutMs) {
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, timeoutMs || 20000);
+        try {
+          return await fetch(url, Object.assign({}, options || {}, { signal: controller.signal }));
+        } finally {
+          clearTimeout(timer);
+        }
+      }
 
       function setStatus(text, isError) {
         if (!status) return;
@@ -135,20 +147,17 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
         return res;
       }
 
-      function escapeHtml(text) {
-        var div = document.createElement('div');
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
-      }
-
       async function downloadFile(url, filename, showStatus) {
         showStatus = showStatus !== false;
         if (showStatus) setStatus('正在下载 ' + filename + ' ...', false);
         try {
-          var response = await fetch(url);
+          var response = await fetchWithTimeout(url, {}, 30000);
           if (!response.ok) throw new Error('HTTP ' + response.status);
+          var declaredSize = Number(response.headers.get('Content-Length') || 0);
+          if (declaredSize > MAX_DOWNLOAD_BYTES) throw new Error('file too large');
           var buffer = await response.arrayBuffer();
           if (!buffer || buffer.byteLength === 0) throw new Error('empty');
+          if (buffer.byteLength > MAX_DOWNLOAD_BYTES) throw new Error('file too large');
           var contentType = response.headers.get('Content-Type') || 'audio/wav';
           var blob = new Blob([buffer], { type: contentType });
           var blobUrl = URL.createObjectURL(blob);
@@ -158,7 +167,7 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
           a.style.display = 'none';
           document.body.appendChild(a);
           a.click();
-          setTimeout(function () { a.remove(); }, 2000);
+          setTimeout(function () { a.remove(); URL.revokeObjectURL(blobUrl); }, 2000);
           if (showStatus) setStatus(filename + ' 下载完成', false);
         } catch (e) {
           console.error('blob 下载失败，尝试直接链接:', e);
@@ -237,6 +246,10 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
           setStatus('请先输入文本内容', true);
           return;
         }
+        if (text.length > MAX_TEXT_LENGTH) {
+          setStatus('文本过长，请控制在 ' + MAX_TEXT_LENGTH + ' 个字符以内', true);
+          return;
+        }
 
         isProcessing = true;
         submitBtn.disabled = true;
@@ -266,9 +279,10 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
           var success = false;
           var retries = 0;
           
-          while (!success && retries < 10) {
+          while (!success && retries < 3) {
             try {
-              var res = await fetch(apiUrl);
+              var res = await fetchWithTimeout(apiUrl, {}, 20000);
+              if (!res.ok) throw new Error('HTTP ' + res.status);
               var data = await res.json();
               if (data.code === 200 && data.url) {
                 audioUrls.push(data.url);
@@ -277,9 +291,9 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
                 throw new Error(data.code ? data.code.toString() : 'unknown');
               }
             } catch (e) {
-              console.error('fetch error', e, apiUrl);
+              console.error('TTS request failed:', e);
               retries++;
-              await new Promise(function (resolve) { setTimeout(resolve, 2000); });
+              if (retries < 3) await new Promise(function (resolve) { setTimeout(resolve, retries * 1000); });
             }
           }
           updateProgress(i);
@@ -295,6 +309,14 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
       addApiBtn.addEventListener('click', function () {
         var url = (customApi.value || '').trim();
         if (!url) return;
+        try {
+          var parsedUrl = new URL(url);
+          if (!['https:', 'http:'].includes(parsedUrl.protocol)) throw new Error('protocol');
+          url = parsedUrl.href;
+        } catch (e) {
+          setStatus('请输入合法的 HTTP 或 HTTPS API 地址', true);
+          return;
+        }
         var label = url.replace(/^https?:\/\//, '').replace(/\/.*/, '');
         var opt = document.createElement('option');
         opt.value = url;
@@ -307,10 +329,20 @@ import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
       fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
         if (!file) return;
+        if (file.size > 1024 * 1024) {
+          setStatus('文本文件不能超过 1 MB', true);
+          fileInput.value = '';
+          return;
+        }
         var reader = new FileReader();
         reader.onload = function () {
           input.value = String(reader.result || '');
           fileInput.value = '';
+          setStatus('文本文件已载入', false);
+        };
+        reader.onerror = function () {
+          fileInput.value = '';
+          setStatus('文本文件读取失败，请重试', true);
         };
         reader.readAsText(file);
       });

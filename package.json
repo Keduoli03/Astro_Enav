@@ -1,31 +1,24 @@
 {
-  "name": "test",
+  "name": "astro-enav",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check"
   },
   "dependencies": {
-    "@ant-design/icons": "^6.1.1",
-    "@astrojs/react": "^5.0.3",
     "@astrojs/sitemap": "^3.7.2",
-    "@astrojs/svelte": "^8.0.4",
     "@astrojs/vercel": "^10.0.4",
     "@iconify-json/ri": "^1.2.6",
-    "antd": "^6.3.5",
     "astro": "^6.1.5",
     "astro-icon": "^1.1.5",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "sharp": "^0.33.5",
-    "svelte": "^5.55.3"
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.2",
-    "@types/jquery": "^3.5.32",
-    "tailwindcss": "^4.2.2"
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.8.3"
   }
 }

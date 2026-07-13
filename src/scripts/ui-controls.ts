@@ -16,47 +16,89 @@ if (goTopBtn) {
 const modalLinkSelector = 'a[data-toggle="modal"][data-target="#search-modal"]';
 const modal = document.getElementById('search-modal');
 const body = document.body;
-function openModal() {
-  if (!modal) return;
+let modalBackdrop: HTMLDivElement | null = null;
+let lastFocusedElement: HTMLElement | null = null;
+
+function getModalFocusables(): HTMLElement[] {
+  if (!modal) return [];
+  return Array.from(modal.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+    .filter((element) => !element.hasAttribute('disabled') && element.offsetParent !== null);
+}
+
+function openModal(trigger?: HTMLElement) {
+  if (!modal || modal.classList.contains('show')) return;
+  lastFocusedElement = trigger || (document.activeElement instanceof HTMLElement ? document.activeElement : null);
   modal.style.display = 'block';
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
-  backdrop = document.createElement('div');
-  backdrop.className = 'modal-backdrop fade show';
-  body.appendChild(backdrop);
+  modalBackdrop = document.createElement('div');
+  modalBackdrop.className = 'modal-backdrop fade show';
+  body.appendChild(modalBackdrop);
   body.style.overflow = 'hidden';
   body.classList.add('modal-open');
   modal.dispatchEvent(new CustomEvent('modal:shown'));
+  requestAnimationFrame(() => {
+    const searchInput = modal.querySelector<HTMLInputElement>('#m_search-text');
+    (searchInput || getModalFocusables()[0])?.focus();
+  });
 }
+
 function closeModal() {
-  if (!modal) return;
+  if (!modal || !modal.classList.contains('show')) return;
   modal.classList.remove('show');
   modal.style.display = 'none';
   modal.setAttribute('aria-hidden', 'true');
-  if (backdrop) {
-    backdrop.remove();
-    backdrop = null;
-  }
+  modalBackdrop?.remove();
+  modalBackdrop = null;
   body.style.overflow = '';
   body.classList.remove('modal-open');
+  lastFocusedElement?.focus();
+  lastFocusedElement = null;
 }
-document.querySelectorAll(modalLinkSelector).forEach(a => {
-  a.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+
+document.querySelectorAll<HTMLElement>(modalLinkSelector).forEach((trigger) => {
+  trigger.addEventListener('click', (event) => {
+    event.preventDefault();
+    openModal(trigger);
+  });
 });
-document.addEventListener('click', (e) => {
-  const t = e.target as Element | null;
-  if (!t) return;
-  if (t.closest('[data-dismiss="modal"]')) {
-    e.preventDefault();
+
+document.addEventListener('click', (event) => {
+  const target = event.target as Element | null;
+  if (target?.closest('[data-dismiss="modal"]')) {
+    event.preventDefault();
     closeModal();
   }
 });
-window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-if (modal) {
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-}
+
+window.addEventListener('keydown', (event) => {
+  if (!modal?.classList.contains('show')) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeModal();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+  const focusables = getModalFocusables();
+  if (!focusables.length) {
+    event.preventDefault();
+    modal.focus();
+    return;
+  }
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+
+modal?.addEventListener('click', (event) => {
+  if (event.target === modal) closeModal();
+});
 
 const imgs = Array.from(document.querySelectorAll('img[data-src]')) as HTMLImageElement[];
 const fallbackSrc = '/images/logos/default.webp';

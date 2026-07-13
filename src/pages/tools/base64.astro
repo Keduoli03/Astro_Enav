@@ -79,7 +79,7 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
               <div id="image-preview-empty" class="tool-preview-empty">输入图片 Base64 后可在这里预览</div>
             </div>
             <div class="d-flex flex-wrap gap-2 mt-3 tool-actions">
-              <a id="base64-image-download" class="btn btn-outline-primary disabled" download="base64-image.png" href="javascript:">下载图片</a>
+              <a id="base64-image-download" class="btn btn-outline-primary disabled" download="base64-image.png" href="#" aria-disabled="true">下载图片</a>
             </div>
           </div>
         </div>
@@ -91,9 +91,9 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
 
   <script is:inline>
     (function () {
-      var tabs = Array.prototype.slice.call(document.querySelectorAll('.tool-tab'));
-      var panels = Array.prototype.slice.call(document.querySelectorAll('.tool-panel'));
       var status = document.getElementById('base64-status');
+      var MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+      var MAX_BASE64_LENGTH = 16 * 1024 * 1024;
 
       var input = document.getElementById('base64-input');
       var output = document.getElementById('base64-output');
@@ -131,6 +131,12 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
         });
       }
 
+      if (downloadLink) {
+        downloadLink.addEventListener('click', function (event) {
+          if (downloadLink.classList.contains('disabled')) event.preventDefault();
+        });
+      }
+
       function setStatus(text, isError) {
         if (!status) return;
         status.textContent = text || '';
@@ -139,11 +145,16 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
       }
 
       function encodeUtf8(str) {
-        return btoa(unescape(encodeURIComponent(str)));
+        var bytes = new TextEncoder().encode(str);
+        var binary = '';
+        bytes.forEach(function (byte) { binary += String.fromCharCode(byte); });
+        return btoa(binary);
       }
 
       function decodeUtf8(str) {
-        return decodeURIComponent(escape(atob(str)));
+        var binary = atob(str);
+        var bytes = Uint8Array.from(binary, function (char) { return char.charCodeAt(0); });
+        return new TextDecoder().decode(bytes);
       }
 
       function normalizeImageDataUrl(value) {
@@ -169,7 +180,8 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
         }
         if (previewEmpty) previewEmpty.style.display = 'flex';
         if (downloadLink) {
-          downloadLink.setAttribute('href', 'javascript:');
+          downloadLink.setAttribute('href', '#');
+          downloadLink.setAttribute('aria-disabled', 'true');
           downloadLink.classList.add('disabled');
         }
       }
@@ -218,6 +230,12 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
       imageFileInput && imageFileInput.addEventListener('change', function () {
         var file = imageFileInput.files && imageFileInput.files[0];
         if (!file) return;
+        if (file.size > MAX_IMAGE_BYTES) {
+          setStatus('图片不能超过 10 MB', true);
+          imageFileInput.value = '';
+          resetSourcePreview();
+          return;
+        }
         var reader = new FileReader();
         reader.onload = function () {
           var result = String(reader.result || '');
@@ -254,7 +272,13 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
 
       previewBtn && previewBtn.addEventListener('click', function () {
         try {
-          var dataUrl = normalizeImageDataUrl((base64ImageInput && base64ImageInput.value) || '');
+          var rawBase64 = (base64ImageInput && base64ImageInput.value) || '';
+          if (rawBase64.length > MAX_BASE64_LENGTH) {
+            resetPreview();
+            setStatus('Base64 内容过大，请控制在 16 MB 以内', true);
+            return;
+          }
+          var dataUrl = normalizeImageDataUrl(rawBase64);
           if (!dataUrl) {
             resetPreview();
             setStatus('请先输入图片 Base64', true);
@@ -267,6 +291,7 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
           if (previewEmpty) previewEmpty.style.display = 'none';
           if (downloadLink) {
             downloadLink.setAttribute('href', dataUrl);
+            downloadLink.setAttribute('aria-disabled', 'false');
             downloadLink.classList.remove('disabled');
           }
           setStatus('图片预览已生成', false);
