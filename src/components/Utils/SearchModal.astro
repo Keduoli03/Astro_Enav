@@ -84,7 +84,7 @@ import { Icon } from 'astro-icon/components'
         </div>
       </div>
       
-      <div style="position: absolute;bottom: -40px;width: 100%;text-align: center;">
+      <div class="search-modal-close-wrap">
         <button type="button" class="search-modal-close" data-dismiss="modal" aria-label="关闭搜索弹窗">
           <Icon name="ri:close-circle-line" class="icon-2x" aria-hidden="true" />
         </button>
@@ -304,8 +304,10 @@ document.addEventListener('DOMContentLoaded', function() {
 .search-modal .search-group{padding-left:75px}
 .search-modal #m_search-text{height:50px}
 .search-modal .modal-dialog{max-width:860px;margin:1rem auto;padding:0 .5rem}
-.search-modal .modal-content{max-height:calc(100vh - 2rem);overflow:auto}
+.search-modal .modal-content{overflow:visible}
+.search-modal-close-wrap{position:absolute;bottom:-40px;width:100%;text-align:center}
 .search-modal #modal-search form{position:relative}
+.search-modal .search-smart-tips{position:relative;top:auto;left:auto;width:100%;max-height:min(320px,40vh);margin-top:8px;overflow-y:auto}
 .search-modal #modal-search button{position:absolute;top:0;right:0;margin:0;height:50px;line-height:50px;background:#313437;border:0;color:#fff}
 .search-modal #modal-search button svg{color:#fff;width:18px;height:18px}
 .search-type {display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0;list-style:none}
