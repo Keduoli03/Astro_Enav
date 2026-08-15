@@ -2,14 +2,14 @@
 import { Icon } from 'astro-icon/components'
 ---
 
-<div class="big-header-banner">
+<div class="big-header-banner" transition:persist="header">
     <div id="header" class="page-header sticky">
-        <div class="navbar navbar-expand-md">
-            <div class="container-fluid p-0">
-                <div class="collapse navbar-collapse order-2 order-md-1">
+        <div class="navbar navbar-expand-md flex flex-wrap items-center gap-2 px-4 md:flex-nowrap">
+            <div class="flex min-w-0 flex-1 items-center">
+                <div class="navbar-collapse order-2 md:order-1 hidden items-center md:flex md:flex-1">
                     <div class="header-mini-btn">
                         <label>
-                            <input id="mini-button" type="checkbox">
+                            <input id="mini-button" type="checkbox" aria-label="折叠或展开侧边栏">
                             <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                                 <path class="line--1" d="M0 40h62c18 0 18-20-17 5L31 55"></path>
                                 <path class="line--2" d="M0 50h80"></path>
@@ -18,7 +18,7 @@ import { Icon } from 'astro-icon/components'
                         </label>
                     </div>
 
-                    <ul class="navbar-nav site-menu" style="margin-right: 16px;">
+                    <ul class="navbar-nav site-menu flex items-center" style="margin-right: 16px;">
                         <li>
                             <a href="/">
                                 <Icon name="ri:global-line" class="icon-fw icon-lg mr-2" />
@@ -35,7 +35,7 @@ import { Icon } from 'astro-icon/components'
                         </li>
                     </ul>
 
-                    <div class="rounded-circle weather">
+                    <div class="weather rounded-full">
                         <div id="he-plugin-simple" style="display: contents;"></div>
                         <script>(window as any).WIDGET = {
                             CONFIG: {
@@ -62,43 +62,36 @@ import { Icon } from 'astro-icon/components'
                     </div>
                 </div>
 
-                <ul class="nav navbar-menu text-xs order-1 order-md-2">
+                <ul class="nav navbar-menu text-xs order-1 md:order-2 flex items-center">
                     <!-- 一言核心部分 - 修复缓存问题 -->
-                    <li class="nav-item mr-3 mr-lg-0 d-none d-lg-block">
+                    <li class="nav-item mr-3 lg:mr-0 hidden lg:block">
                         <div id="hitokoto">
-                            <script is:inline>
-                              (function(){
-                                var container = document.getElementById('hitokoto');
-                                if(!container) return;
-                                var s = document.createElement('script');
-                                s.type = 'text/javascript';
-                                s.src = 'https://api.yviii.com/yiyan/yi.php/?syz=js&charset=utf-8';
-                                s.onload = function(){
-                                  try{
-                                    var oldWrite = Reflect.get(document, 'write');
-                                    Reflect.set(document, 'write', function(html){
-                                      if(container) container.textContent = String(html || '');
-                                    });
-                                    try {
-                                      if(window && typeof window.hiyi === 'function') window.hiyi();
-                                    } finally {
-                                      Reflect.set(document, 'write', oldWrite);
-                                    }
-                                  }catch(e){ if(container) container.textContent = '疏影横斜水清浅，暗香浮动月黄昏。'; }
-                                };
-                                s.onerror = function(){ if(container) container.textContent = '疏影横斜水清浅，暗香浮动月黄昏。'; };
-                                document.head.appendChild(s);
-                              })();
-                            </script>
+                            <a href="https://hitokoto.cn/" target="_blank" rel="noopener noreferrer" id="hitokoto_text">
+                                疏影横斜水清浅，暗香浮动月黄昏。
+                            </a>
                         </div>
+                        <script is:inline>
+                          (() => {
+                            const link = document.getElementById('hitokoto_text');
+                            if (!link) return;
+                            fetch('https://v1.hitokoto.cn/?encode=json', { cache: 'no-store' })
+                              .then((response) => response.ok ? response.json() : Promise.reject())
+                              .then((data) => {
+                                if (typeof data?.hitokoto !== 'string' || !data.hitokoto.trim()) return;
+                                link.textContent = data.hitokoto.trim();
+                                if (data.uuid) link.href = `https://hitokoto.cn/?uuid=${encodeURIComponent(data.uuid)}`;
+                              })
+                              .catch(() => {});
+                          })();
+                        </script>
                     </li>
 
-                    <li class="nav-search ml-3 ml-md-4">
+                    <li class="nav-search ml-3 md:ml-4">
                         <a href="#" data-toggle="modal" data-target="#search-modal" role="button" aria-label="打开搜索">
                             <Icon name="ri:search-line" class="icon-2x" />
                         </a>
                     </li>
-                    <li class="nav-item d-md-none mobile-menu ml-3 ml-md-4">
+                    <li class="nav-item mobile-menu md:hidden ml-3 md:ml-4">
                         <a href="#" id="sidebar-switch" role="button" aria-label="打开侧边栏">
                             <Icon name="ri:apps-2-line" class="icon-2x" />
                         </a>

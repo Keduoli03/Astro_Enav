@@ -1,54 +1,52 @@
 ---
-// src/components/Utils/SearchModal.astro
 import { searchGroups, defaultSearch } from '@/data/searchConfig';
-import { Icon } from 'astro-icon/components'
+import { Icon } from 'astro-icon/components';
 
+const defaultGroupId = searchGroups.find((group) =>
+  group.engines.some((engine) => engine.id === defaultSearch.id)
+)?.id || searchGroups[0]?.id || '';
 ---
 
-<div class="modal fade search-modal" id="search-modal" tabindex="-1" role="dialog" aria-modal="true" aria-label="搜索" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="search-modal" id="search-modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="search-modal-title" aria-hidden="true" transition:persist>
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-body">
-        <div id="modal-search" class="s-search mx-auto my-4">
+        <h2 id="search-modal-title" class="sr-only">站内与网络搜索</h2>
+        <div id="modal-search" class="s-search mx-auto my-4" data-search-root="modal">
           <div id="modal-search-list" class="hide-type-list">
-            <!-- 分类标签 -->
             <div class="s-type">
-              <span id="group-current"></span>
-              <div class="s-type-list">
-                {searchGroups.map((group, index) => (
-                  <label 
-                    for={`m_${group.engines[0].id}`}
-                    data-id={group.id}
-                    class={index === 0 ? 'active' : ''}
+              <button id="group-current" class="search-group-current" type="button" aria-expanded="false">常用</button>
+              <div class="s-type-list" role="group" aria-label="搜索分类">
+                {searchGroups.map((group) => (
+                  <button
+                    type="button"
+                    class="search-group-tab"
+                    data-search-group={group.id}
+                    aria-pressed={group.id === defaultGroupId ? 'true' : 'false'}
                   >
                     {group.label}
-                  </label>
+                  </button>
                 ))}
               </div>
             </div>
 
-            <!-- 搜索引擎组 -->
             <div class="search-groups-container">
-              {searchGroups.map((group, index) => (
-                <div 
-                  class={`search-group ${group.id}`}
-                  style={`display: ${index === 0 ? 'block' : 'none'};`}
-                >
-                  <ul class="search-type">
-                    {group.engines.map(engine => (
+              {searchGroups.map((group) => (
+                <div class={`search-group ${group.id}`} data-search-panel={group.id} hidden={group.id !== defaultGroupId}>
+                  <ul class="search-type" aria-label={`${group.label}搜索引擎`}>
+                    {group.engines.map((engine) => (
                       <li>
                         <input
+                          class="sr-only"
                           type="radio"
                           name="type2"
                           id={`m_${engine.id}`}
                           value={engine.url}
+                          data-engine-id={engine.id}
                           data-placeholder={engine.placeholder}
                           checked={engine.id === defaultSearch.id}
-                          hidden
                         />
-                        <label for={`m_${engine.id}`}>
-                          <span class="text-muted">{engine.label}</span>
-                        </label>
+                        <label for={`m_${engine.id}`}><span class="text-muted">{engine.label}</span></label>
                       </li>
                     ))}
                   </ul>
@@ -57,33 +55,28 @@ import { Icon } from 'astro-icon/components'
             </div>
           </div>
 
-          <!-- 搜索表单 -->
-          <form 
-            action={defaultSearch.url} 
-            method="get" 
-            target="_blank" 
-            class="super-search-fm"
-          >
+          <form action={defaultSearch.url} method="get" target="_blank" class="super-search-fm">
+            <label class="sr-only" for="m_search-text">搜索关键词</label>
             <input
-              type="text"
+              type="search"
               id="m_search-text"
-              class="form-control smart-tips search-key"
+              class="smart-tips search-key h-[50px] w-full rounded-[6px] border border-line bg-white px-3 text-[15px] text-ink outline-none"
               autocomplete="off"
               placeholder={defaultSearch.placeholder}
-              style="outline:0"
+              aria-autocomplete="list"
+              aria-controls="modal-search-suggestions"
               required
             />
-            <button type="submit" aria-label="搜索">
+            <button class="search-submit" type="submit" aria-label="搜索">
               <Icon name="ri:search-line" aria-hidden="true" />
             </button>
           </form>
-          <div id="smart-card-modal" class="card search-smart-tips search-hot-text" style="display:none">
-            <ul id="m_word" style="display:none"></ul>
-            <ul id="m_local_word" style="display:none"></ul>
+          <div id="smart-card-modal" class="card search-smart-tips search-hot-text rounded-xl" hidden>
+            <ul id="modal-search-suggestions" data-search-suggestions hidden></ul>
           </div>
         </div>
       </div>
-      
+
       <div class="search-modal-close-wrap">
         <button type="button" class="search-modal-close" data-dismiss="modal" aria-label="关闭搜索弹窗">
           <Icon name="ri:close-circle-line" class="icon-2x" aria-hidden="true" />
@@ -93,272 +86,46 @@ import { Icon } from 'astro-icon/components'
   </div>
 </div>
 
-
-<!-- 分组切换与模态框控制脚本 -->
-<script is:inline>
-document.addEventListener('DOMContentLoaded', function() {
-  const STORE_KEY = 'selectedSearchEngineId';
-  const STORE_GROUP_KEY = 'selectedSearchGroupId';
-  const STORE_GROUP_ENGINE_PREFIX = 'selectedEngineIdForGroup:';
-  const modal = document.getElementById('search-modal');
-  const container = modal;
-  if (!container) return;
-
-  function toMainEngineId(modalEngineId) {
-    return String(modalEngineId || '').replace(/^m_/, '');
-  }
-
-  function toModalEngineId(mainEngineId) {
-    return mainEngineId ? ('m_' + mainEngineId) : '';
-  }
-
-  function persistSelection(groupId, modalEngineId) {
-    const mainEngineId = toMainEngineId(modalEngineId);
-    try {
-      if (groupId) localStorage.setItem(STORE_GROUP_KEY, groupId);
-      if (mainEngineId) {
-        localStorage.setItem(STORE_KEY, mainEngineId);
-        if (groupId) localStorage.setItem(STORE_GROUP_ENGINE_PREFIX + groupId, mainEngineId);
-      }
-    } catch (e) {}
-  }
-
-  function switchGroup(groupId, preferredMainEngineId) {
-    container.querySelectorAll('.s-type-list label').forEach(label => {
-      (label).classList.toggle('active', (label).dataset.id === groupId);
-    });
-
-    container.querySelectorAll('.search-group').forEach(group => {
-      (group).style.display = group.classList.contains(groupId) ? 'block' : 'none';
-    });
-
-    let targetEngine = null;
-    const preferredModalId = toModalEngineId(preferredMainEngineId || '');
-    if (preferredModalId) {
-      targetEngine = container.querySelector(`#${preferredModalId}`);
-    }
-    if (!targetEngine) {
-      let savedPerGroup = '';
-      try { savedPerGroup = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + groupId) || ''; } catch (e) {}
-      if (savedPerGroup) {
-        targetEngine = container.querySelector(`#${toModalEngineId(savedPerGroup)}`);
-      }
-    }
-    if (!targetEngine) {
-      targetEngine = container.querySelector(`.search-group.${groupId} input[name="type2"]`);
-    }
-    if (targetEngine) {
-      (targetEngine).checked = true;
-      updateSearchForm((targetEngine).value, (targetEngine).dataset.placeholder || '');
-      persistSelection(groupId, (targetEngine).id || '');
-    }
-
-    const labelEl = container.querySelector(`.s-type-list label[data-id="${groupId}"]`)
-      || container.querySelector('.s-type-list label.active');
-    const display = container.querySelector('#group-current');
-    if (display && labelEl) display.textContent = (labelEl.textContent || '').trim();
-    const typeWrap = container.querySelector('.s-type');
-    if (typeWrap) (typeWrap).classList.remove('open');
-  }
-
-
-  function updateSearchForm(action, placeholder) {
-    const form = container.querySelector('.super-search-fm');
-    const input = container.querySelector('#m_search-text');
-    if (form) form.action = action;
-    if (input && placeholder) input.placeholder = placeholder;
-  }
-
-  let localSitesPromise;
-  function getLocalSites(){
-    if (!localSitesPromise) {
-      localSitesPromise = fetch('/search-index.json')
-        .then(function(response) { if (!response.ok) throw new Error('Search index request failed'); return response.json(); })
-        .then(function(data) { return Array.isArray(data) ? data : []; })
-        .catch(function() { return []; });
-    }
-    return localSitesPromise;
-  }
-  async function localSearchModal(keyword){
-    const tips = container.querySelector('#m_local_word');
-    const smartCard = container.querySelector('#smart-card-modal');
-    if (!tips) return;
-    keyword = (keyword||'').trim().toLowerCase();
-    if (!keyword){ (tips).replaceChildren(); (tips).style.display='none'; if(smartCard){ var mword = container.querySelector('#m_word'); var netLen = mword && mword.children ? mword.children.length : 0; (smartCard).style.display = netLen ? 'block' : 'none'; } return; }
-    const list = await getLocalSites();
-    const currentKeyword = String((container.querySelector('#m_search-text') || {}).value || '').trim().toLowerCase();
-    if (currentKeyword !== keyword) return;
-    const results = [];
-    for (let i=0;i<list.length;i++){
-      const item = list[i];
-      const t = (item.title||'').toLowerCase();
-      const d = (item.description||'').toLowerCase();
-      const u = (item.url||'').toLowerCase();
-      if (t.indexOf(keyword)>=0 || d.indexOf(keyword)>=0 || u.indexOf(keyword)>=0) results.push(item);
-      if (results.length>=10) break;
-    }
-    (tips).style.display = results.length ? 'block' : 'none';
-    (tips).replaceChildren();
-    results.forEach(function(result) {
-      const li = document.createElement('li');
-      li.dataset.url = result.url || '';
-      const badge = document.createElement('span');
-      badge.className = 'local';
-      badge.textContent = '本地';
-      const text = result.description ? ((result.title || result.url) + ' - ' + result.description) : (result.title || result.url);
-      li.appendChild(badge);
-      li.appendChild(document.createTextNode(text));
-      li.addEventListener('click', function() {
-        const url = li.dataset.url || '';
-        if (url) window.open(url, '_blank', 'noopener,noreferrer');
-      });
-      tips.appendChild(li);
-    });
-    if(smartCard){ var mword2 = container.querySelector('#m_word'); var netLen2 = mword2 && mword2.children ? mword2.children.length : 0; (smartCard).style.display = (results.length || netLen2) ? 'block' : 'none'; }
-  }
-
-  container.querySelectorAll('.s-type-list label').forEach(label => {
-    label.addEventListener('click', function(e) {
-      e.preventDefault();
-      const gid = (this).dataset.id || '';
-      if (gid) switchGroup(gid);
-    });
-  });
-
-  const typeWrap = container.querySelector('.s-type');
-  const typeToggle = container.querySelector('.s-type > span');
-  if (typeWrap && typeToggle) {
-    typeToggle.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      (typeWrap).classList.toggle('open');
-    });
-    container.addEventListener('click', function(e) {
-      var t = e.target;
-      if (!t || !(t).closest) return;
-      if (!(t).closest('.s-type')) (typeWrap).classList.remove('open');
-    });
-  }
-  
-  container.querySelectorAll('input[name="type2"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      if ((this).checked) {
-        const grp = (this).closest('.search-group');
-        const gid = grp ? Array.prototype.slice.call((grp).classList).filter(function(c){ return c !== 'search-group'; })[0] || '' : '';
-        persistSelection(gid, (this).id || '');
-        updateSearchForm((this).value, (this).dataset.placeholder || '');
-        var inputEl2 = container.querySelector('#m_search-text');
-        var val = ((inputEl2 && inputEl2.value) ? inputEl2.value : '').trim();
-        if ((this).id === 'm_type-local') {
-          localSearchModal(val);
-        } else {
-          const tips = container.querySelector('#m_local_word');
-          const smartCard = container.querySelector('#smart-card-modal');
-          if (tips){ (tips).innerHTML=''; (tips).style.display='none'; }
-          var mword3 = container.querySelector('#m_word');
-          var netLen3 = mword3 && mword3.children ? mword3.children.length : 0;
-          if (smartCard) (smartCard).style.display = netLen3 ? 'block' : 'none';
-        }
-      }
-    });
-  });
-  
-  const init = () => {
-    let savedGroup = '';
-    let savedEngine = '';
-    try {
-      savedGroup = localStorage.getItem(STORE_GROUP_KEY) || '';
-      savedEngine = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + savedGroup) || localStorage.getItem(STORE_KEY) || '';
-    } catch (e) {}
-    const active = container.querySelector('.s-type-list label.active');
-    const first = container.querySelector('.s-type-list label');  
-    const gid = savedGroup || (active && active.dataset.id) || (first && first.dataset.id) || 'group-a';
-    switchGroup(gid, savedEngine);
-    const display = container.querySelector('#group-current');
-    const labelEl = container.querySelector(`.s-type-list label[data-id="${gid}"]`) || active || first;
-    if (display && labelEl) display.textContent = (labelEl.textContent || '').trim();
-  };
-  modal.addEventListener('shown.bs.modal', init);
-  modal.addEventListener('modal:shown', init);
-  init();
-
-  const mInputEl = container.querySelector('#m_search-text');
-  if (mInputEl) mInputEl.addEventListener('keyup', function(){
-    const val = (mInputEl.value || '').trim();
-    const checked = container.querySelector('input[name="type2"]:checked');
-    if (checked && checked.id === 'm_type-local') localSearchModal(val);
-  });
-
-});
-</script>
 <style>
-.search-modal-close{border:0;background:transparent;color:inherit;padding:0;cursor:pointer}
-/* 模态框内使用左侧下拉+右侧子类布局 */
-.search-modal #modal-search{max-width:800px;position:relative}
-.search-modal .s-type{position:absolute;top:0;left:0;z-index:23;width:75px}
-.search-modal .s-type>span{display:block;height:31px;width:75px}
-.search-modal .s-type>span{line-height:31px;text-align:center;color:#515C6B;background:#fff;border-radius:5px}
-.search-modal .s-type-list{display:none;position:absolute;top:31px;padding:9pt 0;width:70px;background:#fff;border-radius:5px;box-shadow:0 9px 20px rgba(0,0,0,.16)}
-.search-modal .s-type:hover .s-type-list{display:block}
-.search-modal .s-type.open .s-type-list{display:block}
-.search-modal .search-group{padding-left:75px}
-.search-modal #m_search-text{height:50px}
-.search-modal .modal-dialog{max-width:860px;margin:1rem auto;padding:0 .5rem}
-.search-modal .modal-content{overflow:visible}
-.search-modal-close-wrap{position:absolute;bottom:-40px;width:100%;text-align:center}
-.search-modal #modal-search form{position:relative}
-.search-modal .search-smart-tips{position:relative;top:auto;left:auto;width:100%;max-height:min(320px,40vh);margin-top:8px;overflow-y:auto}
-.search-modal #modal-search button{position:absolute;top:0;right:0;margin:0;height:50px;line-height:50px;background:#313437;border:0;color:#fff}
-.search-modal #modal-search button svg{color:#fff;width:18px;height:18px}
-.search-type {display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0;list-style:none}
-.search-type li {margin:0}
-:global(.modal-open) #sidebar{filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
-:global(.modal-open) .page-header{filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
-:global(.modal-open) .main-content > :not(.search-modal){filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
-.modal-backdrop{position:fixed;left:0;top:0;width:100%;height:100%;z-index:1084}
-:global(.modal-backdrop),
-:global(.modal-backdrop.fade.show){
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-.search-modal{z-index:1085}
-
-/* 主题自适配 */
-:global(.io-grey-mode) .search-modal .modal-content{background:#fff;color:#282a2d;border-color:#e5e7eb}
-:global(.io-black-mode) .search-modal .modal-content{background:#2c2e2f;color:#c6c9cf;border-color:#404040}
-
-:global(.io-grey-mode) .search-modal .s-type>span{background:#fff;color:#515C6B;border:1px solid #e5e7eb}
-:global(.io-black-mode) .search-modal .s-type>span{background:#2c2e2f;color:#c6c9cf;border:1px solid #404040}
-
-:global(.io-grey-mode) .search-modal .s-type-list{background:#fff;box-shadow:0 9px 20px rgba(0,0,0,.16)}
-:global(.io-black-mode) .search-modal .s-type-list{background:#363738;box-shadow:0 9px 20px rgba(0,0,0,.3)}
-
-:global(.io-grey-mode) .search-modal .s-type-list label{color:#515C6B}
-:global(.io-black-mode) .search-modal .s-type-list label{color:#c6c9cf}
-:global(.io-grey-mode) .search-modal .s-type-list label.active{background:rgba(126,126,126,.1)}
-:global(.io-black-mode) .search-modal .s-type-list label.active{background:rgba(255,255,255,.08)}
-
-:global(.io-grey-mode) .search-modal #m_search-text{background:#fff;color:#282a2d;border:1px solid #e5e7eb}
-:global(.io-black-mode) .search-modal #m_search-text{background:#2c2e2f;color:#fff;border:1px solid #2c2e2f}
-
-:global(.io-grey-mode) .search-modal #modal-search button{background:#313437}
-:global(.io-black-mode) .search-modal #modal-search button{background:#2c2e2f}
-:global(.io-black-mode) .search-modal #modal-search button:hover{background:#313437}
-
-:global(.io-black-mode) .search-modal .text-muted{color:#bbb!important}
-
-@media (max-width: 768px) {
-  .search-modal .modal-dialog{max-width:100%;margin:.5rem}
-  .search-modal .modal-body{padding:12px}
-  .search-modal #modal-search{max-width:none}
-  .search-modal .s-type{position:relative;width:100%;margin-bottom:10px}
-  .search-modal .s-type>span{width:100%;text-align:left;padding:0 12px}
-  .search-modal .s-type-list{position:static;display:flex;flex-wrap:wrap;gap:8px;width:100%;padding:8px 0;box-shadow:none}
-  .search-modal .s-type:hover .s-type-list{display:flex}
-  .search-modal .s-type.open .s-type-list{display:flex}
-  .search-modal .search-group{padding-left:0}
-  .search-modal #m_search-text{height:44px;padding-right:46px}
-  .search-modal #modal-search button{height:44px;line-height:44px;width:44px}
-}
+  .search-modal-close{border:0;background:transparent;color:inherit;padding:0;cursor:pointer}
+  .search-modal #modal-search{max-width:800px;position:relative}
+  .search-modal .s-type{position:absolute;top:0;left:0;z-index:23;width:75px}
+  .search-modal .search-group-current{display:block;height:31px;width:75px;line-height:31px;text-align:center;color:#515c6b;background:#fff;border:1px solid #e5e7eb;border-radius:5px;padding:0}
+  .search-modal .s-type-list{display:none;position:absolute;top:31px;padding:9pt 0;width:90px;background:#fff;border-radius:5px;box-shadow:0 9px 20px rgba(0,0,0,.16)}
+  .search-modal .s-type:hover .s-type-list,.search-modal .s-type.open .s-type-list,.search-modal .s-type:focus-within .s-type-list{display:block}
+  .search-modal .search-group-tab{display:block;position:static;width:100%;height:auto;line-height:1.5;margin:0;padding:5px 8px;background:transparent!important;color:#515c6b;border:0;text-align:center}
+  .search-modal .search-group-tab[aria-pressed="true"]{background:rgba(126,126,126,.1)!important}
+  .search-modal .search-group{padding-left:75px}
+  .search-modal #m_search-text{height:50px}
+  /* 原 Bootstrap .modal/.modal-dialog/.modal-content/.modal-body 的基础定位与布局 */
+  .search-modal{position:fixed;top:0;left:0;display:none;width:100%;height:100%;overflow:hidden;outline:0;z-index:1085}
+  .search-modal.show{display:block}
+  .search-modal .modal-dialog{position:relative;width:auto;max-width:860px;margin:1rem auto;padding:0 .5rem;pointer-events:none}
+  .search-modal .modal-content{position:relative;display:flex;flex-direction:column;width:100%;pointer-events:auto;background-clip:padding-box;border:1px solid rgba(0,0,0,.2);border-radius:.5rem;outline:0;overflow:visible}
+  .search-modal .modal-body{position:relative;flex:1 1 auto;padding:1rem}
+  :global(.modal-backdrop){position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:1084;background:rgba(0,0,0,.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .search-modal-close-wrap{position:absolute;bottom:-40px;width:100%;text-align:center}
+  .search-modal #modal-search form{position:relative}
+  .search-modal .search-smart-tips{position:relative;top:auto;left:auto;width:100%;max-height:min(320px,40vh);margin-top:8px;overflow-y:auto}
+  .search-modal #modal-search .search-submit{position:absolute;top:0;right:0;margin:0;height:50px;line-height:50px;background:#313437;border:0;color:#fff}
+  .search-modal #modal-search .search-submit svg{color:#fff;width:18px;height:18px}
+  .search-type{display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:0;list-style:none}
+  .search-type li{margin:0}
+  :global(.modal-open) #sidebar,:global(.modal-open) .page-header,:global(.modal-open) .main-content > :not(.search-modal){filter:blur(6px);pointer-events:none;user-select:none;transition:filter .2s ease}
+  :global(.modal-backdrop),:global(.modal-backdrop.fade.show){background:rgba(0,0,0,.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .search-modal{z-index:1085}
+  :global(.io-grey-mode) .search-modal .modal-content{background:#fff;color:#282a2d;border-color:#e5e7eb}
+  :global(.io-black-mode) .search-modal .modal-content{background:#2c2e2f;color:#c6c9cf;border-color:#404040}
+  :global(.io-black-mode) .search-modal .search-group-current{background:#2c2e2f;color:#c6c9cf;border-color:#404040}
+  :global(.io-black-mode) .search-modal .s-type-list{background:#363738;box-shadow:0 9px 20px rgba(0,0,0,.3)}
+  :global(.io-black-mode) .search-modal .search-group-tab{color:#c6c9cf}
+  :global(.io-black-mode) .search-modal #m_search-text{background:#2c2e2f;color:#fff;border:1px solid #404040}
+  :global(.io-black-mode) .search-modal #modal-search .search-submit{background:#2c2e2f}
+  :global(.io-black-mode) .search-modal .text-muted{color:#bbb!important}
+  @media (max-width:768px){
+    .search-modal .modal-dialog{max-width:100%;margin:.5rem}.search-modal .modal-body{padding:12px}.search-modal #modal-search{max-width:none}
+    .search-modal .s-type{position:relative;width:100%;margin-bottom:10px}.search-modal .search-group-current{width:100%;text-align:left;padding:0 12px}
+    .search-modal .s-type-list{position:static;display:flex;flex-wrap:wrap;gap:8px;width:100%;padding:8px 0;box-shadow:none}.search-modal .search-group-tab{width:auto}
+    .search-modal .search-group{padding-left:0}.search-modal #m_search-text{height:44px;padding-right:46px}.search-modal #modal-search .search-submit{height:44px;line-height:44px;width:44px}
+  }
 </style>

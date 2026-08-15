@@ -1,0 +1,23 @@
+---
+/**
+ * ToolToolbar - 一组按钮容器,自动应用统一的圆角/间距/黑暗模式适配
+ *
+ * @slot default 若干 <button> / <a class="btn">
+ */
+interface Props {
+  /** 对齐方式 */
+  align?: 'start' | 'end' | 'between';
+  /** 顶部外边距 (rem) */
+  mt?: number;
+  /** 自定义容器类 */
+  class?: string;
+}
+const { align = 'start', mt, class: className = '' } = Astro.props;
+const justify = align === 'end' ? 'flex-end' : align === 'between' ? 'space-between' : 'flex-start';
+---
+<div
+  class:list={['tool-toolbar tool-actions', className]}
+  style={`justify-content:${justify};${mt !== undefined ? `margin-top:${mt}rem;` : ''}`}
+>
+  <slot />
+</div>

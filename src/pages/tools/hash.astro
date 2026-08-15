@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { HashTool } from '../../react-tools/tools/hash/ui';
+---
+
+<ToolLayout title="哈希生成" description="生成 SHA-256、SHA-512 等常用摘要。">
+  <HashTool client:load />
+</ToolLayout>

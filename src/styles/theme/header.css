@@ -1,10 +1,13 @@
 .navbar-collapse ul li{position:relative;list-style:none}
+.navbar-collapse,.navbar-nav,.navbar-menu{list-style:none}
+.navbar-nav>li,.navbar-menu>li{list-style:none}
 .navbar-collapse li>ul{transform:translateY(15px)}
 .navbar-collapse ul li ul{position:absolute;min-width:90px;opacity:0;overflow:hidden;visibility:hidden;background:#fff;border-radius:4px;box-shadow:0 5px 20px 0 rgba(0,0,0,.15);transition:.3s}
 .navbar-collapse ul li.focus>ul,.navbar-collapse ul li:hover>ul{opacity:1;z-index:1;overflow:visible;visibility:visible;transform:translateY(0)}
 .navbar-collapse ul li.menu-item-has-children:after{display:none}
 .navbar .navbar-nav li>a{font-size:14px;padding:10px 15px;display:block;transition:color .2s}
 .navbar .navbar-nav i{margin-right:2px!important}
+.navbar .navbar-nav svg,.navbar-menu svg{display:inline-block;flex:none;overflow:visible}
 .navbar-menu{flex-direction:row;margin-left:auto;align-items:center}
 .navbar-collapse .weather{display:table}
 .navbar-brand img{max-height:40px}
@@ -36,10 +39,10 @@
 .main-content.sidebar-expanding .page-header{left:170px}
 .main-content.sidebar-collapsing .page-header{left:60px}
 @media (max-width:767.98px){.nav-github{display:none}}
- .big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6),0 0 2px rgba(255,255,255,.3)}
- .big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a .icon-fw,.big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a .icon-lg,.big-header-banner:not(.header-bg) .page-header .navbar .nav-item .icon-2x{filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
- .big-header-banner:not(.header-bg) .page-header #hitokoto a{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6),0 0 2px rgba(255,255,255,.3)}
-  .big-header-banner:not(.header-bg) .page-header .nav-search a{color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+ .big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a{color:#313437;text-shadow:none}
+ .big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a .icon-fw,.big-header-banner:not(.header-bg) .page-header .navbar .navbar-nav li>a .icon-lg,.big-header-banner:not(.header-bg) .page-header .navbar .nav-item .icon-2x{filter:none}
+ .big-header-banner:not(.header-bg) .page-header #hitokoto a{color:#313437;text-shadow:none}
+  .big-header-banner:not(.header-bg) .page-header .nav-search a{color:#313437;filter:none}
 
 .io-grey-mode .big-header-banner.header-bg .page-header .navbar .navbar-nav li>a{color:#313437}
 .io-grey-mode .big-header-banner.header-bg .page-header .navbar .navbar-nav li>a .icon-fw,
@@ -47,3 +50,28 @@
 .io-grey-mode .big-header-banner.header-bg .page-header .navbar .nav-item .icon-2x{color:#313437}
 .io-grey-mode .big-header-banner.header-bg .page-header .nav-search a{color:#313437}
 .io-grey-mode .big-header-banner.header-bg .page-header .navbar-menu .nav-item a{color:#313437}
+
+/* Keep the persistent header visually stable while the theme snapshots are
+   being composited. Without this, the homepage's intentional transparent
+   header can expose the transition's root background for a frame. */
+html.theme-switching .big-header-banner .page-header{
+  background:var(--sidebar-bg-color)!important;
+  color:#313437!important;
+  box-shadow:var(--sidebar-header-shadow,0 6px 24px rgba(0,0,0,.12))!important;
+  backdrop-filter:blur(var(--sidebar-blur,12px));
+  -webkit-backdrop-filter:blur(var(--sidebar-blur,12px));
+}
+html.theme-switching .big-header-banner .page-header .navbar-nav>li>a,
+html.theme-switching .big-header-banner .page-header .navbar-menu a:not(.dropdown-item){
+  color:#313437!important;
+  text-shadow:none!important;
+}
+html.theme-switching.theme-dark .big-header-banner .page-header{
+  background:var(--sidebar-bg-color)!important;
+  color:#fff!important;
+  box-shadow:var(--sidebar-header-shadow,0 6px 24px rgba(0,0,0,.35))!important;
+}
+html.theme-switching.theme-dark .big-header-banner .page-header .navbar-nav>li>a,
+html.theme-switching.theme-dark .big-header-banner .page-header .navbar-menu a:not(.dropdown-item){
+  color:#fff!important;
+}

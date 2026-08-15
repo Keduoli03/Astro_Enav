@@ -1,233 +1,205 @@
 ---
 import ToolLayout from '../../layouts/ToolLayout.astro';
 import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
-import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
+import ToolTabs from '../../components/tools/ToolTabs.astro';
+import ToolField from '../../components/tools/ToolField.astro';
+import ToolToolbar from '../../components/tools/ToolToolbar.astro';
+import ToolStatus from '../../components/tools/ToolStatus.astro';
+
+/* Shared Tailwind class strings (consistent with the React tool islands) */
+const BTN =
+  'inline-flex min-h-[40px] cursor-pointer items-center justify-center gap-2 rounded-control! border px-4 text-[13px] font-semibold leading-none no-underline transition duration-150 disabled:pointer-events-none disabled:opacity-45';
+const BTN_PRIMARY = `${BTN} border-ink bg-ink text-paper hover:bg-[#24242a]`;
+const BTN_SECONDARY = `${BTN} border-line bg-surface text-ink hover:border-ink/40 hover:bg-surface-2`;
+const BTN_SM = 'min-h-[34px] px-3 text-[12px]';
+const TEXTAREA =
+  'min-h-[180px] w-full resize-y rounded-control! border border-line bg-paper px-3.5 py-3 font-mono text-[13px] leading-[1.7] text-ink outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/5';
+const PANEL = 'rounded-[12px] border border-line bg-surface p-5 md:p-6';
 ---
 
 <ToolLayout title="Base64 编解码" description="支持文本编解码、图片转 Base64、Base64 转图片预览与下载。">
-  <div class="tool-switch mb-4">
-    <button class="tool-tab active" type="button" data-tab="text">文本</button>
-    <button class="tool-tab" type="button" data-tab="image">图片</button>
-  </div>
 
-  <ToolTabsScript />
+  <ToolTabs
+    tabs={[
+      { id: 'text', label: '文本' },
+      { id: 'image', label: '图片' },
+    ]}
+  />
 
-  <section class="tool-panel" data-panel="text">
-    <div class="card border-0 shadow-sm mb-4 tool-card">
-      <div class="card-body p-4 p-md-4">
-        <label class="font-weight-bold mb-2 d-block tool-label">输入内容</label>
-        <textarea id="base64-input" class="form-control tool-textarea mb-3" rows="8" placeholder="请输入要编码或解码的文本内容"></textarea>
-        <div class="d-flex flex-wrap gap-2 mb-3 tool-actions">
-          <button id="base64-encode" class="btn btn-primary" type="button">文本转 Base64</button>
-          <button id="base64-decode" class="btn btn-outline-primary" type="button">Base64 转文本</button>
-          <button id="base64-clear" class="btn btn-outline-secondary" type="button">清空文本区</button>
-          <button id="base64-copy" class="btn btn-outline-dark" type="button">复制结果</button>
-        </div>
-        <label class="font-weight-bold mb-2 d-block tool-label">输出结果</label>
-        <textarea id="base64-output" class="form-control tool-textarea" rows="8" placeholder="结果会显示在这里"></textarea>
+  <!-- ============ 文本 tab ============ -->
+  <section class="mt-5" data-panel="text">
+
+    <ToolField label="输入内容" hint="任意 UTF-8 文本">
+      <textarea id="base64-input" class={TEXTAREA} rows="7"
+        placeholder="请输入要编码或解码的文本内容..."></textarea>
+    </ToolField>
+
+    <ToolToolbar>
+      <button id="base64-encode" class={BTN_PRIMARY} type="button">文本 → Base64</button>
+      <button id="base64-decode" class={BTN_SECONDARY} type="button">Base64 → 文本</button>
+      <button id="base64-clear" class={BTN_SECONDARY} type="button">清空</button>
+      <button id="base64-copy" class={BTN_SECONDARY} type="button">复制结果</button>
+    </ToolToolbar>
+
+    <div class="h-4"></div>
+
+    <ToolField label="输出结果">
+      <textarea id="base64-output" class={TEXTAREA} rows="7"
+        placeholder="结果会显示在这里" readonly></textarea>
+    </ToolField>
+
+  </section>
+
+  <!-- ============ 图片 tab ============ -->
+  <section class="mt-5 hidden" data-panel="image">
+    <!-- 图片 → Base64 -->
+    <div class={PANEL}>
+      <ToolField label="上传图片" hint="≤ 10 MB · JPG/PNG/GIF/WebP">
+        <label slot="suffix" class={`${BTN_PRIMARY} ${BTN_SM} inline-flex!`}>
+          <span>选择图片</span>
+          <input id="image-file-input" type="file" accept="image/*" hidden>
+        </label>
+        <div id="image-file-meta" class="tool-field__desc" style="min-height:1rem;"></div>
+      </ToolField>
+
+      <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ToolField label="原图预览">
+          <div class="tool-preview-box">
+            <img id="source-image-preview" class="tool-preview-image hidden" alt="原图预览" />
+            <div id="source-image-empty" class="tool-preview-empty">选择图片后在此显示原图</div>
+          </div>
+        </ToolField>
+        <ToolField label="Data URL 结果">
+          <textarea id="image-base64-output" class={TEXTAREA}
+            rows="10" placeholder="选择图片后自动生成 data:image/..." readonly></textarea>
+        </ToolField>
       </div>
+
+      <ToolToolbar mt={0.5}>
+        <button id="image-to-base64-copy" class={`${BTN_SECONDARY} ${BTN_SM}`} type="button">复制 Base64</button>
+        <button id="image-to-base64-clear" class={`${BTN_SECONDARY} ${BTN_SM}`} type="button">清空</button>
+      </ToolToolbar>
+    </div>
+
+    <!-- Base64 → 图片 -->
+    <div class={`${PANEL} mt-5`}>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ToolField label="Base64 输入" hint="支持纯 Base64 或 data URL">
+          <textarea id="base64-image-input" class={TEXTAREA}
+            rows="10" placeholder="data:image/png;base64,iVBORw0K..."></textarea>
+        </ToolField>
+        <ToolField label="图片预览">
+          <div class="tool-preview-box">
+            <img id="base64-image-preview" class="tool-preview-image hidden" alt="Base64 图片预览" />
+            <div id="image-preview-empty" class="tool-preview-empty">输入 Base64 后在此预览</div>
+          </div>
+        </ToolField>
+      </div>
+
+      <ToolToolbar mt={0.5}>
+        <button id="base64-to-image-preview-btn" class={`${BTN_PRIMARY} ${BTN_SM}`} type="button">生成预览</button>
+        <a id="base64-image-download" class={`${BTN_SECONDARY} ${BTN_SM} tool-disabled`}
+          download="base64-image.png" href="#" aria-disabled="true">下载图片</a>
+        <button id="base64-image-clear" class={`${BTN_SECONDARY} ${BTN_SM}`} type="button">清空</button>
+      </ToolToolbar>
     </div>
   </section>
 
-  <section class="tool-panel d-none" data-panel="image">
-    <div class="card border-0 shadow-sm mb-4 tool-card">
-      <div class="card-body p-4 p-md-4">
-        <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-3">
-          <div>
-            <div class="font-weight-bold tool-label mb-1">上传图片转 Base64</div>
-            <div id="image-file-meta" class="text-muted small mt-1"></div>
-          </div>
-          <label class="btn btn-primary mb-0 tool-upload-btn">
-            <span>选择图片</span>
-            <input id="image-file-input" type="file" accept="image/*" hidden>
-          </label>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-6 mb-4">
-            <label class="font-weight-bold mb-2 d-block tool-label">原图预览</label>
-            <div class="tool-preview-box">
-              <img id="source-image-preview" class="tool-preview-image d-none" alt="上传图片预览">
-              <div id="source-image-empty" class="tool-preview-empty">选择图片后会在这里显示原图预览</div>
-            </div>
-            <div class="d-flex flex-wrap gap-2 mt-3 tool-actions">
-              <button id="image-to-base64-copy" class="btn btn-outline-dark" type="button">复制图片 Base64</button>
-              <button id="image-to-base64-clear" class="btn btn-outline-secondary" type="button">清空图片结果</button>
-            </div>
-          </div>
-
-          <div class="col-lg-6 mb-4">
-            <label class="font-weight-bold mb-2 d-block tool-label">图片 Base64 结果</label>
-            <textarea id="image-base64-output" class="form-control tool-textarea" rows="12" placeholder="选择图片后会自动生成 Data URL / Base64"></textarea>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-6 mb-4 mb-lg-0">
-            <label class="font-weight-bold mb-2 d-block tool-label">Base64 转图片</label>
-            <textarea id="base64-image-input" class="form-control tool-textarea" rows="12" placeholder="请输入图片的 Base64 或 Data URL，例如 data:image/png;base64,..."></textarea>
-            <div class="d-flex flex-wrap gap-2 mt-3 tool-actions">
-              <button id="base64-to-image-preview-btn" class="btn btn-primary" type="button">生成图片预览</button>
-              <button id="base64-image-clear" class="btn btn-outline-secondary" type="button">清空预览区</button>
-            </div>
-          </div>
-
-          <div class="col-lg-6">
-            <label class="font-weight-bold mb-2 d-block tool-label">图片预览</label>
-            <div class="tool-preview-box">
-              <img id="base64-image-preview" class="tool-preview-image d-none" alt="Base64 图片预览">
-              <div id="image-preview-empty" class="tool-preview-empty">输入图片 Base64 后可在这里预览</div>
-            </div>
-            <div class="d-flex flex-wrap gap-2 mt-3 tool-actions">
-              <a id="base64-image-download" class="btn btn-outline-primary disabled" download="base64-image.png" href="#" aria-disabled="true">下载图片</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <p id="base64-status" class="tool-status text-muted mb-0"></p>
+  <ToolStatus id="base64-status" mt={1} />
 
   <script is:inline>
     (function () {
-      var status = document.getElementById('base64-status');
+      var $ = function (id) { return document.getElementById(id); };
+      var status = $('base64-status');
       var MAX_IMAGE_BYTES = 10 * 1024 * 1024;
       var MAX_BASE64_LENGTH = 16 * 1024 * 1024;
 
-      var input = document.getElementById('base64-input');
-      var output = document.getElementById('base64-output');
-      var encodeBtn = document.getElementById('base64-encode');
-      var decodeBtn = document.getElementById('base64-decode');
-      var clearBtn = document.getElementById('base64-clear');
-      var copyBtn = document.getElementById('base64-copy');
-
-      var imageFileInput = document.getElementById('image-file-input');
-      var imageFileMeta = document.getElementById('image-file-meta');
-      var imageBase64Output = document.getElementById('image-base64-output');
-      var imageToBase64CopyBtn = document.getElementById('image-to-base64-copy');
-      var imageToBase64ClearBtn = document.getElementById('image-to-base64-clear');
-      var sourceImagePreview = document.getElementById('source-image-preview');
-      var sourceImageEmpty = document.getElementById('source-image-empty');
-
-      var base64ImageInput = document.getElementById('base64-image-input');
-      var previewBtn = document.getElementById('base64-to-image-preview-btn');
-      var previewImg = document.getElementById('base64-image-preview');
-      var previewEmpty = document.getElementById('image-preview-empty');
-      var previewClearBtn = document.getElementById('base64-image-clear');
-      var downloadLink = document.getElementById('base64-image-download');
-
-      if (sourceImagePreview) {
-        sourceImagePreview.addEventListener('error', function () {
-          resetSourcePreview();
-          setStatus('图片预览加载失败，请重新选择图片', true);
-        });
-      }
-
-      if (previewImg) {
-        previewImg.addEventListener('error', function () {
-          resetPreview();
-          setStatus('图片解析失败，请确认 Base64 是否正确', true);
-        });
-      }
-
-      if (downloadLink) {
-        downloadLink.addEventListener('click', function (event) {
-          if (downloadLink.classList.contains('disabled')) event.preventDefault();
-        });
-      }
+      var input = $('base64-input');
+      var output = $('base64-output');
+      var imageFileInput = $('image-file-input');
+      var imageFileMeta = $('image-file-meta');
+      var imageBase64Output = $('image-base64-output');
+      var sourceImagePreview = $('source-image-preview');
+      var sourceImageEmpty = $('source-image-empty');
+      var base64ImageInput = $('base64-image-input');
+      var previewImg = $('base64-image-preview');
+      var previewEmpty = $('image-preview-empty');
+      var downloadLink = $('base64-image-download');
 
       function setStatus(text, isError) {
         if (!status) return;
         status.textContent = text || '';
-        status.classList.toggle('text-danger', !!isError);
-        status.classList.toggle('text-muted', !isError);
+        status.classList.toggle('tool-status--error', !!isError);
+      }
+      function flashStatus(text) {
+        setStatus(text, false);
+        clearTimeout(flashStatus._t);
+        flashStatus._t = setTimeout(function () { setStatus('', false); }, 2500);
       }
 
       function encodeUtf8(str) {
         var bytes = new TextEncoder().encode(str);
-        var binary = '';
-        bytes.forEach(function (byte) { binary += String.fromCharCode(byte); });
-        return btoa(binary);
+        var bin = '';
+        bytes.forEach(function (b) { bin += String.fromCharCode(b); });
+        return btoa(bin);
       }
-
       function decodeUtf8(str) {
-        var binary = atob(str);
-        var bytes = Uint8Array.from(binary, function (char) { return char.charCodeAt(0); });
+        var bin = atob(str);
+        var bytes = Uint8Array.from(bin, function (c) { return c.charCodeAt(0); });
         return new TextDecoder().decode(bytes);
       }
-
-      function normalizeImageDataUrl(value) {
-        var raw = String(value || '').trim();
+      function normalizeImageDataUrl(v) {
+        var raw = String(v || '').trim();
         if (!raw) return '';
         if (/^data:image\/[a-zA-Z0-9.+-]+;base64,/.test(raw)) return raw;
         return 'data:image/png;base64,' + raw.replace(/^base64,?/i, '').replace(/\s+/g, '');
       }
-
       function resetSourcePreview() {
-        if (sourceImagePreview) {
-          sourceImagePreview.removeAttribute('src');
-          sourceImagePreview.classList.add('d-none');
-        }
+        if (sourceImagePreview) { sourceImagePreview.removeAttribute('src'); sourceImagePreview.classList.add('hidden'); }
         if (sourceImageEmpty) sourceImageEmpty.style.display = 'flex';
         if (imageFileMeta) imageFileMeta.textContent = '';
       }
-
       function resetPreview() {
-        if (previewImg) {
-          previewImg.removeAttribute('src');
-          previewImg.classList.add('d-none');
-        }
+        if (previewImg) { previewImg.removeAttribute('src'); previewImg.classList.add('hidden'); }
         if (previewEmpty) previewEmpty.style.display = 'flex';
         if (downloadLink) {
           downloadLink.setAttribute('href', '#');
           downloadLink.setAttribute('aria-disabled', 'true');
-          downloadLink.classList.add('disabled');
+          downloadLink.classList.add('tool-disabled');
         }
       }
-
-      async function copyText(value, successText) {
-        if (!value) {
-          setStatus('当前没有可复制的内容', true);
-          return;
-        }
-        try {
-          await navigator.clipboard.writeText(value);
-          setStatus(successText, false);
-        } catch (e) {
-          setStatus('复制失败，请手动复制', true);
-        }
+      async function copyText(value, ok) {
+        if (!value) { setStatus('当前没有可复制的内容', true); return; }
+        try { await navigator.clipboard.writeText(value); flashStatus(ok); }
+        catch (e) { setStatus('复制失败，请手动复制', true); }
       }
 
-      encodeBtn && encodeBtn.addEventListener('click', function () {
-        try {
-          output.value = encodeUtf8(input.value || '');
-          setStatus('文本已编码为 Base64', false);
-        } catch (e) {
-          setStatus('编码失败，请检查输入内容', true);
-        }
+      sourceImagePreview && sourceImagePreview.addEventListener('error', function () {
+        resetSourcePreview(); setStatus('图片预览加载失败', true);
+      });
+      previewImg && previewImg.addEventListener('error', function () {
+        resetPreview(); setStatus('图片解析失败，请确认 Base64 是否正确', true);
+      });
+      downloadLink && downloadLink.addEventListener('click', function (e) {
+        if (downloadLink.classList.contains('tool-disabled')) e.preventDefault();
       });
 
-      decodeBtn && decodeBtn.addEventListener('click', function () {
-        try {
-          output.value = decodeUtf8(input.value || '');
-          setStatus('Base64 已解码为文本', false);
-        } catch (e) {
-          setStatus('解码失败，输入内容不是合法的 Base64', true);
-        }
+      $('base64-encode').addEventListener('click', function () {
+        try { output.value = encodeUtf8(input.value || ''); flashStatus('已编码为 Base64'); }
+        catch (e) { setStatus('编码失败，请检查输入内容', true); }
+      });
+      $('base64-decode').addEventListener('click', function () {
+        try { output.value = decodeUtf8(input.value || ''); flashStatus('已解码为文本'); }
+        catch (e) { setStatus('解码失败，输入不是合法 Base64', true); }
+      });
+      $('base64-clear').addEventListener('click', function () {
+        input.value = ''; output.value = ''; flashStatus('文本已清空');
+      });
+      $('base64-copy').addEventListener('click', function () {
+        copyText(output.value || '', '结果已复制');
       });
 
-      clearBtn && clearBtn.addEventListener('click', function () {
-        input.value = '';
-        output.value = '';
-        setStatus('文本内容已清空', false);
-      });
-
-      copyBtn && copyBtn.addEventListener('click', function () {
-        copyText(output.value || '', '结果已复制到剪贴板');
-      });
-
-      imageFileInput && imageFileInput.addEventListener('change', function () {
+      imageFileInput.addEventListener('change', function () {
         var file = imageFileInput.files && imageFileInput.files[0];
         if (!file) return;
         if (file.size > MAX_IMAGE_BYTES) {
@@ -239,72 +211,53 @@ import ToolTabsScript from '../../components/tools/ToolTabsScript.astro';
         var reader = new FileReader();
         reader.onload = function () {
           var result = String(reader.result || '');
-          if (imageBase64Output) imageBase64Output.value = result;
-          if (sourceImagePreview) {
-            sourceImagePreview.src = result;
-            sourceImagePreview.classList.remove('d-none');
-          }
-          if (sourceImageEmpty) sourceImageEmpty.style.display = 'none';
-          if (imageFileMeta) {
-            var sizeText = file.size >= 1024 * 1024
-              ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
-              : Math.max(1, Math.round(file.size / 1024)) + ' KB';
-            imageFileMeta.textContent = file.name + ' · ' + sizeText;
-          }
-          setStatus('图片已转换为 Base64', false);
+          imageBase64Output.value = result;
+          sourceImagePreview.src = result;
+          sourceImagePreview.classList.remove('hidden');
+          sourceImageEmpty.style.display = 'none';
+          var size = file.size >= 1024 * 1024
+            ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
+            : Math.max(1, Math.round(file.size / 1024)) + ' KB';
+          imageFileMeta.textContent = file.name + ' · ' + size;
+          flashStatus('图片已转换为 Base64');
         };
-        reader.onerror = function () {
-          setStatus('图片读取失败，请重试', true);
-        };
+        reader.onerror = function () { setStatus('图片读取失败', true); };
         reader.readAsDataURL(file);
       });
 
-      imageToBase64CopyBtn && imageToBase64CopyBtn.addEventListener('click', function () {
-        copyText((imageBase64Output && imageBase64Output.value) || '', '图片 Base64 已复制到剪贴板');
+      $('image-to-base64-copy').addEventListener('click', function () {
+        copyText(imageBase64Output.value || '', '图片 Base64 已复制');
       });
-
-      imageToBase64ClearBtn && imageToBase64ClearBtn.addEventListener('click', function () {
-        if (imageBase64Output) imageBase64Output.value = '';
-        if (imageFileInput) imageFileInput.value = '';
+      $('image-to-base64-clear').addEventListener('click', function () {
+        imageBase64Output.value = '';
+        imageFileInput.value = '';
         resetSourcePreview();
-        setStatus('图片结果已清空', false);
+        flashStatus('图片结果已清空');
       });
 
-      previewBtn && previewBtn.addEventListener('click', function () {
+      $('base64-to-image-preview-btn').addEventListener('click', function () {
         try {
-          var rawBase64 = (base64ImageInput && base64ImageInput.value) || '';
-          if (rawBase64.length > MAX_BASE64_LENGTH) {
-            resetPreview();
-            setStatus('Base64 内容过大，请控制在 16 MB 以内', true);
-            return;
+          var raw = base64ImageInput.value || '';
+          if (raw.length > MAX_BASE64_LENGTH) {
+            resetPreview(); setStatus('Base64 过大 (>16 MB)', true); return;
           }
-          var dataUrl = normalizeImageDataUrl(rawBase64);
-          if (!dataUrl) {
-            resetPreview();
-            setStatus('请先输入图片 Base64', true);
-            return;
-          }
-          if (previewImg) {
-            previewImg.src = dataUrl;
-            previewImg.classList.remove('d-none');
-          }
-          if (previewEmpty) previewEmpty.style.display = 'none';
-          if (downloadLink) {
-            downloadLink.setAttribute('href', dataUrl);
-            downloadLink.setAttribute('aria-disabled', 'false');
-            downloadLink.classList.remove('disabled');
-          }
-          setStatus('图片预览已生成', false);
+          var dataUrl = normalizeImageDataUrl(raw);
+          if (!dataUrl) { resetPreview(); setStatus('请先输入 Base64', true); return; }
+          previewImg.src = dataUrl;
+          previewImg.classList.remove('hidden');
+          previewEmpty.style.display = 'none';
+          downloadLink.setAttribute('href', dataUrl);
+          downloadLink.setAttribute('aria-disabled', 'false');
+          downloadLink.classList.remove('tool-disabled');
+          flashStatus('图片预览已生成');
         } catch (e) {
-          resetPreview();
-          setStatus('图片解析失败，请确认 Base64 是否正确', true);
+          resetPreview(); setStatus('图片解析失败', true);
         }
       });
-
-      previewClearBtn && previewClearBtn.addEventListener('click', function () {
-        if (base64ImageInput) base64ImageInput.value = '';
+      $('base64-image-clear').addEventListener('click', function () {
+        base64ImageInput.value = '';
         resetPreview();
-        setStatus('图片预览已清空', false);
+        flashStatus('图片预览已清空');
       });
 
       resetSourcePreview();

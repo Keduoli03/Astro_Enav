@@ -1,24 +1,49 @@
 ---
-// src/layouts/Layout.astro
 import Sidebar from '../components/Sidebar.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_DESCRIPTION as DEFAULT_SITE_DESCRIPTION, SITE_FAVICON as DEFAULT_SITE_FAVICON, SITE_TITLE as DEFAULT_SITE_TITLE, SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK } from '../settings';
-import { LIGHT_MODE, DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
+import SearchModal from '@/components/Utils/SearchModal.astro';
+import { ClientRouter, fade } from 'astro:transitions';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import {
+  SITE_DESCRIPTION as DEFAULT_SITE_DESCRIPTION,
+  SITE_FAVICON as DEFAULT_SITE_FAVICON,
+  SITE_TITLE as DEFAULT_SITE_TITLE,
+  SEARCH_BG,
+  CONTENT_BG,
+  SEARCH_BG_DARK,
+  CONTENT_BG_DARK,
+} from '../settings';
+import { DARK_MODE, DEFAULT_THEME } from '../constants/constants';
 import '../styles/global.css';
 import '../styles/external.css';
-import SearchModal from '@/components/Utils/SearchModal.astro';
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
-const isImageMeta = (v: unknown): v is ImageMetadata => !!v && typeof v === 'object' && 'src' in (v as any) && 'width' in (v as any) && 'height' in (v as any);
-const darkSearchBg: ImageMetadata | null = (SEARCH_BG_DARK && isImageMeta(SEARCH_BG_DARK)) ? SEARCH_BG_DARK : (isImageMeta(SEARCH_BG) ? SEARCH_BG : null);
-const contentDark: ImageMetadata | null = (CONTENT_BG_DARK && isImageMeta(CONTENT_BG_DARK)) ? CONTENT_BG_DARK : (isImageMeta(CONTENT_BG) ? CONTENT_BG : null);
+import '../styles/tools-tailwind.css';
+
 interface Props {
   title?: string;
   description?: string;
   favicon?: string;
   hideFooter?: boolean;
 }
+
+const isImageMeta = (value: unknown): value is ImageMetadata =>
+  Boolean(value && typeof value === 'object' && 'src' in value && 'width' in value && 'height' in value);
+
+const optimizeBackground = async (value: unknown, quality: number) => isImageMeta(value)
+  ? getImage({ src: value, width: 1920, format: 'webp', quality })
+  : null;
+
+const contentLight = await optimizeBackground(CONTENT_BG, 80);
+const contentDark = await optimizeBackground(
+  isImageMeta(CONTENT_BG_DARK) ? CONTENT_BG_DARK : CONTENT_BG,
+  80,
+);
+const searchLight = await optimizeBackground(SEARCH_BG, 90);
+const searchDark = await optimizeBackground(
+  isImageMeta(SEARCH_BG_DARK) ? SEARCH_BG_DARK : SEARCH_BG,
+  90,
+);
 
 const hasSearch = Astro.slots.has('searchbar');
 const {
@@ -29,204 +54,129 @@ const {
 } = Astro.props;
 const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site) : Astro.url;
 ---
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#f9f9f9" />
   <link rel="sitemap" href="/sitemap-index.xml" />
   <title>{title}</title>
   <link rel="icon" href={favicon} />
-  <meta name="keywords" content={title} />
+  {contentLight ? <link rel="preload" as="image" href={contentLight.src} fetchpriority="high" /> : null}
+  {contentDark && contentDark.src !== contentLight?.src ? <link rel="preload" as="image" href={contentDark.src} fetchpriority="high" /> : null}
   <meta name="description" content={description} />
   <link rel="canonical" href={canonicalURL} />
   <meta property="og:type" content="website" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:site_name" content={DEFAULT_SITE_TITLE} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonicalURL} />
+  <ClientRouter />
+
+  <!-- Apply the persisted theme before the body is parsed to prevent a white
+       first paint when the saved theme is dark. -->
+  <script is:inline define:vars={{ DEFAULT_THEME, DARK_MODE }}>
+    (() => {
+      let theme = DEFAULT_THEME;
+      try { theme = localStorage.getItem('theme') || DEFAULT_THEME; } catch {}
+      const isDark = theme === DARK_MODE;
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    })();
+  </script>
 
   <style>
-    html, body{background-color:#f9f9f9}
-    @media (prefers-color-scheme: dark){html, body{background-color:#1b1d1f}}
+    html,body{background-color:#f9f9f9;color:#282a2d}
+    html.theme-dark,html.theme-dark body{background-color:#1b1d1f!important;color:#c6c9cf!important}
+    html.theme-light,html.theme-light body{background-color:#f9f9f9!important;color:#282a2d!important}
     body.io-black-mode{background-color:#1b1d1f!important;color:#c6c9cf!important}
     body.io-grey-mode{background-color:#f9f9f9!important;color:#282a2d!important}
-    body{transition:background-color .3s ease,color .3s ease}
-    body.theme-init{transition:none!important}
-    :root{--sidebar-blur:12px;--sidebar-border-color:rgba(0,0,0,.06);--sidebar-bg-color:linear-gradient(to bottom, rgba(255,255,255,.65), rgba(255,255,255,.45));--sidebar-popup-bg-color:linear-gradient(to bottom, rgba(245,245,245,.75), rgba(245,245,245,.64));--sidebar-text-color:#20272b;--sidebar-title-color:#1b2226;--sidebar-hover-bg:rgba(0,0,0,.06);--sidebar-active-bg:rgba(0,0,0,.06);--sidebar-submenu-bg:rgba(0,0,0,.05)}
-    /* 全局内容背景分层 */
-    .global-bg-layer{position:fixed;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0;pointer-events:none;opacity:0;transition:opacity .3s;filter:blur(var(--content-bg-blur,0px));width:100%;height:100%;object-fit:cover}
-    body.io-grey-mode #global-bg-light{opacity:1}
-    body.io-grey-mode #global-bg-dark{opacity:0}
-    body.io-black-mode #global-bg-light{opacity:0}
-    body.io-black-mode #global-bg-dark{opacity:1}
-    /* 顶部搜索背景分层 */
+    body{transition:none}
+    body.page-loading,body.theme-init{transition:none!important}
+    html.theme-switching body,html.theme-switching body *{transition:none!important}
+    :root{--sidebar-blur:12px;--sidebar-border-color:rgba(0,0,0,.06);--sidebar-bg-color:linear-gradient(to bottom,rgba(255,255,255,.65),rgba(255,255,255,.45));--sidebar-header-shadow:0 6px 24px rgba(0,0,0,.12);--sidebar-popup-bg-color:linear-gradient(to bottom,rgba(245,245,245,.75),rgba(245,245,245,.64));--sidebar-text-color:#20272b;--sidebar-title-color:#1b2226;--sidebar-hover-bg:rgba(0,0,0,.06);--sidebar-active-bg:rgba(0,0,0,.06);--sidebar-submenu-bg:rgba(0,0,0,.05)}
+    .global-bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;filter:blur(var(--content-bg-blur,0));transform:scale(1.01);background-color:#f9f9f9;background-image:var(--content-bg-light-image);background-size:cover;background-position:center;background-repeat:no-repeat}
+    html.theme-dark .global-bg-layer{background-color:#1b1d1f;background-image:var(--content-bg-dark-image)}
+    .global-bg-layer img,.search-bg-layer img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .page-container{position:relative;z-index:1;background:transparent!important}
     #search-bg{position:relative;overflow:visible}
-    .search-bg-layer{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;z-index:0;pointer-events:none;opacity:0;transition:opacity .3s;filter:blur(var(--search-bg-blur,0px))}
-    .page-container{position:relative;z-index:1;background:transparent !important}
-    /* 移除顶部渐变遮罩，避免覆盖背景 */
+    .search-bg-layer{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;filter:blur(var(--search-bg-blur,0));background-image:var(--search-bg-light-image);background-size:cover;background-position:center;background-repeat:no-repeat}
+    html.theme-dark .search-bg-layer{background-image:var(--search-bg-dark-image)}
+    #search-bg>:not(.search-bg-layer){position:relative;z-index:1}
     .header-big.bg-gradual:before{display:none}
-    #search-bg > :not(.search-bg-layer){position:relative;z-index:1}
-    body.io-grey-mode #search-bg-light{opacity:1}
-    body.io-grey-mode #search-bg-dark{opacity:0}
-    body.io-black-mode #search-bg-light{opacity:0}
-    body.io-black-mode #search-bg-dark{opacity:1}
+    ::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+    /* transition:persist reparents the sidebar/header nodes on every route swap;
+       their own CSS transitions (width/max-width/all) would otherwise animate
+       from a transient mid-reparent layout instead of applying instantly. */
+    html.astro-route-swap .sidebar-nav,
+    html.astro-route-swap .sidebar-nav *,
+    html.astro-route-swap .page-header,
+    html.astro-route-swap .main-content{transition:none!important;animation:none!important}
   </style>
-
-  <script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE}}>
-    (function() {
-      // 使用与theme-utils.ts相同的逻辑
-      function getStoredTheme() {
-        const stored = localStorage.getItem('theme');
-        return stored || DEFAULT_THEME;
-      }
-      
-      function applyThemeToDocument(theme) {
-        // 立即应用到body，不等待DOM加载
-        const body = document.body || document.getElementsByTagName('body')[0];
-        if (body) {
-          // 移除现有的主题类
-          body.classList.remove('io-grey-mode', 'io-black-mode');
-          
-          // 应用新的主题类
-          switch (theme) {
-            case LIGHT_MODE:
-              body.classList.add('io-grey-mode');
-              break;
-            case DARK_MODE:
-              body.classList.add('io-black-mode');
-              break;
-            case AUTO_MODE:
-              if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                body.classList.add('io-black-mode');
-              } else {
-                body.classList.add('io-grey-mode');
-              }
-              break;
-          }
-        }
-      }
-      
-      // 立即应用存储的主题
-      const storedTheme = getStoredTheme();
-      // 如果存储的是AUTO_MODE，LightDarkSwitch会默认设为LIGHT_MODE
-      const theme = (storedTheme === LIGHT_MODE || storedTheme === DARK_MODE) ? storedTheme : LIGHT_MODE;
-      
-      try { (document.body || document.getElementsByTagName('body')[0]).classList.add('theme-init'); } catch(e) {}
-      applyThemeToDocument(theme);
-      requestAnimationFrame(function(){ try { (document.body || document.getElementsByTagName('body')[0]).classList.remove('theme-init'); } catch(e) {} });
-      
-      // 如果body还不存在，监听DOM变化
-      if (!document.body) {
-        const observer = new MutationObserver(function() {
-          if (document.body) {
-            observer.disconnect();
-            applyThemeToDocument(theme);
-          }
-        });
-        observer.observe(document.documentElement, { childList: true, subtree: true });
-      }
+</head>
+<body class="page-loading theme-init">
+  <script is:inline define:vars={{ DEFAULT_THEME, DARK_MODE }}>
+    (() => {
+      let theme = DEFAULT_THEME;
+      try { theme = localStorage.getItem('theme') || DEFAULT_THEME; } catch {}
+      const isDark = theme === DARK_MODE;
+      document.documentElement.classList.toggle('theme-dark', isDark);
+      document.documentElement.classList.toggle('theme-light', !isDark);
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+      document.body.classList.toggle('io-black-mode', isDark);
+      document.body.classList.toggle('io-grey-mode', !isDark);
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#1b1d1f' : '#f9f9f9');
+      requestAnimationFrame(() => document.body.classList.remove('theme-init'));
     })();
   </script>
   <script is:inline>
-    (function(){
-      try{
-        var stored = localStorage.getItem('miniSidebar') === '1';
-        function apply(){
-          var el = document.getElementById('sidebar');
-          if(el){
-            if(stored) el.classList.add('mini-sidebar');
-            return true;
-          }
-          return false;
-        }
-        if(!apply()){
-          var obs = new MutationObserver(function(){ if(apply()) obs.disconnect(); });
-          obs.observe(document.documentElement,{childList:true,subtree:true});
-        }
-      }catch(e){}
+    document.addEventListener('astro:before-swap', () => document.documentElement.classList.add('astro-route-swap'));
+    document.addEventListener('astro:after-swap', () => {
+      requestAnimationFrame(() => document.documentElement.classList.remove('astro-route-swap'));
+    });
+  </script>
+
+  <SearchModal />
+  {contentLight || contentDark ? (
+    <div id="global-bg" class="global-bg-layer" style={`--content-bg-light-image:url("${contentLight?.src || ''}");--content-bg-dark-image:url("${contentDark?.src || contentLight?.src || ''}")`} data-light-src={contentLight?.src || ''} data-dark-src={contentDark?.src || contentLight?.src || ''} transition:persist>
+      <img id="global-bg-image" alt="" decoding="async" fetchpriority="high" />
+    </div>
+  ) : null}
+
+  <div class="page-container">
+    <Sidebar />
+    <div class="main-content flex-fill flex-1">
+      <Header />
+      {hasSearch ? (
+        <div class="header-big post-top css-color mb-4" id="search-bg">
+          {searchLight || searchDark ? (
+            <div class="search-bg-layer" style={`--search-bg-light-image:url("${searchLight?.src || ''}");--search-bg-dark-image:url("${searchDark?.src || searchLight?.src || ''}")`} data-light-src={searchLight?.src || ''} data-dark-src={searchDark?.src || searchLight?.src || ''}>
+              <img id="search-bg-image" alt="" decoding="async" />
+            </div>
+          ) : null}
+          <div class="s-search"><slot name="searchbar" /></div>
+        </div>
+      ) : null}
+      <div id="content" class="content-site customize-site" transition:animate={fade({ duration: '200ms' })}><slot /></div>
+      {hideFooter ? null : <Footer />}
+    </div>
+  </div>
+
+  <script is:inline>
+    (() => {
+      try {
+        if (localStorage.getItem('miniSidebar') === '1') document.getElementById('sidebar')?.classList.add('mini-sidebar');
+      } catch {}
     })();
   </script>
-  
   <script src="../scripts/search-suggest.ts"></script>
   <script src="../scripts/sidebar-controller.ts"></script>
   <script src="../scripts/background-controller.ts"></script>
   <script src="../scripts/ui-controls.ts"></script>
   <script src="../scripts/mobile-sidebar.ts"></script>
-</head>
-<body class="page-loading io-grey-mode">
-  <SearchModal />
-  {isImageMeta(CONTENT_BG) ? (
-    <div id="global-bg-light" class="global-bg-layer">
-      <Image 
-        src={CONTENT_BG} 
-        alt="" 
-        format="webp"
-        quality={80}
-        width={1920}
-        loading="eager"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-    </div>
-  ) : (
-    <div id="global-bg-light" class="global-bg-layer"></div>
-  )}
-  {contentDark ? (
-    <div id="global-bg-dark" class="global-bg-layer">
-      <Image 
-        src={contentDark} 
-        alt="" 
-        format="webp"
-        quality={80}
-        width={1920}
-        loading="eager"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-      />
-    </div>
-  ) : (
-    <div id="global-bg-dark" class="global-bg-layer"></div>
-  )}
-<div class="page-container">
-  <Sidebar />
-  <div class="main-content flex-fill"> 
-    <Header />
-    {hasSearch ? (
-      <div class="header-big post-top css-color mb-4" id="search-bg">
-        <div id="search-bg-light" class="search-bg-layer">
-          {isImageMeta(SEARCH_BG) ? (
-            <Image
-              src={SEARCH_BG}
-              alt="搜索背景（浅色模式)"
-              format="webp"
-              quality={100}
-              width={1920}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', visibility: 'visible' }}
-            />
-          ) : null}
-        </div>
-        <div id="search-bg-dark" class="search-bg-layer">
-          {darkSearchBg ? (
-            <Image
-              src={darkSearchBg}
-              alt="搜索背景（深色模式)"
-              format="webp"
-              quality={100}
-              width={1920}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', visibility: 'visible' }}
-            />
-          ) : null}
-        </div>
-        <div class="s-search">
-          <slot name="searchbar" />
-        </div>
-      </div>
-    ) : null}
-    <div id="content" class="content-site customize-site">
-      <slot />
-    </div>
-    {hideFooter ? null : <Footer />}
-  </div>
-</div>
 </body>
 </html>

@@ -23,23 +23,24 @@ body,html{font-size:14px;}
 #search button i{color:#6C757D;font-size:18px}
 
 /*顶部导航栏字体+图标颜色*/
-.big-header-banner .page-header{color:#ffffff;background:rgba(255,255,255,0);box-shadow:none;transition:color .3s,background-color .3s}
-.big-header-banner.header-bg .page-header{color:initial;backdrop-filter:blur(10px);background:rgba(255,255,255,.7);box-shadow:0 5px 20px 0 rgba(0,0,0,.15)}
+.big-header-banner .page-header{color:#313437;background:var(--sidebar-bg-color)!important;backdrop-filter:blur(var(--sidebar-blur,12px));-webkit-backdrop-filter:blur(var(--sidebar-blur,12px));box-shadow:var(--sidebar-header-shadow,0 6px 24px rgba(0,0,0,.12));border:1px solid var(--sidebar-border-color);transition:color .3s,background-color .3s}
+.big-header-banner.header-bg .page-header{color:initial;backdrop-filter:blur(var(--sidebar-blur,12px));-webkit-backdrop-filter:blur(var(--sidebar-blur,12px));background:var(--sidebar-bg-color)!important;box-shadow:var(--sidebar-header-shadow,0 6px 24px rgba(0,0,0,.12))}
 .io-black-mode .big-header-banner.header-bg .page-header{color:#fff;background:#2c2e2f;box-shadow:0 0 25px 5px rgba(10,10,10,.25)}
-.big-header-banner:not(.header-bg) .page-header .navbar-nav>li>a,.big-header-banner:not(.header-bg) .navbar-menu a:not(.dropdown-item){color:#ffffff;}
+.big-header-banner:not(.header-bg) .page-header .navbar-nav>li>a,.big-header-banner:not(.header-bg) .navbar-menu a:not(.dropdown-item){color:#313437;}
 .big-header-banner:not(.header-bg) .page-header .navbar-nav>li>a:hover,.big-header-banner:not(.header-bg) .navbar-menu a:not(.dropdown-item):hover{color:#dc3545;}
-.big-header-banner:not(.header-bg) .header-mini-btn path{stroke:#ffffff;}
-.big-header-banner:not(.header-bg) .header-mini-btn label:hover path{stroke:#ffffff;}
+.big-header-banner:not(.header-bg) .header-mini-btn path{stroke:#666;}
+.big-header-banner:not(.header-bg) .header-mini-btn label:hover path{stroke:#f1404b;}
 
 /* 浅色模式下的默认图标颜色（未显式设置 text-* 时） */
-:global(.io-grey-mode) .icon-fw,
-:global(.io-grey-mode) .icon-lg,
-:global(.io-grey-mode) .icon-2x {
+.io-grey-mode .icon-fw,
+.io-grey-mode .icon-lg,
+.io-grey-mode .icon-2x {
   color: #000 !important;
 }
 
 /* 浅色模式下页脚工具按钮图标颜色 */
-:global(.io-grey-mode) #footer-tools .btn {
+.io-grey-mode #footer-tools > a,
+.io-grey-mode #footer-tools .theme-switch-btn {
   color: #000 !important;
 }
 
@@ -217,9 +218,9 @@ footer.main-footer .footer-text a:hover {
 --------------------------------------------------------------*/
 footer.main-footer{padding:20px 30px;margin-top:0px}
 #footer-tools{position:fixed;bottom:20px;right:20px;display:flex;z-index:1000;pointer-events:none}
-#footer-tools .btn{color:#777;background:#eee;width:40px;height:40px;font-size:1rem;text-align:center;line-height:40px;padding:unset;display:block;border:unset;pointer-events:auto}
+#footer-tools > a,#footer-tools .theme-switch-btn{color:#777;background:#eee;width:40px;height:40px;font-size:1rem;text-align:center;line-height:40px;padding:unset;display:block;border:unset;pointer-events:auto}
 #footer-tools .go-up{display:none}
-#footer-tools .btn:hover{color:#444}
+#footer-tools > a:hover,#footer-tools .theme-switch-btn:hover{color:#444}
 #footer-tools [data-v-db6ccf64][data-v-41ba7e2c],#footer-tools [data-v-db6ccf64][data-v-6d083e75]{top:unset!important;bottom:0!important;right:44px!important}
 #footer-tools .s-sticker-tmp{position:absolute!important;font-size:12px!important;top:-6px;left:18px;transform:scale(.82);padding:1px 5px;background:#f1404b;color:#ffffff!important;border-radius:50px;padding:1px 5px!important}
 .friendlink a{position:relative;display:inline-block;margin:.25rem .5rem .25rem .25rem}
@@ -257,11 +258,11 @@ body,html{font-size:14px;}
 #search button i{color:#6C757D;font-size:18px}
 
 /*顶部导航栏字体+图标颜色*/
-.big-header-banner .page-header{color:#ffffff;background:rgba(255,255,255,0);box-shadow:none;transition:color .3s,background-color .3s}
-.big-header-banner:not(.header-bg) .page-header .navbar-nav>li>a,.big-header-banner:not(.header-bg) .navbar-menu a:not(.dropdown-item){color:#ffffff;}
+.big-header-banner .page-header{color:#313437;background:var(--sidebar-bg-color)!important;backdrop-filter:blur(var(--sidebar-blur,12px));-webkit-backdrop-filter:blur(var(--sidebar-blur,12px));box-shadow:var(--sidebar-header-shadow,0 6px 24px rgba(0,0,0,.12));border:1px solid var(--sidebar-border-color);transition:color .3s,background-color .3s}
+.big-header-banner:not(.header-bg) .page-header .navbar-nav>li>a,.big-header-banner:not(.header-bg) .navbar-menu a:not(.dropdown-item){color:#313437;}
 .big-header-banner:not(.header-bg) .page-header .navbar-nav>li>a:hover,.big-header-banner:not(.header-bg) .navbar-menu a:not(.dropdown-item):hover{color:#dc3545;}
-.big-header-banner:not(.header-bg) .header-mini-btn path{stroke:#ffffff;}
-.big-header-banner:not(.header-bg) .header-mini-btn label:hover path{stroke:#ffffff;}
+.big-header-banner:not(.header-bg) .header-mini-btn path{stroke:#666;}
+.big-header-banner:not(.header-bg) .header-mini-btn label:hover path{stroke:#f1404b;}
 
 /*搜索栏字体+背景*/
 .header-big #search-text{color:#6C757D;}
@@ -430,9 +431,9 @@ footer.main-footer .footer-text a:hover {
 --------------------------------------------------------------*/
 footer.main-footer{padding:20px 30px;margin-top:0px}
 #footer-tools{position:fixed;bottom:20px;right:20px;display:flex;z-index:1000;pointer-events:none}
-#footer-tools .btn{color:#777;background:#eee;width:40px;height:40px;font-size:1rem;text-align:center;line-height:40px;padding:unset;display:block;border:unset;pointer-events:auto}
+#footer-tools > a,#footer-tools .theme-switch-btn{color:#777;background:#eee;width:40px;height:40px;font-size:1rem;text-align:center;line-height:40px;padding:unset;display:block;border:unset;pointer-events:auto}
 #footer-tools .go-up{display:none}
-#footer-tools .btn:hover{color:#444}
+#footer-tools > a:hover,#footer-tools .theme-switch-btn:hover{color:#444}
 #footer-tools [data-v-db6ccf64][data-v-41ba7e2c],#footer-tools [data-v-db6ccf64][data-v-6d083e75]{top:unset!important;bottom:0!important;right:44px!important}
 #footer-tools .s-sticker-tmp{position:absolute!important;font-size:12px!important;top:-6px;left:18px;transform:scale(.82);padding:1px 5px;background:#f1404b;color:#ffffff!important;border-radius:50px;padding:1px 5px!important}
 .friendlink a{position:relative;display:inline-block;margin:.25rem .5rem .25rem .25rem}
@@ -538,8 +539,8 @@ html.has-content-bg{background:transparent!important}
 .has-content-bg .page-container{background:transparent!important}
 .has-content-bg .main-content{background:transparent!important}
 .has-content-bg .content-site{background:transparent!important}
-.has-content-bg .card,.has-content-bg .block{background:rgba(255,255,255,0.85)!important}
-.has-content-bg .big-header-banner.header-bg .page-header{background:transparent!important}
+.has-content-bg .card,.has-content-bg .block{background:rgba(255,255,255,.85)!important}
+.has-content-bg .big-header-banner.header-bg .page-header{background:var(--sidebar-bg-color)!important;backdrop-filter:blur(var(--sidebar-blur,12px));-webkit-backdrop-filter:blur(var(--sidebar-blur,12px))}
 .has-content-bg .sidebar .url-card .card{background:transparent!important}
 /* 确保内容层在固定背景层之上 */
 body.has-content-bg .page-container, body.has-content-bg .main-content{position:relative;z-index:1}
@@ -548,5 +549,5 @@ body.has-content-bg .page-container, body.has-content-bg .main-content{position:
   body.has-content-bg{background-attachment:fixed!important}
 }
 
-.io-black-mode.has-content-bg .card,.io-black-mode.has-content-bg .block{background:rgba(44,46,47,0.85)!important}
+.io-black-mode.has-content-bg .card,.io-black-mode.has-content-bg .block{background:rgba(44,46,47,.85)!important}
 .category-section h4 .icon-fw, .category-section h4 .icon-lg{position:relative;top:2px}

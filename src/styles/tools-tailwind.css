@@ -1,0 +1,76 @@
+/* Tailwind utilities for the whole site. Unprefixed now that Bootstrap has
+   been removed: the old `tw:` prefix was only needed to dodge same-name
+   collisions with Bootstrap's unlayered utilities, and that conflict is gone. */
+/* Import theme + utilities only — skip Preflight. Preflight resets bare
+   elements (*, ul, img, a…) site-wide, which would fight the existing
+   custom theme CSS; the needed reboot equivalents live in theme/utilities.css. */
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+/* The nav site toggles dark mode via a body class, not the [data-theme]
+   attribute tool.site used — point the variant at the real mechanism so
+   none of the migrated component code has to change. */
+@custom-variant dark (&:where(.io-black-mode, .io-black-mode *));
+
+@theme {
+  /* Match the Bootstrap 4 grid breakpoints the card layout was built against,
+     so `xl:`/`2xl:` still switch the homepage to 5- and 6-per-row where they
+     always did. Tailwind's stock 1280px/1536px would shift both.
+     Kept in rem (75rem = 1200px, 105rem = 1680px — media-query rem is always
+     16px regardless of the 14px root font-size) because Tailwind sorts the
+     emitted media blocks by raw value, and px values sort ahead of the stock
+     rem ones, which would let `md:` override `xl:`/`2xl:`. */
+  --breakpoint-xl: 75rem;
+  --breakpoint-2xl: 105rem;
+
+  --color-paper: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f4f5;
+  --color-ink: #18181b;
+  --color-muted: #71717a;
+  --color-line: #e4e4e7;
+  /* Nav site's own brand blue — the tools render inside ToolLayout.astro's
+     blue-gradient card, so they should read as part of the same site. */
+  --color-accent: #1677ff;
+  --color-accent-ink: #ffffff;
+  --color-green: #27775d;
+
+  --color-code-bg: #ffffff;
+  --color-code-chrome: #fafafa;
+  --color-code-gutter: #fafafa;
+  --color-code-gutter-line: #ececed;
+  --color-code-frame: #e4e4e7;
+  --color-code-faint: #a1a1aa;
+
+  --font-sans: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  --shadow-popover: 0 8px 30px rgb(0 0 0 / 0.12);
+}
+
+/* Dark-mode token overrides — must mirror the unprefixed @theme names. */
+.io-black-mode {
+  --color-paper: #09090b;
+  --color-surface: #18181b;
+  --color-surface-2: #27272a;
+  --color-ink: #f4f4f5;
+  --color-muted: #a1a1aa;
+  --color-line: #3f3f46;
+  --color-accent: #4c9aff;
+  --color-accent-ink: #09090b;
+  --color-green: #5cae8f;
+
+  --color-code-bg: #18181b;
+  --color-code-chrome: #202023;
+  --color-code-gutter: #202023;
+  --color-code-gutter-line: #3f3f46;
+  --color-code-frame: #3f3f46;
+  --color-code-faint: #71717a;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.4);
+  --shadow-popover: 0 8px 30px rgb(0 0 0 / 0.5);
+}

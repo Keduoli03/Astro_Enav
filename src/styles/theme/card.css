@@ -33,7 +33,9 @@
 .edit .url-card.sortable{cursor:move}
 .edit .url-card.sortable .url-body a{pointer-events:none}
 .edit .url-card.sortable .url-body:hover{transform:initial;box-shadow:initial}
-.card,.block{background:#fff;border-width:0;margin-bottom:1rem;box-shadow:0 0 20px -5px rgba(158,158,158,.2);transition:background-color .3s}
+.card,.block{background:#fff;border-width:0;border-radius:.5rem;margin-bottom:1rem;box-shadow:0 0 20px -5px rgba(158,158,158,.2);transition:background-color .3s}
+.card{position:relative;display:flex;flex-direction:column;min-width:0;word-wrap:break-word;background-clip:border-box}
+.card-body{flex:1 1 auto}
 .dropdown-menu{border:unset;box-shadow:0 5px 20px 0 rgba(0,0,0,.15)}
 .dropdown-item:hover{background-color:rgba(136,136,136,.1)}
 .dropdown-item:active,.dropdown-item:focus{color:#333;background-color:rgba(136,136,136,.2)}

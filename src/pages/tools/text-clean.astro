@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { TextCleanTool } from '../../react-tools/tools/text-clean/ui';
+---
+
+<ToolLayout title="文本清洗" description="去除多余空格、重复行与不可见字符。">
+  <TextCleanTool client:load />
+</ToolLayout>

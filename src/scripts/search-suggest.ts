@@ -1,232 +1,297 @@
-let input: HTMLInputElement | null = null;
-let list: HTMLUListElement | null = null;
-let mInput: HTMLInputElement | null = null;
-let mList: HTMLUListElement | null = null;
-let currentSearch = '';
-let mainSuggestTimer: ReturnType<typeof setTimeout> | undefined;
-let modalSuggestTimer: ReturnType<typeof setTimeout> | undefined;
-function updatePlaceholderAndEngine() {
-  const checked = document.querySelector('#search-bg input[name="type"]:checked') as HTMLInputElement | null;
-  if (checked) {
-    currentSearch = checked.value || '';
-    const ph = checked.getAttribute('data-placeholder');
-    if (ph && input) input.placeholder = ph;
-    const mainForm = document.querySelector('#search-bg .super-search-fm') as HTMLFormElement | null;
-    if (mainForm) mainForm.action = currentSearch;
-    return;
-  }
-  const mf = document.querySelector('#search-bg .super-search-fm') as HTMLFormElement | null;
-  if (mf) currentSearch = mf.action || '';
+type SearchSite = { title?: string; description?: string; url?: string };
+
+const STORE_ENGINE = 'selectedSearchEngineId';
+const STORE_GROUP = 'selectedSearchGroupId';
+const STORE_GROUP_ENGINE = 'selectedEngineIdForGroup:';
+const LOCAL_ENGINE = 'type-local';
+const SUGGEST_TIMEOUT_MS = 6000;
+
+let localSitesPromise: Promise<SearchSite[]> | null = null;
+let jsonpSequence = 0;
+const requestVersions = new WeakMap<HTMLElement, number>();
+const debounceTimers = new WeakMap<HTMLElement, number>();
+
+function readStorage(key: string): string {
+  try { return localStorage.getItem(key) || ''; } catch { return ''; }
 }
-function openSearch(q: string, useModalEngine = false) {
-  let use = '';
-  const checked = document.querySelector(useModalEngine ? '#search-modal input[name="type2"]:checked' : '#search-bg input[name="type"]:checked') as HTMLInputElement | null;
-  if (checked) use = checked.value || '';
-  if (!use) {
-    const mf = document.querySelector(useModalEngine ? '#search-modal .super-search-fm' : '#search-bg .super-search-fm') as HTMLFormElement | null;
-    if (mf) use = mf.action || '';
-  }
-  if (!use) return;
-  const url = use + encodeURIComponent(q);
-  window.open(url, '_blank', 'noopener,noreferrer');
+
+function writeStorage(key: string, value: string): void {
+  try { localStorage.setItem(key, value); } catch {}
 }
-function init(): boolean {
-  input = document.getElementById('search-text') as HTMLInputElement | null;
-  list = document.getElementById('word') as HTMLUListElement | null;
-  mInput = document.getElementById('m_search-text') as HTMLInputElement | null;
-  mList = document.getElementById('m_word') as HTMLUListElement | null;
-  const forms = document.querySelectorAll('.super-search-fm') as NodeListOf<HTMLFormElement>;
-  const engineRadios = document.querySelectorAll('input[name="type"]') as NodeListOf<HTMLInputElement>;
-  const modalRadios = document.querySelectorAll('input[name="type2"]') as NodeListOf<HTMLInputElement>;
-  if (!forms.length) return false;
-  updatePlaceholderAndEngine();
-  if (engineRadios.length) engineRadios.forEach(r => r.addEventListener('change', updatePlaceholderAndEngine));
-  if (modalRadios.length) modalRadios.forEach(r => r.addEventListener('change', () => {
-    const checked = document.querySelector('input[name="type2"]:checked') as HTMLInputElement | null;
-    const ph = checked?.getAttribute('data-placeholder') || '';
-    const mInput = document.getElementById('m_search-text') as HTMLInputElement | null;
-    if (ph && mInput) mInput.placeholder = ph;
-    const mForm = document.querySelector('#search-modal .super-search-fm') as HTMLFormElement | null;
-    if (mForm && checked) mForm.action = checked.value || '';
-    const val = (mInput?.value.trim() || '');
-    if (val) {
-      const isLocal = !!(checked && checked.id === 'm_type-local');
-      if (!isLocal) fetchSuggestionsTo(val, mList);
-      else {
-        if (mList) mList.style.display = 'none';
-        const card = mList?.parentElement as HTMLElement | null;
-        if (card) card.style.display = 'none';
-      }
-    }
-  }));
-  forms.forEach(f => {
-    f.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const field = (f.querySelector('input[type="text"]') as HTMLInputElement | null) || input;
-      const q = (field && field.value.trim()) || '';
-      if (!q) return;
-      const scope = f.closest('.s-search') || document;
-      const c1 = scope.querySelector('input[name="type"]:checked') as HTMLInputElement | null;
-      const c2 = scope.querySelector('input[name="type2"]:checked') as HTMLInputElement | null;
-      const use = (c1?.value || c2?.value || f.action || '');
-      if (!use) return;
-      const url = use + encodeURIComponent(q);
-      window.open(url, '_blank', 'noopener,noreferrer');
-    });
-  });
-  if (input) {
-    const field = input as HTMLInputElement;
-    field.addEventListener('keyup', () => {
-      const q = field.value.trim();
-      if (!q) {
-        if (list) list.style.display = 'none';
-        return;
-      }
-      const checked = document.querySelector('#search-bg input[name="type"]:checked') as HTMLInputElement | null;
-      if (checked && checked.id === 'type-local') {
-        if (list) list.style.display = 'none';
-        return;
-      }
-      clearTimeout(mainSuggestTimer);
-      mainSuggestTimer = setTimeout(() => fetchSuggestions(q), 180);
-    });
-  }
-  if (mInput) {
-    const field = mInput as HTMLInputElement;
-    field.addEventListener('keyup', () => {
-      const q = field.value.trim();
-      if (!q) {
-        if (mList) mList.style.display = 'none';
-        const card = mList?.parentElement as HTMLElement | null;
-        if (card) card.style.display = 'none';
-        return;
-      }
-      const checked = document.querySelector('#search-modal input[name="type2"]:checked') as HTMLInputElement | null;
-      const isLocal = !!(checked && checked.id === 'm_type-local');
-      if (isLocal) {
-        if (mList) mList.style.display = 'none';
-        const card = mList?.parentElement as HTMLElement | null;
-        if (card) card.style.display = 'none';
-        return;
-      }
-      clearTimeout(modalSuggestTimer);
-      modalSuggestTimer = setTimeout(() => fetchSuggestionsTo(q, mList), 180);
-    });
-  }
-  return true;
+
+function getEngineId(radio: HTMLInputElement | null): string {
+  return radio?.dataset.engineId || radio?.id.replace(/^m_/, '') || '';
 }
-if (!init()) {
-  document.addEventListener('DOMContentLoaded', () => { if (!init()) {
-    const obs = new MutationObserver(() => { if (init()) obs.disconnect(); });
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-  }});
+
+function getGroupId(radio: HTMLInputElement | null): string {
+  return radio?.closest<HTMLElement>('[data-search-panel]')?.dataset.searchPanel || '';
 }
-let jsonpSeq = 0;
-function fetchSuggestions(q: string) {
-  const cbName = `__bdSugCb_${Date.now()}_${jsonpSeq++}`;
-  const script = document.createElement('script');
-  (window as any)[cbName] = (res: any) => {
-    try {
-      renderSuggestions(Array.isArray(res?.s) ? res.s : []);
-    } finally {
-      delete (window as any)[cbName];
-      script.remove();
-    }
+
+function getElements(root: HTMLElement) {
+  return {
+    form: root.querySelector<HTMLFormElement>('.super-search-fm'),
+    input: root.querySelector<HTMLInputElement>('.search-key'),
+    list: root.querySelector<HTMLUListElement>('[data-search-suggestions]'),
   };
-  script.src = `https://suggestion.baidu.com/su?wd=${encodeURIComponent(q)}&cb=${cbName}`;
-  script.onerror = () => {
-    renderSuggestions([]);
-    delete (window as any)[cbName];
+}
+
+function selectedRadio(root: HTMLElement): HTMLInputElement | null {
+  return root.querySelector<HTMLInputElement>('input[type="radio"]:checked');
+}
+
+function isLocal(root: HTMLElement): boolean {
+  return getEngineId(selectedRadio(root)) === LOCAL_ENGINE;
+}
+
+function safeOpen(url: string): void {
+  try {
+    const parsed = new URL(url, window.location.href);
+    if (!['http:', 'https:'].includes(parsed.protocol)) return;
+    window.open(parsed.href, '_blank', 'noopener,noreferrer');
+  } catch {}
+}
+
+function setListVisible(root: HTMLElement, visible: boolean): void {
+  const { list } = getElements(root);
+  const card = list?.closest<HTMLElement>('.search-smart-tips');
+  if (list) list.hidden = !visible;
+  if (card) card.hidden = !visible;
+}
+
+function clearResults(root: HTMLElement): void {
+  const { list } = getElements(root);
+  list?.replaceChildren();
+  setListVisible(root, false);
+}
+
+function renderResults(root: HTMLElement, items: SearchSite[], local: boolean): void {
+  const { input, list } = getElements(root);
+  if (!list) return;
+  list.replaceChildren();
+
+  items.forEach((item, index) => {
+    const text = item.title || item.url || '';
+    const li = document.createElement('li');
+    li.tabIndex = 0;
+    li.setAttribute('role', 'option');
+    if (item.url) li.dataset.url = item.url;
+
+    const badge = document.createElement('span');
+    badge.className = local ? 'local' : 'suggestion-index';
+    badge.textContent = local ? '本地' : String(index + 1);
+    li.append(badge, document.createTextNode(
+      local && item.description ? `${text} - ${item.description}` : text
+    ));
+
+    const activate = () => {
+      if (local && item.url) safeOpen(item.url);
+      else if (text) {
+        if (input) input.value = text;
+        submitNetworkSearch(root, text);
+      }
+      clearResults(root);
+    };
+    li.addEventListener('click', activate);
+    li.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        activate();
+      }
+    });
+    list.appendChild(li);
+  });
+  setListVisible(root, items.length > 0);
+}
+
+function getLocalSites(): Promise<SearchSite[]> {
+  if (!localSitesPromise) {
+    localSitesPromise = fetch('/search-index.json')
+      .then((response) => {
+        if (!response.ok) throw new Error('Search index request failed');
+        return response.json();
+      })
+      .then((data) => Array.isArray(data) ? data : [])
+      .catch(() => []);
+  }
+  return localSitesPromise;
+}
+
+async function searchLocal(root: HTMLElement, query: string): Promise<void> {
+  const normalized = query.trim().toLocaleLowerCase('zh-CN');
+  if (!normalized) return clearResults(root);
+  const version = (requestVersions.get(root) || 0) + 1;
+  requestVersions.set(root, version);
+  const sites = await getLocalSites();
+  if (requestVersions.get(root) !== version || getElements(root).input?.value.trim().toLocaleLowerCase('zh-CN') !== normalized) return;
+
+  const matches = sites.filter((site) =>
+    [site.title, site.description, site.url].some((value) =>
+      String(value || '').toLocaleLowerCase('zh-CN').includes(normalized)
+    )
+  ).slice(0, 10);
+  renderResults(root, matches, true);
+}
+
+function searchNetwork(root: HTMLElement, query: string): void {
+  const version = (requestVersions.get(root) || 0) + 1;
+  requestVersions.set(root, version);
+  const callbackName = `__astroNavSuggest_${Date.now()}_${jsonpSequence++}`;
+  const script = document.createElement('script');
+  let settled = false;
+
+  const cleanup = () => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    delete (window as unknown as Record<string, unknown>)[callbackName];
     script.remove();
   };
-  document.head.appendChild(script);
-}
-function fetchSuggestionsTo(q: string, target: HTMLUListElement | null) {
-  const cbName = `__bdSugCb_${Date.now()}_${jsonpSeq++}`;
-  const script = document.createElement('script');
-  (window as any)[cbName] = (res: any) => {
-    try {
-      renderSuggestionsTo(target, Array.isArray(res?.s) ? res.s : []);
-    } finally {
-      delete (window as any)[cbName];
-      script.remove();
+  const finish = (items: string[]) => {
+    if (requestVersions.get(root) === version) {
+      renderResults(root, items.slice(0, 10).map((title) => ({ title })), false);
     }
+    cleanup();
   };
-  script.src = `https://suggestion.baidu.com/su?wd=${encodeURIComponent(q)}&cb=${cbName}`;
-  script.onerror = () => {
-    renderSuggestionsTo(target, []);
-    delete (window as any)[cbName];
-    script.remove();
+
+  (window as unknown as Record<string, unknown>)[callbackName] = (response: { s?: unknown }) => {
+    const items = Array.isArray(response?.s) ? response.s.filter((item): item is string => typeof item === 'string') : [];
+    finish(items);
   };
+  const timeout = window.setTimeout(() => finish([]), SUGGEST_TIMEOUT_MS);
+  script.onerror = () => finish([]);
+  script.src = `https://suggestion.baidu.com/su?wd=${encodeURIComponent(query)}&cb=${callbackName}`;
   document.head.appendChild(script);
 }
-function renderSuggestions(items: string[]) {
-  const targetList = list;
-  if (!targetList) return;
-  targetList.innerHTML = '';
-  if (!items || !items.length) {
-    targetList.style.display = 'none';
-    return;
-  }
-  targetList.style.display = 'block';
-  items.forEach((text, i) => {
-    const li = document.createElement('li');
-    const span = document.createElement('span');
-    span.textContent = String(i + 1);
-    li.appendChild(span);
-    li.appendChild(document.createTextNode(text));
-    li.addEventListener('click', () => {
-      const field = input as HTMLInputElement | null;
-      if (field) field.value = text;
-      targetList.style.display = 'none';
-      openSearch(text);
-    });
-    targetList.appendChild(li);
-  });
+
+function submitNetworkSearch(root: HTMLElement, query: string): void {
+  const radio = selectedRadio(root);
+  const action = radio?.value || getElements(root).form?.action || '';
+  if (!action || action === '#') return;
+  safeOpen(action + encodeURIComponent(query));
 }
-function renderSuggestionsTo(target: HTMLUListElement | null, items: string[]) {
-  if (!target) return;
-  target.innerHTML = '';
-  const card = target.parentElement as HTMLElement | null;
-  if (!items || !items.length) {
-    target.style.display = 'none';
-    if (card) card.style.display = 'none';
-    return;
+
+function updateEngine(root: HTMLElement, persist = true): void {
+  const radio = selectedRadio(root);
+  const { form, input } = getElements(root);
+  if (!radio) return;
+  if (form) form.action = radio.value || form.action;
+  if (input && radio.dataset.placeholder) input.placeholder = radio.dataset.placeholder;
+
+  const engineId = getEngineId(radio);
+  const groupId = getGroupId(radio);
+  root.classList.toggle('local-mode', engineId === LOCAL_ENGINE);
+  if (persist) {
+    writeStorage(STORE_ENGINE, engineId);
+    if (groupId) {
+      writeStorage(STORE_GROUP, groupId);
+      writeStorage(STORE_GROUP_ENGINE + groupId, engineId);
+    }
   }
-  target.style.display = 'block';
-  items.forEach((text, i) => {
-    const li = document.createElement('li');
-    const span = document.createElement('span');
-    span.textContent = String(i + 1);
-    li.appendChild(span);
-    li.appendChild(document.createTextNode(text));
-    li.addEventListener('click', () => {
-      const field = mInput as HTMLInputElement | null;
-      if (field) field.value = text;
-      target.style.display = 'none';
-      openSearch(text, true);
-    });
-    target.appendChild(li);
-  });
-  if (card) card.style.display = 'block';
+  const query = input?.value.trim() || '';
+  if (!query) clearResults(root);
+  else if (engineId === LOCAL_ENGINE) void searchLocal(root, query);
+  else searchNetwork(root, query);
 }
-// input keyup is attached in init
-document.addEventListener('click', (e) => {
-  const target = e.target as Element | null;
-  const container = document.querySelector('.io-grey-mode');
-  if (list && container && target && container.contains(target)) {
-    list.style.display = 'none';
+
+function switchGroup(root: HTMLElement, groupId: string, preferredEngine = ''): void {
+  const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-search-panel]'));
+  if (!panels.some((panel) => panel.dataset.searchPanel === groupId)) return;
+
+  root.querySelectorAll<HTMLElement>('[data-search-group]').forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.dataset.searchGroup === groupId));
+  });
+  panels.forEach((panel) => {
+    const active = panel.dataset.searchPanel === groupId;
+    panel.hidden = !active;
+    panel.classList.toggle('s-current', active);
+  });
+
+  const panel = root.querySelector<HTMLElement>(`[data-search-panel="${CSS.escape(groupId)}"]`);
+  const engineId = preferredEngine || readStorage(STORE_GROUP_ENGINE + groupId);
+  const radios = Array.from(panel?.querySelectorAll<HTMLInputElement>('input[type="radio"]') || []);
+  const radio = radios.find((item) => getEngineId(item) === engineId) || radios[0];
+  if (radio) radio.checked = true;
+
+  const current = root.querySelector<HTMLButtonElement>('.search-group-current');
+  const activeButton = root.querySelector<HTMLElement>(`[data-search-group="${CSS.escape(groupId)}"]`);
+  if (current && activeButton) {
+    current.textContent = activeButton.textContent?.trim() || '搜索';
+    current.setAttribute('aria-expanded', 'false');
   }
+  root.querySelector('.s-type')?.classList.remove('open');
+  writeStorage(STORE_GROUP, groupId);
+  updateEngine(root);
+}
+
+function handleInput(root: HTMLElement): void {
+  const { input } = getElements(root);
+  const query = input?.value.trim() || '';
+  const previousTimer = debounceTimers.get(root);
+  if (previousTimer) clearTimeout(previousTimer);
+  if (!query) return clearResults(root);
+  const timer = window.setTimeout(() => {
+    if (isLocal(root)) void searchLocal(root, query);
+    else searchNetwork(root, query);
+  }, isLocal(root) ? 80 : 220);
+  debounceTimers.set(root, timer);
+}
+
+function initRoot(root: HTMLElement): void {
+  if (root.dataset.searchReady === 'true') return;
+  root.dataset.searchReady = 'true';
+  const { form, input } = getElements(root);
+  if (!form || !input) return;
+
+  root.querySelectorAll<HTMLButtonElement>('[data-search-group]').forEach((button) => {
+    button.addEventListener('click', () => switchGroup(root, button.dataset.searchGroup || ''));
+  });
+  root.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((radio) => {
+    radio.addEventListener('change', () => updateEngine(root));
+  });
+  const currentGroupButton = root.querySelector<HTMLButtonElement>('.search-group-current');
+  currentGroupButton?.addEventListener('click', () => {
+    const type = root.querySelector('.s-type');
+    const open = !type?.classList.contains('open');
+    type?.classList.toggle('open', open);
+    currentGroupButton.setAttribute('aria-expanded', String(open));
+  });
+  input.addEventListener('input', () => handleInput(root));
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const query = input.value.trim();
+    if (!query) return;
+    if (isLocal(root)) {
+      const first = getElements(root).list?.querySelector<HTMLElement>('li[data-url]');
+      if (first?.dataset.url) safeOpen(first.dataset.url);
+    } else submitNetworkSearch(root, query);
+  });
+
+  const savedGroup = readStorage(STORE_GROUP);
+  const fallbackGroup = root.querySelector<HTMLElement>('[data-search-group][aria-pressed="true"]')?.dataset.searchGroup || '';
+  switchGroup(root, savedGroup || fallbackGroup, readStorage(STORE_ENGINE));
+}
+
+function initSearch(): void {
+  document.querySelectorAll<HTMLElement>('[data-search-root]').forEach(initRoot);
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSearch, { once: true });
+else initSearch();
+document.addEventListener('astro:page-load', initSearch);
+
+document.addEventListener('click', (event) => {
+  const target = event.target as Element | null;
+  document.querySelectorAll<HTMLElement>('[data-search-root]').forEach((root) => {
+    if (!target || root.contains(target)) return;
+    clearResults(root);
+    root.querySelector('.s-type')?.classList.remove('open');
+    root.querySelector('.search-group-current')?.setAttribute('aria-expanded', 'false');
+  });
 });
-const modalEl = document.getElementById('search-modal') as HTMLElement | null;
-const onModalShown = () => {
-  const q = (mInput?.value.trim() || '');
-  if (!q) return;
-  const checked = document.querySelector('#search-modal input[name="type2"]:checked') as HTMLInputElement | null;
-  const isLocal = !!(checked && checked.id === 'm_type-local');
-  if (!isLocal) fetchSuggestionsTo(q, mList);
-};
-if (modalEl) {
-  modalEl.addEventListener('shown.bs.modal', onModalShown);
-  modalEl.addEventListener('modal:shown', onModalShown);
-}
+
+document.getElementById('search-modal')?.addEventListener('modal:shown', () => {
+  const root = document.querySelector<HTMLElement>('[data-search-root="modal"]');
+  if (!root) return;
+  switchGroup(root, readStorage(STORE_GROUP) || 'group-a', readStorage(STORE_ENGINE));
+  handleInput(root);
+});

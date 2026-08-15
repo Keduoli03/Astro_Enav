@@ -4,13 +4,13 @@ import LightDarkSwitch from "./Utils/LightDarkSwitch.astro";
 import  {Icon}  from 'astro-icon/components'
 ---
 
-<footer class="main-footer footer-type-1 text-xs">
-    <div id="footer-tools" class="d-flex flex-column">
-        <a href="#" id="go-to-up" class="btn rounded-circle go-up m-1" rel="go-top" role="button" aria-label="返回顶部">
+<footer class="main-footer footer-type-1 text-xs" transition:persist="footer">
+    <div id="footer-tools" class="flex flex-col">
+        <a href="#" id="go-to-up" class="go-up m-1 rounded-full" rel="go-top" role="button" aria-label="返回顶部">
             <Icon name="ri:arrow-up-line" />
         </a>
 
-        <a href="#" data-toggle="modal" data-target="#search-modal" class="btn rounded-circle m-1"
+        <a href="#" data-toggle="modal" data-target="#search-modal" class="m-1 rounded-full"
             rel="search" role="button" aria-label="打开搜索" one-link-mark="yes">
             <Icon name="ri:search-line" />
         </a>
@@ -21,13 +21,9 @@ import  {Icon}  from 'astro-icon/components'
     <div class="footer-inner transition text-50 text-sm text-center">
         Powered by: 🪐 <a href="https://astro.build/">Astro</a> + <a href="https://github.com/WebStackPage/WebStackPage.github.io">Webstack</a>✨
         <div class="flex flex-col items-center">
-        <!-- 运行时间和访问量合并到同一行 -->
+        <!-- 运行时间 -->
         <div id="runtime-container" class="flex items-center justify-center space-x-2">
         <span id="runningtime"></span>
-        <span>|</span>
-        <span>本网站已访问 <span id="busuanzi_value_page_pv" style=" color: hsl(192 98% 55%); font-weight: bold; "></span> 次</span>
-        <span>|</span>
-        <span>总访客 <span id="busuanzi_value_site_uv" style=" color: hsl(192 98% 55%); font-weight: bold; "></span> 人</span>
         </div>
         <div class="footer-text">本站内容源自互联网，如有内容侵犯了你的权益，请联系删除相关内容<br/></div>
         </div>
@@ -47,7 +43,6 @@ import  {Icon}  from 'astro-icon/components'
     runtime();
     setInterval(runtime, 1000);
     </script>
-<script is:inline async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </footer>
 
 
@@ -58,4 +53,3 @@ import  {Icon}  from 'astro-icon/components'
 <!-- 貌似是适配不同设备的js，不能换成网络引用，影响侧栏 -->
 <!-- <script type='text/javascript' src='/js/theia-sticky-sidebar-1.5.0.js' id='sidebar-js'></script> -->
  
-

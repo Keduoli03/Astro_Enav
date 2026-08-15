@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { RegexTool } from '../../react-tools/tools/regex/ui';
+---
+
+<ToolLayout title="正则表达式测试" description="实时检查表达式、标志与每一条匹配结果。">
+  <RegexTool client:load />
+</ToolLayout>
