@@ -550,4 +550,7 @@ body.has-content-bg .page-container, body.has-content-bg .main-content{position:
 }
 
 .io-black-mode.has-content-bg .card,.io-black-mode.has-content-bg .block{background:rgba(44,46,47,.85)!important}
+#global-bg.global-bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;filter:blur(var(--content-bg-blur,0));transform:scale(1.01);background-color:#f9f9f9;background-image:var(--content-bg-light-image);background-size:cover;background-position:center;background-repeat:no-repeat}
+html.theme-dark #global-bg.global-bg-layer{background-color:#1b1d1f;background-image:var(--content-bg-dark-image)}
+#global-bg.global-bg-layer img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .category-section h4 .icon-fw, .category-section h4 .icon-lg{position:relative;top:2px}
