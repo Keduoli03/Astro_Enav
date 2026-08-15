@@ -1,0 +1,176 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import ToolPageStyles from '../../components/tools/ToolPageStyles.astro';
+
+type StatusTone = 'info' | 'success' | 'redirect' | 'client' | 'server' | 'extended';
+
+interface HttpStatus {
+  code: number;
+  phrase: string;
+  meaning: string;
+  tone: StatusTone;
+  standard?: boolean;
+}
+
+const statuses: HttpStatus[] = [
+  { code: 100, phrase: 'Continue', meaning: '请求的初始部分已收到，客户端可以继续发送剩余内容。', tone: 'info' },
+  { code: 101, phrase: 'Switching Protocols', meaning: '服务器同意切换到请求头中指定的其他协议。', tone: 'info' },
+  { code: 102, phrase: 'Processing', meaning: '服务器已收到并正在处理请求，但暂时还没有响应可用。', tone: 'info' },
+  { code: 103, phrase: 'Early Hints', meaning: '服务器在最终响应前返回一些预加载资源提示。', tone: 'info' },
+  { code: 200, phrase: 'OK', meaning: '请求成功，响应内容通常会在响应体中返回。', tone: 'success' },
+  { code: 201, phrase: 'Created', meaning: '请求成功并创建了一个或多个新资源。', tone: 'success' },
+  { code: 202, phrase: 'Accepted', meaning: '请求已接受处理，但处理尚未完成。', tone: 'success' },
+  { code: 203, phrase: 'Non-Authoritative Information', meaning: '响应内容来自转换代理，而不是源服务器的直接确认。', tone: 'success' },
+  { code: 204, phrase: 'No Content', meaning: '请求成功，但响应没有需要返回的内容。', tone: 'success' },
+  { code: 205, phrase: 'Reset Content', meaning: '请求成功，客户端应重置当前文档视图或输入内容。', tone: 'success' },
+  { code: 206, phrase: 'Partial Content', meaning: '服务器成功返回了客户端通过 Range 请求的部分内容。', tone: 'success' },
+  { code: 207, phrase: 'Multi-Status', meaning: '多个独立操作的结果会在 XML 响应体中分别给出。', tone: 'success' },
+  { code: 208, phrase: 'Already Reported', meaning: 'DAV 绑定已在同一响应中的前一部分被列出。', tone: 'success' },
+  { code: 226, phrase: 'IM Used', meaning: '服务器已完成对资源的实例操作，并返回了结果。', tone: 'success' },
+  { code: 300, phrase: 'Multiple Choices', meaning: '请求对应多个可能的响应，客户端可以选择其中一个。', tone: 'redirect' },
+  { code: 301, phrase: 'Moved Permanently', meaning: '资源已永久移动到新的 URL，后续请求应使用新地址。', tone: 'redirect' },
+  { code: 302, phrase: 'Found', meaning: '资源暂时位于另一个 URL，客户端通常会跟随 Location。', tone: 'redirect' },
+  { code: 303, phrase: 'See Other', meaning: '应使用 GET 方法访问 Location 指向的另一个资源。', tone: 'redirect' },
+  { code: 304, phrase: 'Not Modified', meaning: '资源未发生变化，客户端可以继续使用缓存版本。', tone: 'redirect' },
+  { code: 305, phrase: 'Use Proxy', meaning: '已弃用，曾表示必须通过指定代理访问资源。', tone: 'redirect' },
+  { code: 306, phrase: 'Switch Proxy', meaning: '未使用状态码，保留用于历史兼容。', tone: 'redirect' },
+  { code: 307, phrase: 'Temporary Redirect', meaning: '资源暂时位于其他 URL，客户端不应改变原请求方法。', tone: 'redirect' },
+  { code: 308, phrase: 'Permanent Redirect', meaning: '资源永久位于其他 URL，客户端不应改变原请求方法。', tone: 'redirect' },
+  { code: 400, phrase: 'Bad Request', meaning: '服务器无法理解请求，通常是语法、参数或格式错误。', tone: 'client' },
+  { code: 401, phrase: 'Unauthorized', meaning: '请求需要有效的身份认证凭据。', tone: 'client' },
+  { code: 402, phrase: 'Payment Required', meaning: '为未来的数字支付场景保留，目前很少被统一使用。', tone: 'client' },
+  { code: 403, phrase: 'Forbidden', meaning: '服务器理解请求，但拒绝授权访问该资源。', tone: 'client' },
+  { code: 404, phrase: 'Not Found', meaning: '服务器找不到请求的资源，或不愿透露资源是否存在。', tone: 'client' },
+  { code: 405, phrase: 'Method Not Allowed', meaning: '请求方法已被服务器识别，但目标资源不支持该方法。', tone: 'client' },
+  { code: 406, phrase: 'Not Acceptable', meaning: '服务器无法生成满足请求中 Accept 条件的响应。', tone: 'client' },
+  { code: 407, phrase: 'Proxy Authentication Required', meaning: '客户端必须先向代理服务器完成身份认证。', tone: 'client' },
+  { code: 408, phrase: 'Request Timeout', meaning: '服务器等待请求期间超时，客户端可以稍后重试。', tone: 'client' },
+  { code: 409, phrase: 'Conflict', meaning: '请求与服务器当前资源状态冲突，无法完成操作。', tone: 'client' },
+  { code: 410, phrase: 'Gone', meaning: '资源已永久删除，服务器确认未来也不会恢复。', tone: 'client' },
+  { code: 411, phrase: 'Length Required', meaning: '服务器要求请求包含有效的 Content-Length 请求头。', tone: 'client' },
+  { code: 412, phrase: 'Precondition Failed', meaning: '请求头中的前置条件检查失败。', tone: 'client' },
+  { code: 413, phrase: 'Content Too Large', meaning: '请求内容超过服务器愿意或能够处理的大小。', tone: 'client' },
+  { code: 414, phrase: 'URI Too Long', meaning: '请求 URI 长度超过服务器能够解析的范围。', tone: 'client' },
+  { code: 415, phrase: 'Unsupported Media Type', meaning: '请求数据格式不受目标资源或服务器支持。', tone: 'client' },
+  { code: 416, phrase: 'Range Not Satisfiable', meaning: '请求的 Range 范围无法满足，通常是超出资源长度。', tone: 'client' },
+  { code: 417, phrase: 'Expectation Failed', meaning: '服务器无法满足 Expect 请求头中的要求。', tone: 'client' },
+  { code: 418, phrase: "I'm a teapot", meaning: '彩蛋状态码，源自愚人节 RFC，表示服务器拒绝煮咖啡。', tone: 'client' },
+  { code: 421, phrase: 'Misdirected Request', meaning: '请求被发送到无法生成响应的服务器。', tone: 'client' },
+  { code: 422, phrase: 'Unprocessable Content', meaning: '请求格式正确，但语义或业务校验无法通过。', tone: 'client' },
+  { code: 423, phrase: 'Locked', meaning: '目标资源已被锁定，当前操作无法执行。', tone: 'client' },
+  { code: 424, phrase: 'Failed Dependency', meaning: '当前请求失败，因为依赖的前一个请求也失败了。', tone: 'client' },
+  { code: 425, phrase: 'Too Early', meaning: '服务器不愿处理可能被重放的过早请求。', tone: 'client' },
+  { code: 426, phrase: 'Upgrade Required', meaning: '服务器要求客户端升级到其他协议才能继续。', tone: 'client' },
+  { code: 428, phrase: 'Precondition Required', meaning: '服务器要求请求必须包含条件请求头。', tone: 'client' },
+  { code: 429, phrase: 'Too Many Requests', meaning: '客户端在一定时间内发送了过多请求，触发限流。', tone: 'client' },
+  { code: 431, phrase: 'Request Header Fields Too Large', meaning: '请求头字段或请求头总大小超过服务器限制。', tone: 'client' },
+  { code: 451, phrase: 'Unavailable For Legal Reasons', meaning: '资源因法律或监管原因无法提供。', tone: 'client' },
+  { code: 500, phrase: 'Internal Server Error', meaning: '服务器遇到未预期的错误，无法完成请求。', tone: 'server' },
+  { code: 501, phrase: 'Not Implemented', meaning: '服务器不支持完成请求所需的功能或方法。', tone: 'server' },
+  { code: 502, phrase: 'Bad Gateway', meaning: '网关或代理从上游服务器收到无效响应。', tone: 'server' },
+  { code: 503, phrase: 'Service Unavailable', meaning: '服务器暂时无法处理请求，常见于维护或过载。', tone: 'server' },
+  { code: 504, phrase: 'Gateway Timeout', meaning: '网关或代理等待上游服务器响应时超时。', tone: 'server' },
+  { code: 505, phrase: 'HTTP Version Not Supported', meaning: '服务器不支持请求中使用的 HTTP 版本。', tone: 'server' },
+  { code: 506, phrase: 'Variant Also Negotiates', meaning: '服务器配置存在内部协商循环。', tone: 'server' },
+  { code: 507, phrase: 'Insufficient Storage', meaning: '服务器没有足够空间完成请求。', tone: 'server' },
+  { code: 508, phrase: 'Loop Detected', meaning: '服务器在处理请求时检测到无限循环。', tone: 'server' },
+  { code: 510, phrase: 'Not Extended', meaning: '请求缺少服务器要求的扩展策略。', tone: 'server' },
+  { code: 511, phrase: 'Network Authentication Required', meaning: '客户端需要先完成网络认证才能访问资源。', tone: 'server' },
+  { code: 218, phrase: 'This Is Fine', meaning: 'Apache 使用的非标准状态码，表示结果可能并不完全可靠。', tone: 'extended', standard: false },
+  { code: 419, phrase: 'Page Expired', meaning: '常见于框架或应用层，表示会话或页面令牌已过期。', tone: 'extended', standard: false },
+  { code: 420, phrase: 'Method Failure / Enhance Your Calm', meaning: '常见于 Web 框架或历史 API，用于表示请求失败或限流。', tone: 'extended', standard: false },
+  { code: 430, phrase: 'Request Header Fields Too Large', meaning: '部分服务使用的扩展状态码，表示请求头超出限制。', tone: 'extended', standard: false },
+  { code: 440, phrase: 'Login Time-out', meaning: 'Microsoft IIS 扩展状态码，表示登录会话已过期。', tone: 'extended', standard: false },
+  { code: 444, phrase: 'No Response', meaning: 'Nginx 扩展状态码，表示服务器关闭连接且不返回响应。', tone: 'extended', standard: false },
+  { code: 449, phrase: 'Retry With', meaning: 'Microsoft IIS 扩展状态码，提示客户端重试请求。', tone: 'extended', standard: false },
+  { code: 450, phrase: 'Blocked by Windows Parental Controls', meaning: 'Microsoft IIS 扩展状态码，表示请求被家长控制策略拦截。', tone: 'extended', standard: false },
+  { code: 460, phrase: 'Client Closed Connection', meaning: '部分云服务使用的扩展状态码，表示客户端提前关闭连接。', tone: 'extended', standard: false },
+  { code: 463, phrase: 'X-Forwarded-For Too Many IPs', meaning: '部分云服务使用的扩展状态码，表示转发 IP 信息过多。', tone: 'extended', standard: false },
+  { code: 494, phrase: 'Request Header Too Large', meaning: 'Nginx 扩展状态码，表示请求头过大。', tone: 'extended', standard: false },
+  { code: 495, phrase: 'SSL Certificate Error', meaning: 'Nginx 扩展状态码，表示客户端证书校验失败。', tone: 'extended', standard: false },
+  { code: 496, phrase: 'No SSL Certificate', meaning: 'Nginx 扩展状态码，表示客户端没有提供证书。', tone: 'extended', standard: false },
+  { code: 497, phrase: 'HTTP Request Sent to HTTPS Port', meaning: 'Nginx 扩展状态码，表示 HTTP 请求被发送到 HTTPS 端口。', tone: 'extended', standard: false },
+  { code: 498, phrase: 'Invalid Token', meaning: '常见于代理或应用服务，表示认证令牌无效。', tone: 'extended', standard: false },
+  { code: 499, phrase: 'Client Closed Request', meaning: 'Nginx 扩展状态码，表示客户端在服务器响应前关闭了连接。', tone: 'extended', standard: false },
+  { code: 520, phrase: 'Web Server Returned an Unknown Error', meaning: 'Cloudflare 扩展状态码，表示源站返回了未知响应。', tone: 'extended', standard: false },
+  { code: 521, phrase: 'Web Server Is Down', meaning: 'Cloudflare 扩展状态码，表示源站拒绝连接或不可用。', tone: 'extended', standard: false },
+  { code: 522, phrase: 'Connection Timed Out', meaning: 'Cloudflare 扩展状态码，表示连接源站超时。', tone: 'extended', standard: false },
+  { code: 523, phrase: 'Origin Is Unreachable', meaning: 'Cloudflare 扩展状态码，表示无法到达源站。', tone: 'extended', standard: false },
+  { code: 524, phrase: 'A Timeout Occurred', meaning: 'Cloudflare 扩展状态码，表示已连接源站但响应超时。', tone: 'extended', standard: false },
+  { code: 525, phrase: 'SSL Handshake Failed', meaning: 'Cloudflare 扩展状态码，表示源站 SSL 握手失败。', tone: 'extended', standard: false },
+  { code: 526, phrase: 'Invalid SSL Certificate', meaning: 'Cloudflare 扩展状态码，表示源站 SSL 证书无效。', tone: 'extended', standard: false },
+  { code: 529, phrase: 'Site is Overloaded', meaning: '部分服务商使用的扩展状态码，表示站点当前过载。', tone: 'extended', standard: false },
+  { code: 530, phrase: 'Site is Frozen', meaning: '部分托管服务使用的扩展状态码，表示站点被冻结。', tone: 'extended', standard: false },
+  { code: 561, phrase: 'Unauthorized', meaning: '部分云服务使用的扩展状态码，表示访问被授权策略拒绝。', tone: 'extended', standard: false },
+];
+
+const familyGroups = [
+  { key: '1xx', title: '1xx 信息', description: '表示临时响应，并需要请求者继续执行操作。' },
+  { key: '2xx', title: '2xx 成功', description: '表示请求已被成功接收、理解并处理。' },
+  { key: '3xx', title: '3xx 重定向', description: '表示请求还需要进一步操作才能完成。' },
+  { key: '4xx', title: '4xx 客户端错误', description: '表示请求包含错误，或请求无法被服务器处理。' },
+  { key: '5xx', title: '5xx 服务器错误', description: '表示服务器在处理有效请求时发生错误。' },
+].map((group) => ({
+  ...group,
+  items: statuses.filter((status) => String(status.code).startsWith(group.key[0])),
+}));
+---
+
+<ToolLayout title="HTTP 状态码" description="查询 HTTP 状态码、英文名称和中文含义，覆盖标准状态码与常见服务商扩展状态码。">
+  <ToolPageStyles />
+
+  <div class="http-status-tables">
+    {familyGroups.map((group) => (
+      <section class={`http-status-section http-status-section--${group.key}`} aria-labelledby={`http-status-${group.key}`}>
+        <div class="http-status-section__heading">
+          <h3 id={`http-status-${group.key}`}>{group.title}</h3>
+          <p>{group.description}</p>
+        </div>
+        <div class="http-status-table-wrap">
+          <table class="http-status-table">
+            <thead>
+              <tr><th scope="col">状态码</th><th scope="col">含义解释</th></tr>
+            </thead>
+            <tbody>
+              {group.items.map((status) => (
+                <tr class={status.standard === false ? 'is-extended' : undefined}>
+                  <td><strong>{status.code} {status.phrase}</strong>{status.standard === false && <small>扩展</small>}</td>
+                  <td>{status.meaning}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    ))}
+  </div>
+</ToolLayout>
+
+<style is:global>
+  .http-status-tables { display: grid; gap: 1.25rem; }
+  .http-status-section { overflow: hidden; border: 1px solid var(--tool-border); border-radius: 10px; background: var(--tool-surface); }
+  .http-status-section__heading { display: flex; align-items: baseline; justify-content: center; gap: 12px; padding: .9rem 1rem; border-bottom: 1px solid var(--tool-border); background: var(--tool-surface-soft); text-align: center; }
+  .http-status-section__heading h3 { margin: 0; color: var(--tool-text); font-size: 1rem; }
+  .http-status-section__heading p { margin: 0; color: var(--tool-text-mute); font-size: .78rem; }
+  .http-status-section--1xx .http-status-section__heading h3 { color: #2797a0; }
+  .http-status-section--2xx .http-status-section__heading h3 { color: #199878; }
+  .http-status-section--3xx .http-status-section__heading h3 { color: #5f82d3; }
+  .http-status-section--4xx .http-status-section__heading h3 { color: #d88932; }
+  .http-status-section--5xx .http-status-section__heading h3 { color: #d76273; }
+  .http-status-table-wrap { overflow-x: auto; }
+  .http-status-table { width: 100%; min-width: 650px; border-collapse: collapse; color: var(--tool-text); font-size: .86rem; }
+  .http-status-table th, .http-status-table td { padding: .78rem 1rem; border-bottom: 1px solid var(--tool-border); text-align: left; vertical-align: middle; }
+  .http-status-table th { background: color-mix(in srgb, var(--tool-surface-soft) 72%, transparent); color: var(--tool-text-soft); font-size: .78rem; font-weight: 700; }
+  .http-status-table th:first-child, .http-status-table td:first-child { width: 26%; }
+  .http-status-table tbody tr:last-child td { border-bottom: 0; }
+  .http-status-table tbody tr:hover { background: var(--tool-brand-soft); }
+  .http-status-table td:first-child strong { display: inline-block; color: var(--tool-text); font-weight: 650; white-space: nowrap; }
+  .http-status-table td:last-child { color: var(--tool-text-soft); line-height: 1.65; }
+  .http-status-table td small { display: inline-block; margin-left: 8px; padding: 2px 5px; border-radius: 4px; background: rgba(155, 140, 255, .13); color: #7561db; font-size: .65rem; }
+  .io-black-mode .http-status-table td small { color: #b8adff; }
+  @media (max-width: 600px) {
+    .http-status-section__heading { display: block; text-align: left; }
+    .http-status-section__heading p { margin-top: 4px; }
+    .http-status-table { min-width: 580px; }
+  }
+</style>

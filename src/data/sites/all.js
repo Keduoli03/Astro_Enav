@@ -96,6 +96,16 @@ export default [
     iconBg: "rgba(37, 99, 235, 0.12)",
     id: "tool-base64",
   },
+  {
+    subId: "api",
+    url: "/tools/http-status",
+    title: "HTTP 状态码",
+    description: "查询标准与常见扩展 HTTP 状态码及其含义",
+    icon: "ri:exchange-box-line",
+    iconColor: "#0f766e",
+    iconBg: "rgba(15, 118, 110, 0.12)",
+    id: "tool-http-status",
+  },
   // api
   {
     subId: "api",
