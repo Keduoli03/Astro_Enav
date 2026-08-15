@@ -1,6 +1,8 @@
 ---
 import Layout from './Layout.astro';
+import ToolPageStyles from '../components/tools/ToolPageStyles.astro';
 import { SITE_FAVICON, SITE_TITLE } from '../settings';
+import '../styles/tools-tailwind.css';
 
 interface Props {
   title: string;
@@ -17,42 +19,52 @@ const pageDescription = description || `${title}，${SITE_TITLE}内置工具页�
   description={pageDescription}
   favicon={SITE_FAVICON}
 >
-  <div class="container-fluid tool-page">
-    <div class="row justify-content-center">
-      <div class="col-lg-12 col-xl-8">
-        <div class="tool-header card mb-4">
-          <div class="card-body p-4 p-md-4">
+  <ToolPageStyles />
+  <div class="tool-page px-4 pb-6 md:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-5xl">
+      <div class="tool-panel">
+          <div class="tool-header">
             <div class="tool-headline">
               <h1 class="tool-title mb-0">{title}</h1>
               <div class="tool-kicker">Tools</div>
             </div>
             {description && <p class="tool-desc mt-1 mb-0">{description}</p>}
           </div>
-        </div>
-        <div class="tool-content card">
-          <div class="card-body p-4 p-md-5">
+          <div class="tool-content">
             <slot />
           </div>
         </div>
       </div>
     </div>
-  </div>
 
   <style>
     .tool-page {
       padding-bottom: 24px;
     }
-    .tool-header,
-    .tool-content {
-      border: 0;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-      border-radius: 22px;
+    .tool-panel {
+      background: var(--tool-surface);
+      border: 1px solid var(--tool-border);
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.08);
       overflow: hidden;
     }
+    .io-black-mode .tool-panel {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 40px rgba(0, 0, 0, 0.35);
+    }
     .tool-header {
+      padding: 1.5rem 1.75rem;
+      border-bottom: 1px solid var(--tool-border);
       background:
-        radial-gradient(circle at top right, rgba(64, 158, 255, 0.14), transparent 34%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.95));
+        linear-gradient(var(--tool-surface-soft), var(--tool-surface-soft));
+    }
+    .tool-content {
+      padding: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .tool-header { padding: 1.75rem 2rem; }
+      .tool-content {
+        padding: 1.75rem 2rem;
+      }
     }
     .tool-headline {
       display: flex;
@@ -64,8 +76,8 @@ const pageDescription = description || `${title}，${SITE_TITLE}内置工具页�
       flex: 0 0 auto;
       padding: 4px 10px;
       border-radius: 999px;
-      background: rgba(64, 158, 255, 0.1);
-      color: #1677ff;
+      background: var(--tool-brand-soft);
+      color: var(--tool-brand);
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.08em;
@@ -75,10 +87,11 @@ const pageDescription = description || `${title}，${SITE_TITLE}内置工具页�
       font-size: clamp(1.45rem, 3vw, 2.15rem);
       font-weight: 800;
       line-height: 1.15;
+      color: var(--tool-text);
     }
     .tool-desc {
       max-width: 720px;
-      color: #66707a;
+      color: var(--tool-text-soft);
       font-size: 0.98rem;
       line-height: 1.7;
     }
@@ -90,24 +103,6 @@ const pageDescription = description || `${title}，${SITE_TITLE}内置工具页�
       .tool-kicker {
         margin-top: 4px;
       }
-    }
-    :global(.io-black-mode) .tool-header,
-    :global(.io-black-mode) .tool-content {
-      background: #26282b !important;
-      color: #d9dde3;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-    }
-    :global(.io-black-mode) .tool-header {
-      background:
-        radial-gradient(circle at top right, rgba(64, 158, 255, 0.2), transparent 34%),
-        linear-gradient(135deg, rgba(38, 40, 43, 0.98), rgba(31, 33, 36, 0.98)) !important;
-    }
-    :global(.io-black-mode) .tool-kicker {
-      background: rgba(64, 158, 255, 0.16);
-      color: #7cb8ff;
-    }
-    :global(.io-black-mode) .tool-desc {
-      color: #a9b1ba;
     }
   </style>
 </Layout>

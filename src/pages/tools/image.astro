@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { ImageTool } from '../../react-tools/tools/image/ui';
+---
+
+<ToolLayout title="图片压缩与转换" description="压缩体积并转换为 WebP、JPG 或 PNG，全程不上云。">
+  <ImageTool client:load />
+</ToolLayout>

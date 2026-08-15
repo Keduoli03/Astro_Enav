@@ -33,7 +33,7 @@ const categoryData = Object.values(CATEGORY_CONFIG).flatMap((categoryInfo) => {
     ...sub,
     sites: sitesBySubcategory[sub.id] || [],
   }));
-});
+}).filter((data) => data.sites.length > 0);
 ---
 
 <Layout 

@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { TimestampTool } from '../../react-tools/tools/timestamp/ui';
+---
+
+<ToolLayout title="时间戳转换" description="Unix 时间戳与本地日期时间互相转换。">
+  <TimestampTool client:load />
+</ToolLayout>

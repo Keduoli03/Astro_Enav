@@ -1,0 +1,12 @@
+---
+/**
+ * ToolStatus - 页面底部状态行,配合 setStatus(text, isError) 使用
+ */
+interface Props {
+  id: string;
+  /** 顶部外边距 (rem) */
+  mt?: number;
+}
+const { id, mt = 0 } = Astro.props;
+---
+<p id={id} class="tool-status text-muted" style={`margin: ${mt}rem 0 0 0;min-height:22px;`}></p>

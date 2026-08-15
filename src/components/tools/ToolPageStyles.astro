@@ -1,196 +1,308 @@
 <style is:global>
+  /* ============================================================
+   * Tokens (light)
+   * ============================================================ */
+  :root {
+    --tool-brand: #1677ff;
+    --tool-brand-hover: #1668e0;
+    --tool-brand-soft: rgba(22, 119, 255, 0.08);
+    --tool-text: #1f2937;
+    --tool-text-soft: #5c6773;
+    --tool-text-mute: #7c8794;
+    --tool-border: rgba(15, 23, 42, 0.08);
+    --tool-border-strong: rgba(15, 23, 42, 0.14);
+    --tool-surface: #ffffff;
+    --tool-surface-soft: rgba(247, 250, 254, 0.9);
+    --tool-radius-lg: 10px;
+    --tool-radius-md: 8px;
+    --tool-radius-sm: 6px;
+    --tool-shadow: none;
+  }
+  .io-black-mode {
+    --tool-brand: #2d8cff;
+    --tool-brand-hover: #4c9dff;
+    --tool-brand-soft: rgba(45, 140, 255, 0.14);
+    --tool-text: #e6ebf1;
+    --tool-text-soft: #a9b1ba;
+    --tool-text-mute: #7b8591;
+    --tool-border: rgba(255, 255, 255, 0.06);
+    --tool-border-strong: rgba(255, 255, 255, 0.12);
+    --tool-surface: #2c2e2f;
+    --tool-surface-soft: rgba(30, 32, 34, 0.7);
+    --tool-shadow: none;
+  }
+
+  /* ============================================================
+   * Bootstrap conflict reset
+   * Bootstrap reboot sets `label { display:inline-block; margin-bottom:.5rem }`
+   * as UNLAYERED CSS, which out-cascades Tailwind's layered `flex/block/grid`
+   * utilities — collapsing full-width labels (upload dropzones, editor fields)
+   * to their content width. Neutralize it; button-like labels opt back in with
+   * `inline-flex!`.
+   * ============================================================ */
+  .tool-content label {
+    display: block;
+    margin-bottom: 0;
+  }
+
+  /* ============================================================
+   * Tabs
+   * ============================================================ */
   .tool-switch {
     display: inline-flex;
     padding: 4px;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(15, 23, 42, 0.05);
     gap: 4px;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.03);
   }
   .tool-tab {
     border: 0;
     background: transparent;
-    color: #5c6773;
-    padding: 9px 18px;
+    color: var(--tool-text-soft);
+    padding: 8px 18px;
     border-radius: 999px;
-    font-weight: 700;
-    transition: all .18s ease;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.18s ease;
   }
   .tool-tab.active {
-    background: #1677ff;
+    background: var(--tool-brand);
     color: #fff;
-    box-shadow: 0 8px 20px rgba(22, 119, 255, 0.2);
+    box-shadow: 0 6px 16px rgba(22, 119, 255, 0.22);
   }
-  .tool-tab:hover {
-    color: #2f3a45;
-    background: rgba(255, 255, 255, 0.6);
+  .tool-tab:hover { color: var(--tool-text); background: rgba(255, 255, 255, 0.6); }
+  .tool-tab.active:hover { color: #fff; background: var(--tool-brand); }
+
+  /* ============================================================
+   * Field
+   * ============================================================ */
+  .tool-field { margin-bottom: 1.25rem; }
+  .tool-field:last-child { margin-bottom: 0; }
+  .tool-field__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
   }
-  .tool-tab.active:hover {
-    color: #fff;
-    background: #1677ff;
+  .tool-field__label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    color: var(--tool-text);
+    font-weight: 600;
+    font-size: 0.92rem;
+    letter-spacing: 0.01em;
   }
-  .tool-card {
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+  .tool-field__hint {
+    color: var(--tool-text-mute);
+    font-weight: 400;
+    font-size: 0.8rem;
   }
-  .tool-label {
-    color: #2f3a45;
+  .tool-field__suffix { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .tool-field__desc {
+    margin: 6px 0 0;
+    color: var(--tool-text-mute);
+    font-size: 0.78rem;
   }
-  .tool-textarea {
-    min-height: 180px;
-    border-radius: 14px;
-    resize: vertical;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: none !important;
-    padding: 14px 16px;
-    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+  .tool-label { /* legacy alias, still used in some places */
+    color: var(--tool-text);
+    font-weight: 600;
   }
-  .tool-textarea:focus {
-    border-color: rgba(22, 119, 255, 0.4);
-    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.08) !important;
-  }
+
+  /* ============================================================
+   * Preview box
+   * ============================================================ */
   .tool-preview-box {
-    min-height: 280px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(242, 246, 251, 0.92));
+    min-height: 260px;
+    border-radius: 10px;
+    background:
+      linear-gradient(var(--tool-surface-soft), var(--tool-surface-soft)),
+      repeating-conic-gradient(rgba(15, 23, 42, 0.03) 0% 25%, transparent 0% 50%);
+    background-size: auto, 20px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     padding: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--tool-border);
   }
   .tool-preview-image {
     max-width: 100%;
-    max-height: 256px;
+    max-height: 280px;
     display: block;
-    border-radius: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
   }
   .tool-preview-empty {
-    color: #7c8794;
+    color: var(--tool-text-mute);
     text-align: center;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 240px;
+    min-height: 220px;
   }
+
+  /* ============================================================
+   * Toolbar (buttons themselves are Tailwind utilities)
+   * ============================================================ */
+  .tool-toolbar,
   .tool-actions {
-    gap: .5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
   }
+
+  /* ============================================================
+   * Status
+   * ============================================================ */
   .tool-status {
-    min-height: 24px;
+    min-height: 22px;
+    font-size: 0.85rem;
+    color: var(--tool-text-mute);
   }
-  .tool-upload-btn {
-    min-width: 120px;
-    border-radius: 12px;
-    font-weight: 700;
-    box-shadow: 0 10px 20px rgba(22, 119, 255, 0.18);
+  .tool-status--error { color: #ef4444 !important; }
+
+  /* ============================================================
+   * Disabled link/button state (toggled from vanilla JS)
+   * ============================================================ */
+  .tool-disabled {
+    pointer-events: none;
+    opacity: 0.45;
   }
-  .tool-actions .btn {
-    border-radius: 12px;
+
+  /* ============================================================
+   * Collapse (<details>)
+   * ============================================================ */
+  .tool-collapse {
+    border: 1px solid var(--tool-border);
+    border-radius: var(--tool-radius-md);
+    background: var(--tool-surface-soft);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  .tool-collapse__summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-weight: 600;
-    min-height: 40px;
+    color: var(--tool-text);
+    user-select: none;
   }
-  .tool-actions .btn-outline-dark,
-  .tool-actions .btn-outline-secondary,
-  .tool-actions .btn-outline-primary {
-    background: rgba(255, 255, 255, 0.8);
+  .tool-collapse__summary::-webkit-details-marker { display: none; }
+  .tool-collapse__title { font-size: 0.92rem; }
+  .tool-collapse__hint {
+    color: var(--tool-text-mute);
+    font-weight: 400;
+    font-size: 0.78rem;
+    margin-left: auto;
   }
-  .tool-actions .btn-outline-primary:hover,
-  .tool-actions .btn-outline-primary:focus,
-  .tool-actions .btn-outline-primary:active {
-    background: #1677ff !important;
-    border-color: #1677ff !important;
-    color: #fff;
+  .tool-collapse__chevron {
+    color: var(--tool-text-mute);
+    font-size: 1.4rem;
+    line-height: 1;
+    transform: rotate(90deg);
+    transition: transform 0.18s ease;
   }
-  .tool-actions .btn-outline-secondary:hover,
-  .tool-actions .btn-outline-secondary:focus,
-  .tool-actions .btn-outline-secondary:active {
-    background: #6c757d !important;
-    border-color: #6c757d !important;
-    color: #fff;
+  .tool-collapse[open] .tool-collapse__chevron { transform: rotate(-90deg); }
+  .tool-collapse__body {
+    padding: 4px 16px 16px;
+    border-top: 1px dashed var(--tool-border);
+    background: var(--tool-surface);
   }
-  .tool-actions .btn-outline-dark:hover,
-  .tool-actions .btn-outline-dark:focus,
-  .tool-actions .btn-outline-dark:active {
-    background: #343a40 !important;
-    border-color: #343a40 !important;
-    color: #fff;
+
+  /* ============================================================
+   * Progress bar
+   * ============================================================ */
+  .tool-progress {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+    overflow: hidden;
   }
+  .tool-progress__bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--tool-brand), #4c9dff);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
+  /* ============================================================
+   * Audio row (used in tts)
+   * ============================================================ */
+  .tool-audio-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--tool-radius-md);
+    background: var(--tool-surface-soft);
+    border: 1px solid var(--tool-border);
+  }
+  .tool-audio-row__seq {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    padding: 2px 8px;
+    background: var(--tool-brand-soft);
+    color: var(--tool-brand);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  .tool-audio-row audio {
+    flex: 1 1 240px;
+    min-width: 200px;
+    height: 34px;
+  }
+
+  /* ============================================================
+   * Responsive
+   * ============================================================ */
   @media (max-width: 767.98px) {
-    .tool-switch {
-      width: 100%;
-    }
-    .tool-tab {
-      flex: 1 1 0;
-      text-align: center;
-    }
-    .tool-actions .btn,
-    .tool-upload-btn {
-      width: 100%;
-    }
+    .tool-switch { width: 100%; }
+    .tool-tab { flex: 1 1 0; text-align: center; }
+    .tool-field__head { flex-direction: column; align-items: flex-start; }
+    .tool-audio-row audio { flex-basis: 100%; }
   }
+
+  /* ============================================================
+   * Dark mode overrides
+   * ============================================================ */
   .io-black-mode .tool-switch {
     background: rgba(255, 255, 255, 0.06);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
-  .io-black-mode .tool-tab {
-    color: #aab3bd;
-  }
-  .io-black-mode .tool-tab.active {
-    background: #2d8cff;
-    color: #fff;
-  }
-  .io-black-mode .tool-tab:hover {
-    color: #d9dde3;
-    background: rgba(255, 255, 255, 0.05);
-  }
+  .io-black-mode .tool-tab { color: var(--tool-text-soft); }
+  .io-black-mode .tool-tab:hover { color: var(--tool-text); background: rgba(255, 255, 255, 0.05); }
+  .io-black-mode .tool-tab.active,
   .io-black-mode .tool-tab.active:hover {
+    background: var(--tool-brand);
     color: #fff;
-    background: #2d8cff;
-  }
-  .io-black-mode .tool-card {
-    background: #2c2e2f !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18) !important;
-  }
-  .io-black-mode .tool-label {
-    color: #d9dde3;
-  }
-  .io-black-mode .tool-textarea {
-    background: rgba(20, 22, 24, 0.78);
-    color: #d9dde3;
-    border-color: rgba(255, 255, 255, 0.06);
-  }
-  .io-black-mode .tool-textarea:focus {
-    border-color: rgba(45, 140, 255, 0.45);
-    box-shadow: 0 0 0 3px rgba(45, 140, 255, 0.12) !important;
   }
   .io-black-mode .tool-preview-box {
-    background: linear-gradient(180deg, rgba(32, 34, 36, 0.98), rgba(25, 27, 29, 0.95));
-    border-color: rgba(255, 255, 255, 0.04);
+    background:
+      linear-gradient(var(--tool-surface-soft), var(--tool-surface-soft)),
+      repeating-conic-gradient(rgba(255, 255, 255, 0.03) 0% 25%, transparent 0% 50%);
+    background-size: auto, 20px 20px;
   }
-  .io-black-mode .tool-preview-empty,
-  .io-black-mode .tool-status {
-    color: #9ba6b2 !important;
+  .io-black-mode .tool-collapse {
+    background: rgba(255, 255, 255, 0.02);
   }
-  .io-black-mode .tool-actions .btn-outline-dark,
-  .io-black-mode .tool-actions .btn-outline-secondary,
-  .io-black-mode .tool-actions .btn-outline-primary {
-    background: rgba(255, 255, 255, 0.03);
-    color: #d9dde3;
-    border-color: rgba(255, 255, 255, 0.08);
+  .io-black-mode .tool-collapse__body {
+    background: rgba(20, 22, 24, 0.4);
   }
-  .io-black-mode .tool-actions .btn-outline-primary:hover,
-  .io-black-mode .tool-actions .btn-outline-primary:focus,
-  .io-black-mode .tool-actions .btn-outline-primary:active,
-  .io-black-mode .tool-actions .btn-outline-secondary:hover,
-  .io-black-mode .tool-actions .btn-outline-secondary:focus,
-  .io-black-mode .tool-actions .btn-outline-secondary:active,
-  .io-black-mode .tool-actions .btn-outline-dark:hover,
-  .io-black-mode .tool-actions .btn-outline-dark:focus,
-  .io-black-mode .tool-actions .btn-outline-dark:active {
-    color: #fff !important;
-  }
+  .io-black-mode .tool-progress { background: rgba(255, 255, 255, 0.08); }
 </style>

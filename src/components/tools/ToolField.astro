@@ -1,0 +1,41 @@
+---
+/**
+ * ToolField - 单行/单段控件的标签 + 说明 + 内容槽
+ *
+ * @slot default 控件本体 (input / textarea / select / 自定义组合)
+ * @slot suffix 标签右侧的附属操作 (如"上传文件"按钮)
+ */
+interface Props {
+  /** 主标签文本 */
+  label?: string;
+  /** 灰色小字说明,展示在标签右侧 */
+  hint?: string;
+  /** 显示在控件下方的辅助描述 */
+  desc?: string;
+  /** 自定义容器类 */
+  class?: string;
+}
+
+const { label, hint, desc, class: className = '' } = Astro.props;
+const hasSuffix = Astro.slots.has('suffix');
+---
+
+<div class:list={['tool-field', className]}>
+  {(label || hasSuffix) && (
+    <div class="tool-field__head">
+      <div class="tool-field__label">
+        {label && <span>{label}</span>}
+        {hint && <small class="tool-field__hint">{hint}</small>}
+      </div>
+      {hasSuffix && (
+        <div class="tool-field__suffix">
+          <slot name="suffix" />
+        </div>
+      )}
+    </div>
+  )}
+  <div class="tool-field__body">
+    <slot />
+  </div>
+  {desc && <p class="tool-field__desc">{desc}</p>}
+</div>

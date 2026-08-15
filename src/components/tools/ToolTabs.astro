@@ -1,0 +1,63 @@
+---
+/**
+ * ToolTabs - 一次性生成 tab 按钮 + 内联切换脚本
+ *
+ * 使用者只需要在下方渲染 <section class="tool-panel" data-panel="text">.
+ */
+interface Props {
+  /** tab 列表: [{ id: 'text', label: '文本' }] */
+  tabs: Array<{ id: string; label: string }>;
+  /** 默认激活的 tab id, 默认为第一个 */
+  active?: string;
+  class?: string;
+}
+const { tabs, active, class: className = '' } = Astro.props;
+const activeId = active || tabs[0]?.id;
+---
+<div class:list={['tool-switch', className]}>
+  {tabs.map((t) => (
+    <button
+      class:list={['tool-tab', t.id === activeId && 'active']}
+      type="button"
+      data-tab={t.id}
+    >
+      {t.label}
+    </button>
+  ))}
+</div>
+
+<script is:inline>
+  (function () {
+    function initToolTabs() {
+      var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.tool-tab[data-tab]'));
+      var panels = Array.prototype.slice.call(document.querySelectorAll('[data-panel]'));
+      if (!tabButtons.length || !panels.length) return;
+
+      function switchTab(name) {
+        tabButtons.forEach(function (t) {
+          t.classList.toggle('active', t.getAttribute('data-tab') === name);
+        });
+        panels.forEach(function (p) {
+          p.classList.toggle('hidden', p.getAttribute('data-panel') !== name);
+        });
+      }
+
+      tabButtons.forEach(function (t) {
+        if (t.dataset.tabsBound === '1') return;
+        t.dataset.tabsBound = '1';
+        t.addEventListener('click', function () {
+          switchTab(t.getAttribute('data-tab') || '');
+        });
+      });
+
+      var activeTab = tabButtons.find(function (t) { return t.classList.contains('active'); });
+      switchTab((activeTab && activeTab.getAttribute('data-tab')) || tabButtons[0].getAttribute('data-tab') || '');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initToolTabs, { once: true });
+    } else {
+      initToolTabs();
+    }
+  })();
+</script>

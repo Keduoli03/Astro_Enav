@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { CounterTool } from '../../react-tools/tools/counter/ui';
+---
+
+<ToolLayout title="字数统计" description="统计中英文字数、段落与预计阅读时间。">
+  <CounterTool client:load />
+</ToolLayout>

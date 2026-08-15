@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { ImageCropTool } from '../../react-tools/tools/image-crop/ui';
+---
+
+<ToolLayout title="图片裁剪" description="按比例裁剪、缩放并导出常用社交媒体尺寸。">
+  <ImageCropTool client:load />
+</ToolLayout>

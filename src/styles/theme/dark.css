@@ -14,21 +14,26 @@
 .io-black-mode .url-card .card{background:#2c2e2f;border-color:#2c2e2f}
 .io-black-mode .text-muted{color:#bbb}
 .io-black-mode .text-gray{color:#888}
-.io-black-mode .page-header{background:#2c2e2f;box-shadow:0 0 25px 5px rgba(10,10,10,.25)}
-/* 保持顶部导航在未滚动时透明，避免覆盖背景 */
-.io-black-mode .big-header-banner:not(.header-bg) .page-header{
-  background: transparent !important;
-  box-shadow: none !important;
+.io-black-mode .page-header{background:rgba(44,46,47,.9);box-shadow:0 0 25px 5px rgba(10,10,10,.25)}
+.io-black-mode .big-header-banner .page-header{
+  background:var(--sidebar-bg-color)!important;
+  backdrop-filter:blur(var(--sidebar-blur,12px));
+  -webkit-backdrop-filter:blur(var(--sidebar-blur,12px));
+  box-shadow:var(--sidebar-header-shadow,0 6px 24px rgba(0,0,0,.35))!important;
 }
+.io-black-mode .big-header-banner .page-header .navbar-nav>li>a,
+.io-black-mode .big-header-banner .page-header .navbar-menu a:not(.dropdown-item),
+.io-black-mode .big-header-banner .page-header #hitokoto a{color:#fff!important;text-shadow:none}
+.io-black-mode .big-header-banner .header-mini-btn path{stroke:#fff}
 .io-black-mode .big-header-banner.header-bg .page-header{
-  background: rgba(44,46,47,0.5) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 6px 24px rgba(0,0,0,.2);
+  background: var(--sidebar-bg-color) !important;
+  backdrop-filter: blur(var(--sidebar-blur,12px));
+  -webkit-backdrop-filter: blur(var(--sidebar-blur,12px));
+  box-shadow: var(--sidebar-header-shadow,0 6px 24px rgba(0,0,0,.35));
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.io-black-mode #footer-tools .btn{color:#aaa;background:#363738}
-.io-black-mode #footer-tools .btn:hover{color:#fff}
+.io-black-mode #footer-tools > a,.io-black-mode #footer-tools .theme-switch-btn{color:#aaa;background:#363738}
+.io-black-mode #footer-tools > a:hover,.io-black-mode #footer-tools .theme-switch-btn:hover{color:#fff}
 .io-black-mode .sidebar-logo{background:transparent!important}
 .io-black-mode .sidebar-nav .flex-bottom a,.io-black-mode .sidebar-menu-inner a{color:var(--sidebar-text-color,#fff)!important}
 .io-black-mode .sidebar-menu-inner a .icon-fw,.io-black-mode .sidebar-menu-inner a .icon-lg,.io-black-mode .sidebar-menu-inner a .icon-2x{color:var(--sidebar-text-color,#fff)!important}

@@ -4,24 +4,24 @@ import { SITE_LOGO, SITE_LOGO_DARK, SITE_TITLE } from '../settings';
 const categories = getCategoryList();
 import { Icon } from 'astro-icon/components';
 ---
-<div id="sidebar" class="sticky sidebar-nav fade animate-nav">
-  <div class="modal-dialog h-100 sidebar-nav-inner">
+<div id="sidebar" class="sticky sidebar-nav animate-nav" transition:persist>
+  <div class="sidebar-nav-inner h-full">
     <!-- Logo部分 -->
-    <div class="sidebar-logo border-bottom border-color">
+    <div class="sidebar-logo border-b border-color">
   <div class="logo overflow-hidden">
     <a href="/" class="logo-expanded inline-flex items-center gap-2" style="color: var(--sidebar-title-color)">
       <img src={SITE_LOGO} height="40" class="logo-light" alt={SITE_TITLE}>
-      <img src={SITE_LOGO_DARK} height="40" class="logo-dark d-none" alt={SITE_TITLE}>
+      <img src={SITE_LOGO_DARK} height="40" class="logo-dark hidden" alt={SITE_TITLE}>
       <span style="font-size: 20px; font-weight: bold;">{SITE_TITLE}</span>
     </a>
     <a href="/" class="logo-collapsed inline-flex items-center gap-2" style="color: var(--sidebar-title-color)">
       <img src={SITE_LOGO} height="40" class="logo-light" alt={SITE_TITLE}>
-      <img src={SITE_LOGO_DARK} height="40" class="logo-dark d-none" alt={SITE_TITLE}>
+      <img src={SITE_LOGO_DARK} height="40" class="logo-dark hidden" alt={SITE_TITLE}>
     </a>
   </div>
 </div>
     <!-- 动态生成分类菜单 -->
-<div class="sidebar-menu flex-fill">
+<div class="sidebar-menu flex-fill flex-1">
   <div class="sidebar-scroll">
     <div class="sidebar-menu-inner">
       <ul>
@@ -69,7 +69,7 @@ import { Icon } from 'astro-icon/components';
 </div>
 
 <!-- 底部固定链接 -->
-    <div class="border-top py-2 border-color">
+    <div class="border-t py-2 border-color">
       <div class="flex-bottom">
         <ul>
           <li class="sidebar-item">
@@ -93,6 +93,8 @@ import { Icon } from 'astro-icon/components';
         </ul>
       </div>
     </div>
+  </div>
+</div>
 
 
 <!-- 侧栏交互与平滑滚动脚本 -->

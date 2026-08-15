@@ -5,7 +5,7 @@ import { Icon } from 'astro-icon/components';
 <div class="theme-switch-wrapper">
   <button 
     aria-label="切换主题模式"
-    class="btn rounded-circle theme-switch-btn m-1 transition-all duration-200"
+    class="theme-switch-btn m-1 rounded-full transition-all duration-200"
     id="scheme-switch"
     title="点击切换：亮色 ⇄ 暗色"
   >
@@ -30,9 +30,15 @@ import { Icon } from 'astro-icon/components';
       try{ const t = localStorage.getItem('theme'); return t === DARK_MODE ? DARK_MODE : LIGHT_MODE; }catch{ return LIGHT_MODE; }
     }
     function applyThemeToDocument(theme){
+      const root = document.documentElement;
       const body = document.body; if(!body) return;
+      const isDark = theme === DARK_MODE;
+      root.classList.toggle('theme-dark', isDark);
+      root.classList.toggle('theme-light', !isDark);
+      root.style.colorScheme = isDark ? 'dark' : 'light';
       body.classList.remove('io-grey-mode','io-black-mode');
-      body.classList.add(theme === DARK_MODE ? 'io-black-mode' : 'io-grey-mode');
+      body.classList.add(isDark ? 'io-black-mode' : 'io-grey-mode');
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#1b1d1f' : '#f9f9f9');
     }
     function setTheme(theme){ try{ localStorage.setItem('theme', theme); }catch{} }
 
@@ -44,6 +50,9 @@ import { Icon } from 'astro-icon/components';
       }
       if (btn) {
         btn.classList.toggle('opacity-75', isAnimating);
+        const nextTheme = mode === DARK_MODE ? '亮色' : '暗色';
+        btn.setAttribute('aria-label', `切换到${nextTheme}模式`);
+        btn.setAttribute('title', `切换到${nextTheme}模式`);
       }
     }
 
@@ -55,20 +64,25 @@ import { Icon } from 'astro-icon/components';
     function triggerThemeTransition(event, newMode) {
       if (isAnimating || mode === newMode) return;
       isAnimating = true;
+      document.documentElement.classList.add('theme-switching');
 
-      const trigger = () => {
+      const trigger = async () => {
         mode = newMode;
         setTheme(mode);
         applyThemeToDocument(mode);
         updateIcon();
+        try{
+          if (window && window.__applyBackgrounds) await window.__applyBackgrounds();
+        }catch{}
         try{ window.dispatchEvent(new CustomEvent('theme:changed', { detail: { mode } })); }catch{}
-        try{ if (window && window.__applyBackgrounds) { window.__applyBackgrounds(); } }catch{}
       };
 
       if (!document.startViewTransition) {
-        trigger();
-        isAnimating = false;
-        updateIcon();
+        trigger().finally(() => {
+          isAnimating = false;
+          document.documentElement.classList.remove('theme-switching');
+          updateIcon();
+        });
         return;
       }
 
@@ -89,18 +103,22 @@ import { Icon } from 'astro-icon/components';
 
         document.documentElement.animate(
           {
-            clipPath: mode === DARK_MODE ? clipPath : [...clipPath].reverse(),
+            // Always reveal the new snapshot. Reversing the old snapshot on
+            // dark -> light can expose the browser's white root background
+            // for a frame, which is perceived as a flash.
+            clipPath,
           },
           {
             duration: 600,
             easing: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-            pseudoElement: mode === DARK_MODE ? "::view-transition-new(root)" : "::view-transition-old(root)",
+            pseudoElement: "::view-transition-new(root)",
           },
         );
       });
 
       transition.finished.then(() => {
         isAnimating = false;
+        document.documentElement.classList.remove('theme-switching');
         updateIcon();
       });
     }

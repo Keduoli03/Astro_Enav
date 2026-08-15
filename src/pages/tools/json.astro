@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import { JsonTool } from '../../react-tools/tools/json/ui';
+---
+
+<ToolLayout title="JSON 格式化" description="校验、格式化、压缩并快速复制 JSON 数据。">
+  <JsonTool client:load />
+</ToolLayout>

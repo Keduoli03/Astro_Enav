@@ -110,6 +110,38 @@ export const CATEGORY_CONFIG = {
       },
     ],
   },
+  ai: {
+    name: "AI 工具",
+    icon: "ri:robot-2-line",
+    subItems: [
+      {
+        id: "ai-model",
+        name: "模型与运行",
+        icon: "ri:cpu-line",
+      },
+      {
+        id: "ai-generate",
+        name: "AI 生成",
+        icon: "ri:magic-line",
+      },
+      {
+        id: "ai-chat",
+        name: "AI 对话",
+        icon: "ri:chat-voice-line",
+      },
+    ],
+  },
+  tools: {
+    name: "实用工具",
+    icon: "ri:tools-line",
+    subItems: [
+      {
+        id: "tools",
+        name: "实用工具",
+        icon: "ri:apps-line",
+      },
+    ],
+  },
 };
 
 // 辅助方法

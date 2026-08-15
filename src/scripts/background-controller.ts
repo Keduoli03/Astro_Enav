@@ -1,111 +1,76 @@
-import { SEARCH_BG, CONTENT_BG, SEARCH_BG_DARK, CONTENT_BG_DARK, SEARCH_BG_BLUR, CONTENT_BG_BLUR, SEARCH_BG_BLUR_DARK, CONTENT_BG_BLUR_DARK } from '../settings';
-import { DARK_MODE, AUTO_MODE, DEFAULT_THEME } from '../constants/constants';
-
-let applying = false;
-let lastHasContent = false;
-let lastGrid = false;
+import {
+  SEARCH_BG_BLUR,
+  CONTENT_BG_BLUR,
+  SEARCH_BG_BLUR_DARK,
+  CONTENT_BG_BLUR_DARK,
+} from '../settings';
+import { DARK_MODE, DEFAULT_THEME } from '../constants/constants';
 
 function getStoredTheme(): string {
-  const stored = localStorage.getItem('theme');
-  return stored || DEFAULT_THEME;
+  try { return localStorage.getItem('theme') || DEFAULT_THEME; } catch { return DEFAULT_THEME; }
 }
 
 function isDarkMode(): boolean {
-  const body = document.body;
-  if (body && (body.classList.contains('io-black-mode') || body.classList.contains('dark'))) return true;
-  const t = getStoredTheme();
-  if (t === DARK_MODE) return true;
-  if (t === AUTO_MODE) return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  return false;
+  return document.body.classList.contains('io-black-mode') || getStoredTheme() === DARK_MODE;
 }
 
-function applyBackgrounds(): void {
-  if (applying) return;
-  applying = true;
+function applyLayerSource(layer: HTMLElement | null, dark: boolean): Promise<void> {
+  if (!layer) return Promise.resolve();
+  const image = layer.querySelector<HTMLImageElement>('img');
+  if (!image) return Promise.resolve();
+  const source = dark ? layer.dataset.darkSrc : layer.dataset.lightSrc;
+  if (!source || image.getAttribute('src') === source) return Promise.resolve();
+
+  // Keep the currently visible image until the next one is ready. Assigning
+  // the new src immediately leaves the image empty for a frame, which is
+  // especially noticeable during the dark-to-light theme transition.
+  if (!image.getAttribute('src')) {
+    image.src = source;
+    return Promise.resolve();
+  }
+
+  layer.dataset.pendingSrc = source;
+  return new Promise((resolve) => {
+    const preload = new Image();
+    const commit = () => {
+      if (layer.dataset.pendingSrc === source) {
+        image.src = source;
+        delete layer.dataset.pendingSrc;
+      }
+      resolve();
+    };
+    preload.onload = commit;
+    preload.onerror = commit;
+    preload.src = source;
+  });
+}
+
+async function applyBackgrounds(): Promise<void> {
   const dark = isDarkMode();
-  const searchLight = SEARCH_BG || '';
-  const searchDark = SEARCH_BG_DARK || '';
-  const contentLight = CONTENT_BG || '';
-  const contentDark = CONTENT_BG_DARK || contentLight;
-  const searchImg = dark ? searchDark : searchLight;
-  const contentImg = dark ? contentDark : contentLight;
-  const searchBlur = dark ? (SEARCH_BG_BLUR_DARK ?? SEARCH_BG_BLUR) : SEARCH_BG_BLUR;
-  const contentBlur = dark ? (CONTENT_BG_BLUR_DARK ?? CONTENT_BG_BLUR) : CONTENT_BG_BLUR;
+  const searchBlur = dark ? SEARCH_BG_BLUR_DARK : SEARCH_BG_BLUR;
+  const contentBlur = dark ? CONTENT_BG_BLUR_DARK : CONTENT_BG_BLUR;
   const root = document.documentElement;
-  /* 背景图片切换由分层元素控制，这里不再写入 URL 变量，仅处理模糊与状态 */
+  const searchLayer = document.querySelector<HTMLElement>('.search-bg-layer');
+  const contentLayer = document.getElementById('global-bg');
+  const searchImage = dark ? searchLayer?.dataset.darkSrc : searchLayer?.dataset.lightSrc;
+  const contentImage = dark ? contentLayer?.dataset.darkSrc : contentLayer?.dataset.lightSrc;
+
   root.style.setProperty('--search-bg-blur', `${Number(searchBlur) || 0}px`);
   root.style.setProperty('--content-bg-blur', `${Number(contentBlur) || 0}px`);
-  const sVal = `${Number(searchBlur) || 0}px`;
-  const cVal = `${Number(contentBlur) || 0}px`;
-  document.querySelectorAll('.search-bg-layer').forEach(el => { (el as HTMLElement).style.setProperty('filter', `blur(${sVal})`, 'important'); });
-  document.querySelectorAll('.global-bg-layer').forEach(el => { (el as HTMLElement).style.setProperty('filter', `blur(${cVal})`, 'important'); });
-  const searchEl = document.getElementById('search-bg') as HTMLElement | null;
-  if (searchEl) {
-    searchEl.style.position = 'relative';
-    searchEl.style.zIndex = '1';
-    if (!!searchImg) {
-      searchEl.classList.add('css-img');
-      searchEl.classList.remove('css-color');
-    } else {
-      searchEl.classList.add('css-color');
-      searchEl.classList.remove('css-img');
-    }
-  }
-  const body = document.body;
-  if (body) {
-    const hasContent = !!contentImg;
-    if (hasContent !== lastHasContent) {
-      if (hasContent) body.classList.add('has-content-bg');
-      else body.classList.remove('has-content-bg');
-      lastHasContent = hasContent;
-    }
-  }
-  const main = document.querySelector('.main-content');
-  if (main) {
-    const onlySearch = !!searchImg && !contentImg;
-    if (onlySearch !== lastGrid) {
-      if (onlySearch) (main as HTMLElement).classList.add('grid-bg');
-      else (main as HTMLElement).classList.remove('grid-bg');
-      lastGrid = onlySearch;
-    }
-  }
-  applying = false;
-}
+  await Promise.all([
+    applyLayerSource(searchLayer, dark),
+    applyLayerSource(contentLayer, dark),
+  ]);
 
-function observeThemeChanges(): void {
-  const body = document.body;
-  if (body) {
-    const mo = new MutationObserver(() => {
-      if (!applying) applyBackgrounds();
-    });
-    mo.observe(body, { attributes: true, attributeFilter: ['class'] });
-  }
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'theme') applyBackgrounds();
-  });
-  window.addEventListener('theme:changed', applyBackgrounds);
-  if (window.matchMedia) {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    if (mq.addEventListener) mq.addEventListener('change', applyBackgrounds);
-    else if ((mq as any).addListener) (mq as any).addListener(applyBackgrounds);
-  }
+  const search = document.getElementById('search-bg');
+  search?.classList.toggle('css-img', Boolean(searchImage));
+  search?.classList.toggle('css-color', !searchImage);
+  document.body.classList.toggle('has-content-bg', Boolean(contentImage));
+  document.querySelector('.main-content')?.classList.toggle('grid-bg', Boolean(searchImage && !contentImage));
 }
 
 applyBackgrounds();
-observeThemeChanges();
-try {
-  (window as any).__applyBackgrounds = applyBackgrounds;
-  const exists = () => {
-    return (
-      !!document.getElementById('search-bg') ||
-      !!document.querySelector('.search-bg-layer') ||
-      !!document.querySelector('.global-bg-layer')
-    );
-  };
-  const tryApply = () => { if (exists()) { applyBackgrounds(); return true; } return false; };
-  if (!tryApply()) {
-    const obs = new MutationObserver(() => { if (tryApply()) obs.disconnect(); });
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-    document.addEventListener('DOMContentLoaded', tryApply);
-  }
-} catch {}
+document.addEventListener('astro:page-load', applyBackgrounds);
+window.addEventListener('storage', (event) => { if (event.key === 'theme') applyBackgrounds(); });
+
+(window as typeof window & { __applyBackgrounds?: () => void }).__applyBackgrounds = applyBackgrounds;

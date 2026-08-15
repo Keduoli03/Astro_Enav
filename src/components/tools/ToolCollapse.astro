@@ -1,0 +1,29 @@
+---
+/**
+ * ToolCollapse - 使用原生 <details> 的可折叠区块,零 JS
+ *
+ * @slot default 展开后的内容
+ * @slot summary 覆盖默认摘要行的自定义节点
+ */
+interface Props {
+  /** 摘要标题 */
+  title: string;
+  /** 摘要右侧灰色小字 */
+  hint?: string;
+  /** 默认是否展开 */
+  open?: boolean;
+  /** 自定义容器类 */
+  class?: string;
+}
+const { title, hint, open = false, class: className = '' } = Astro.props;
+---
+<details class:list={['tool-collapse', className]} open={open}>
+  <summary class="tool-collapse__summary">
+    <span class="tool-collapse__title">{title}</span>
+    {hint && <small class="tool-collapse__hint">{hint}</small>}
+    <span class="tool-collapse__chevron" aria-hidden="true">›</span>
+  </summary>
+  <div class="tool-collapse__body">
+    <slot />
+  </div>
+</details>

@@ -64,19 +64,19 @@ let faviconUrl = logo;
 if (hasCustomIcon) {
   faviconUrl = '';
 } else if (isLogoEmpty) {
-  faviconUrl = domain ? `https://favicon.im/${domain}` : defaultData.logo;
+  faviconUrl = domain ? `https://favicon.im/${encodeURIComponent(domain)}?larger=true` : defaultData.logo;
 } else if (!isDefaultLogo) {
   if (!logo.startsWith('http') && !logo.startsWith('//')) {
     faviconUrl = logo.startsWith('/')
       ? logo
-      : (domain ? `https://favicon.im/${domain}` : defaultData.logo);
+      : (domain ? `https://favicon.im/${encodeURIComponent(domain)}?larger=true` : defaultData.logo);
   }
 } else {
-  faviconUrl = domain ? `https://favicon.im/${domain}` : logo;
+  faviconUrl = domain ? `https://favicon.im/${encodeURIComponent(domain)}?larger=true` : logo;
 }
 ---
 
-<div class="url-card col-6 col-sm-6 col-md-4 col-xl-5a col-xxl-6a">
+<div class="url-card px-[15px] w-1/2 md:w-1/3 xl:w-1/5 2xl:w-1/6">
   <div class="url-body default">
     <!-- 主卡片链接 -->
     <a 
@@ -84,19 +84,19 @@ if (hasCustomIcon) {
       target={isInternalUrl ? undefined : '_blank'} 
       data-id={id}
       data-url={url}
-      class="card no-c mb-4"
+      class="card no-c mb-6!"
       data-toggle="tooltip"
       data-placement="bottom"
       title={description}
       rel={isInternalUrl ? undefined : 'noopener noreferrer'}
     >
       <div class="card-body">
-        <div class="url-content d-flex align-items-center">
+        <div class="url-content flex items-center">
           <!-- 网站图标 -->
-          <div class="url-img mr-2 d-flex align-items-center justify-content-center">
+          <div class="url-img mr-2 flex items-center justify-center">
             {hasCustomIcon ? (
               <span
-                class="site-icon d-inline-flex align-items-center justify-content-center"
+                class="site-icon inline-flex items-center justify-center"
                 style={`color:${iconColor || 'var(--primary-color)'};background:${iconBg || 'rgba(64, 158, 255, 0.12)'}`}
                 aria-hidden="true"
               >
@@ -104,8 +104,8 @@ if (hasCustomIcon) {
               </span>
             ) : (
               <img 
-                class="lazy site-favicon"
-                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                class="lazy site-favicon is-ready"
+                src={defaultData.logo}
                 data-src={faviconUrl}
                 alt={title}
                 loading="lazy"
@@ -117,7 +117,7 @@ if (hasCustomIcon) {
           </div>
           
           <!-- 网站信息 -->
-          <div class="url-info flex-fill">
+          <div class="url-info flex-fill flex-1">
             <div class="text-sm overflowClip_1">
               <strong>{title}</strong>
             </div>

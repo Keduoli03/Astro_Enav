@@ -1,251 +1,75 @@
 ---
 import { searchGroups, defaultSearch } from '../data/searchConfig';
 import { Icon } from 'astro-icon/components';
-const defaultGroupId = (searchGroups.find(g => g.engines.some(e => e.id === defaultSearch.id))?.id) || (searchGroups[0]?.id || '');
+
+const defaultGroupId = searchGroups.find((group) =>
+  group.engines.some((engine) => engine.id === defaultSearch.id)
+)?.id || searchGroups[0]?.id || '';
 ---
-<div id="search" class="s-search mx-auto">
-      <!-- 搜索分类标签 -->
-      <div id="search-list-menu" class="hide-type-list">
-        <div class="s-type text-center">
-          <div class="s-type-list big">
-            <div class="anchor" style="position: absolute; left: 50%; opacity: 0;"></div>
-            {searchGroups.map(group => (
-              <label 
-                for={group.engines[0].id} 
-                data-id={group.id}
-              >
-                <span>{group.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-      <!-- 搜索表单 -->
-      <form 
-        action={defaultSearch.url} 
-        method="get" 
-        target="_blank" 
-        class="super-search-fm"
-      >
-        <input 
-          type="text" 
-          id="search-text" 
-          class="form-control smart-tips search-key"
-          name="q"
-          placeholder={defaultSearch.placeholder} 
-          style="outline:0" 
-          autocomplete="off"
-        />
-        <button class="submit" type="submit" aria-label="搜索">
-          <Icon name="ri:search-line" aria-hidden="true" />
-        </button>
-      </form>
-      <!-- 搜索引擎选项 -->
-      <div id="search-list" class="hide-type-list">
-        {searchGroups.map(group => (
-          <div class={`search-group ${group.id} ${group.id === defaultGroupId ? 's-current' : ''}`} style={group.id === defaultGroupId ? 'display:block' : 'display:none'}>
-            <ul class="search-type">
-              {group.engines.map(engine => (
-                <li>
-                  <input 
-                    hidden 
-                    type="radio" 
-                    name="type" 
-                    id={engine.id}
-                    value={engine.url}
-                    data-placeholder={engine.placeholder}
-                    checked={engine.id === defaultSearch.id}
-                  />
-                  <label for={engine.id}>
-                    <span class="text-muted">{engine.label}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
+
+<div id="search" class="s-search mx-auto!" data-search-root="main">
+  <div id="search-list-menu" class="hide-type-list">
+    <div class="s-type text-center">
+      <div class="s-type-list big" role="group" aria-label="搜索分类">
+        {searchGroups.map((group) => (
+          <button
+            type="button"
+            class="search-group-tab"
+            data-search-group={group.id}
+            aria-pressed={group.id === defaultGroupId ? 'true' : 'false'}
+          >
+            <span>{group.label}</span>
+          </button>
         ))}
       </div>
-      <!-- 搜索热词 -->
-      <div id="smart-card" class="card search-smart-tips search-hot-text" style="display:none">
-        <ul id="word" style="display: none"></ul>
-        <ul id="local-word" style="display: none"></ul>
-      </div>
-</div>
-<script is:inline>
-  (function(){
-    var STORE_KEY = 'selectedSearchEngineId';
-    var STORE_GROUP_KEY = 'selectedSearchGroupId';
-    var STORE_GROUP_ENGINE_PREFIX = 'selectedEngineIdForGroup:';
-    function getGroupIdByEngine(el){
-      if(!el) return '';
-      var grp = el.closest('.search-group');
-      if(!grp) return '';
-      var classes = Array.prototype.slice.call(grp.classList).filter(function(c){ return c !== 'search-group'; });
-      return classes[0] || '';
-    }
-    function applyGroup(gid){
-      if(!gid) return;
-      document.querySelectorAll('#search-bg .search-group').forEach(function(g){
-        var show = g.classList.contains(gid);
-        g.classList.toggle('s-current', show);
-        (g).style.display = show ? 'block' : 'none';
-      });
-      document.querySelectorAll('#search-list-menu .s-type-list.big label').forEach(function(l){
-        (l).classList.toggle('active', (l).dataset.id === gid);
-      });
-      var savedPer = '';
-      try{ savedPer = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + gid) || ''; }catch(e){}
-      var toCheck = null;
-      if(savedPer){
-        var el = document.getElementById(savedPer);
-        if(el && el.name === 'type') toCheck = el;
-      }
-      if(!toCheck){
-        toCheck = document.querySelector('.search-group.'+gid+' input[name="type"]');
-      }
-      if(toCheck){
-        (toCheck).checked = true;
-        updateEngine();
-      }
-      try{ localStorage.setItem(STORE_GROUP_KEY, gid); }catch(e){}
-    }
-    function updateEngine(){
-      var checked = document.querySelector('#search-bg input[name="type"]:checked');
-      var form = document.querySelector('#search-bg .super-search-fm');
-      var input = document.getElementById('search-text');
-      if(checked && form){ form.action = (checked).value || form.action; }
-      var ph = checked ? (checked).getAttribute('data-placeholder') || '' : '';
-      if(ph && input){ (input).placeholder = ph; }
-      var isLocal = checked && (checked).id === 'type-local';
-      var netTips = document.getElementById('word');
-      var localTips = document.getElementById('local-word');
-      var smartCard = document.getElementById('smart-card');
-      var root = document.getElementById('search');
-      if(root){ root.classList.toggle('local-mode', !!isLocal); }
-      var netLen = (netTips && netTips.children) ? netTips.children.length : 0;
-      var localLen = (localTips && localTips.children) ? localTips.children.length : 0;
-      if(netTips){ netTips.style.display = isLocal ? 'none' : (netLen ? 'block' : 'none'); }
-      if(localTips){ localTips.style.display = localLen ? 'block' : 'none'; }
-      if(smartCard){ smartCard.style.display = (isLocal ? (localLen ? 'block' : 'none') : ((netLen||localLen) ? 'block' : 'none')); }
-      // 若切换到本地搜索，立即根据当前关键词执行本地搜索以决定显示
-      var inputVal = (input && input.value) ? input.value : '';
-      if(isLocal){ localSearch(inputVal); }
-      else { if(input){ try{ input.dispatchEvent(new Event('keyup')); }catch(e){} } }
-      if(checked){
-        var gid = getGroupIdByEngine(checked);
-        try{ localStorage.setItem(STORE_KEY, (checked).id); }catch(e){}
-        if(gid){
-          try{ localStorage.setItem(STORE_GROUP_KEY, gid); }catch(e){}
-          try{ localStorage.setItem(STORE_GROUP_ENGINE_PREFIX + gid, (checked).id); }catch(e){}
-        }
-      }
-    }
-    var localSitesPromise = null;
-    function getLocalSites(){
-      if(!localSitesPromise){
-        localSitesPromise = fetch('/search-index.json')
-          .then(function(response){ if(!response.ok) throw new Error('Search index request failed'); return response.json(); })
-          .then(function(data){ return Array.isArray(data) ? data : []; })
-          .catch(function(){ return []; });
-      }
-      return localSitesPromise;
-    }
+    </div>
+  </div>
 
-    async function localSearch(keyword){
-      keyword = (keyword || '').trim().toLowerCase();
-      var tips = document.getElementById('local-word');
-      var smartCard = document.getElementById('smart-card');
-      if(!tips){ return; }
-      if(!keyword){ tips.replaceChildren(); tips.style.display = 'none'; return; }
-      var list = await getLocalSites();
-      var currentInput = document.getElementById('search-text');
-      if(!currentInput || String(currentInput.value || '').trim().toLowerCase() !== keyword) return;
-      var results = [];
-      for(var i=0;i<list.length;i++){
-        var item = list[i];
-        var t = (item.title||'').toLowerCase();
-        var d = (item.description||'').toLowerCase();
-        var u = (item.url||'').toLowerCase();
-        if(t.indexOf(keyword)>=0 || d.indexOf(keyword)>=0 || u.indexOf(keyword)>=0){ results.push(item); }
-        if(results.length>=10) break;
-      }
-      tips.style.display = results.length ? 'block' : 'none';
-      tips.replaceChildren();
-      results.forEach(function(result){
-        var li = document.createElement('li');
-        li.dataset.url = result.url || '';
-        var badge = document.createElement('span');
-        badge.className = 'local';
-        badge.textContent = '本';
-        var text = result.description ? ((result.title || result.url) + ' - ' + result.description) : (result.title || result.url);
-        li.appendChild(badge);
-        li.appendChild(document.createTextNode(text));
-        li.addEventListener('click', function(){
-          var url = li.dataset.url || '';
-          if(url) window.open(url, '_blank', 'noopener,noreferrer');
-        });
-        tips.appendChild(li);
-      });
-      if(smartCard){ smartCard.style.display = results.length ? 'block' : 'none'; }
-    }
-    function init(){
-      // 恢复分组与引擎选择
-      try{
-        var savedGroup = localStorage.getItem(STORE_GROUP_KEY) || '';
-        if(savedGroup){
-          applyGroup(savedGroup);
-          var savedEnginePer = localStorage.getItem(STORE_GROUP_ENGINE_PREFIX + savedGroup) || '';
-          if(savedEnginePer){
-            var el = document.getElementById(savedEnginePer);
-            if(el && el.name === 'type'){ (el).checked = true; updateEngine(); }
-          }else{
-            var savedGlobal = localStorage.getItem(STORE_KEY) || '';
-            if(savedGlobal){
-              var el2 = document.getElementById(savedGlobal);
-              if(el2 && el2.name === 'type' && getGroupIdByEngine(el2) === savedGroup){ (el2).checked = true; updateEngine(); }
-            }
-          }
-        }
-      }catch(e){}
-      var labels = document.querySelectorAll('#search-list-menu .s-type-list.big label');
-      labels.forEach(function(l){
-        l.addEventListener('click', function(e){
-          e.preventDefault();
-          var gid = (l).dataset.id || '';
-          if(gid) applyGroup(gid);
-        });
-      });
-      document.querySelectorAll('#search-bg .search-type label').forEach(function(l){
-        l.addEventListener('click', function(){
-          var id = (l).getAttribute('for');
-          if(!id) return;
-          var el = document.getElementById(id);
-          if(el){ (el).checked = true; updateEngine(); }
-        });
-      });
-      updateEngine();
-      // 初次进入页面时，立即触发一次本地搜索以避免空白
-      var inputEl = document.getElementById('search-text');
-      if(inputEl){ localSearch(inputEl.value || ''); }
-      // 监听网络联想内容变化，动态显示/隐藏容器，避免空白条
-      var netTips = document.getElementById('word');
-      var localTips = document.getElementById('local-word');
-      var smartCard = document.getElementById('smart-card');
-      if(netTips && smartCard){
-        var obs = new MutationObserver(function(){
-          var checked = document.querySelector('#search-bg input[name="type"]:checked');
-          var isLocal = checked && (checked).id === 'type-local';
-          var netLen = netTips.children.length;
-          var localLen = localTips ? localTips.children.length : 0;
-          smartCard.style.display = isLocal ? (localLen ? 'block' : 'none') : ((netLen||localLen) ? 'block' : 'none');
-        });
-        obs.observe(netTips, { childList: true });
-      }
-      var input = document.getElementById('search-text');
-      var form = document.querySelector('#search-bg .super-search-fm');
-      if(input){ input.addEventListener('input', function(){ localSearch((input).value || ''); }); }
-      if(form){ form.addEventListener('submit', function(e){ var checked = document.querySelector('#search-bg input[name="type"]:checked'); if(checked && checked.id==='type-local'){ e.preventDefault(); var tips = document.getElementById('local-word'); var first = tips && tips.querySelector('li[data-url]'); var u = first ? (first).getAttribute('data-url') : ''; if(u){ try{ window.open(u, '_blank', 'noopener,noreferrer'); }catch(err){} } } }); }
-    }
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-  })();
-</script>
+  <form action={defaultSearch.url} method="get" target="_blank" class="super-search-fm">
+    <label class="sr-only" for="search-text">搜索关键词</label>
+    <input
+      type="search"
+      id="search-text"
+      class="smart-tips search-key w-full"
+      name="q"
+      placeholder={defaultSearch.placeholder}
+      autocomplete="off"
+      aria-autocomplete="list"
+      aria-controls="search-suggestions"
+    />
+    <button class="submit" type="submit" aria-label="搜索">
+      <Icon name="ri:search-line" aria-hidden="true" />
+    </button>
+  </form>
+
+  <div id="search-list" class="hide-type-list">
+    {searchGroups.map((group) => (
+      <div
+        class={`search-group ${group.id} ${group.id === defaultGroupId ? 's-current' : ''}`}
+        data-search-panel={group.id}
+        hidden={group.id !== defaultGroupId}
+      >
+        <ul class="search-type" aria-label={`${group.label}搜索引擎`}>
+          {group.engines.map((engine) => (
+            <li>
+              <input
+                class="sr-only"
+                type="radio"
+                name="type"
+                id={engine.id}
+                value={engine.url}
+                data-placeholder={engine.placeholder}
+                checked={engine.id === defaultSearch.id}
+              />
+              <label for={engine.id}><span class="text-muted">{engine.label}</span></label>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+
+  <div id="smart-card" class="card search-smart-tips search-hot-text rounded-xl" hidden>
+    <ul id="search-suggestions" data-search-suggestions hidden></ul>
+  </div>
+</div>
