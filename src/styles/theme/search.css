@@ -21,6 +21,9 @@
 .header-big.no-bg{padding-bottom:10px}
 .header-big.css-color{background-size:400%;background-position:0% 100%;animation:gradient 7.5s ease-in-out infinite}
 .header-big .s-search,.header-big #bulletin_box{margin:0 15px}
+.header-big>.s-search{display:flex;flex-direction:column;align-items:center}
+.header-big .lcd-clock{display:flex;width:100%;min-width:0;align-items:center;justify-content:center;margin:0 auto 16px}
+.header-big .lcd-time{display:block;width:100%;font-size:clamp(32px,3vw,50px);line-height:1;text-align:center}
 .header-big #bulletin_box{background:transparent;box-shadow:none}
 .header-big:not(.no-bg) #bulletin_box a{color:#fff}
 .header-big .bulletin-big #bulletin_box{max-width:600px;margin:0 auto}

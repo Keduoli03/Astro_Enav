@@ -113,6 +113,10 @@ import { Icon } from 'astro-icon/components'
             const applyMini = (on, initial) => {
                 if (!sidebar) return;
                 const DURATION = 350;
+                // Keep the content offset in the same state as the sidebar.
+                // This explicit marker is resilient to Astro's persisted nodes,
+                // where a sibling selector can briefly point at the old sidebar.
+                if (mainContent) mainContent.classList.toggle('sidebar-is-mini', !!on);
                 if (on) {
                     if (!initial) {
                         if (mainContent) mainContent.classList.add('sidebar-collapsing');
@@ -163,3 +167,15 @@ import { Icon } from 'astro-icon/components'
         });
     </script>
 </div>
+
+<style is:global>
+  @media (min-width: 768px) {
+    .main-content.sidebar-is-mini {
+      margin-left: 60px !important;
+    }
+
+    .main-content.sidebar-is-mini .page-header {
+      left: 60px !important;
+    }
+  }
+</style>

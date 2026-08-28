@@ -1,5 +1,5 @@
 .sidebar-nav{position:fixed;display:table-cell;font-size:.875rem;width:220px;height:100vh;z-index:1081;opacity:1!important;overflow:hidden}
-.sidebar-nav-inner{width:inherit;margin:0;max-width:170px;background:var(--sidebar-bg-color, rgba(255,255,255,.65));backdrop-filter:blur(var(--sidebar-blur,12px));-webkit-backdrop-filter:blur(var(--sidebar-blur,12px));pointer-events:inherit;display:flex;flex-direction:column;transition:background-color .3s,max-width .35s;overflow:hidden;border:1px solid var(--sidebar-border-color, rgba(255,255,255,.06));box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.sidebar-nav-inner{box-sizing:border-box;width:100%;margin:0;max-width:170px;background:var(--sidebar-bg-color, rgba(255,255,255,.65));backdrop-filter:blur(var(--sidebar-blur,12px));-webkit-backdrop-filter:blur(var(--sidebar-blur,12px));pointer-events:inherit;display:flex;flex-direction:column;transition:background-color .3s,max-width .35s,width .35s;overflow:hidden;border:1px solid var(--sidebar-border-color, rgba(255,255,255,.06));box-shadow:0 6px 24px rgba(0,0,0,.3)}
 .sidebar-nav .logo{height:74px;line-height:normal;width:100%;text-align:center;display:flex;align-items:center;justify-content:center}
 .io-black-mode .sidebar-logo .logo,.io-black-mode .sidebar-logo a{background:transparent!important}
 .sidebar-nav .logo, .sidebar-nav .logo a, .sidebar-logo a{color:var(--sidebar-title-color)}
@@ -49,8 +49,13 @@
 .sidebar-popup ul{margin:0;padding:0}
 .sidebar-nav,.sidebar-popup.sidebar-menu-inner ul li{background:transparent;list-style:none}
 .sidebar-item li>a:hover,.sidebar-popup>div>ul>li>a:hover{color:#fff;background:var(--sidebar-hover-bg, rgba(119,121,125,.15))}
-@media (min-width:768px){.sidebar-nav{width:170px}}
-@media (min-width:768px){.sidebar-nav.mini-sidebar{width:60px}}
+@media (min-width:768px){
+  .sidebar-nav{width:170px}
+  .sidebar-nav.mini-sidebar{width:60px}
+  .sidebar-nav.mini-sidebar>.sidebar-nav-inner{width:60px;max-width:60px}
+  .sidebar-nav.mini-sidebar+.main-content{margin-left:60px}
+  .sidebar-nav.mini-sidebar+.main-content .page-header{left:60px}
+}
 .logo-expanded{display:flex;align-items:center;justify-content:flex-start;padding:0 10px;max-width:100%}
 .logo-expanded img{flex:none}
 .logo-expanded span{flex:1;min-width:0;margin-left:8px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

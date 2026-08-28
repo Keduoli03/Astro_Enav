@@ -217,8 +217,11 @@ footer.main-footer .footer-text a:hover {
 ## footer style
 --------------------------------------------------------------*/
 footer.main-footer{padding:20px 30px;margin-top:0px}
-#footer-tools{position:fixed;bottom:20px;right:20px;display:flex;z-index:1000;pointer-events:none}
+#footer-tools{position:fixed;bottom:20px;right:20px;display:flex;align-items:center;z-index:1000;pointer-events:none}
+#footer-tools > a,#footer-tools > .theme-switch-wrapper{width:40px;height:40px;margin:4px;box-sizing:border-box;pointer-events:auto}
 #footer-tools > a,#footer-tools .theme-switch-btn{color:#777;background:#eee;width:40px;height:40px;font-size:1rem;text-align:center;line-height:40px;padding:unset;display:block;border:unset;pointer-events:auto}
+#footer-tools .theme-switch-wrapper{position:relative}
+#footer-tools .theme-switch-btn{display:flex!important;align-items:center;justify-content:center;margin:0!important;line-height:normal}
 #footer-tools .go-up{display:none}
 #footer-tools > a:hover,#footer-tools .theme-switch-btn:hover{color:#444}
 #footer-tools [data-v-db6ccf64][data-v-41ba7e2c],#footer-tools [data-v-db6ccf64][data-v-6d083e75]{top:unset!important;bottom:0!important;right:44px!important}
@@ -430,8 +433,11 @@ footer.main-footer .footer-text a:hover {
 ## footer style
 --------------------------------------------------------------*/
 footer.main-footer{padding:20px 30px;margin-top:0px}
-#footer-tools{position:fixed;bottom:20px;right:20px;display:flex;z-index:1000;pointer-events:none}
+#footer-tools{position:fixed;bottom:20px;right:20px;display:flex;align-items:center;z-index:1000;pointer-events:none}
+#footer-tools > a,#footer-tools > .theme-switch-wrapper{width:40px;height:40px;margin:4px;box-sizing:border-box;pointer-events:auto}
 #footer-tools > a,#footer-tools .theme-switch-btn{color:#777;background:#eee;width:40px;height:40px;font-size:1rem;text-align:center;line-height:40px;padding:unset;display:block;border:unset;pointer-events:auto}
+#footer-tools .theme-switch-wrapper{position:relative}
+#footer-tools .theme-switch-btn{display:flex!important;align-items:center;justify-content:center;margin:0!important;line-height:normal}
 #footer-tools .go-up{display:none}
 #footer-tools > a:hover,#footer-tools .theme-switch-btn:hover{color:#444}
 #footer-tools [data-v-db6ccf64][data-v-41ba7e2c],#footer-tools [data-v-db6ccf64][data-v-6d083e75]{top:unset!important;bottom:0!important;right:44px!important}
